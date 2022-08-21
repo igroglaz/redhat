@@ -77,6 +77,7 @@ vector<string> Explode(const string& what, const string& separator)
 
     what: обрезаема€ строка
     callback: функци€, определ€юща€ значимость символа. —м. IsWhitespace
+    (callback - simply term for function which called inside of other function)
 */
 string TrimLeft(const string& what, bool (callback)(char))
 {
@@ -91,6 +92,8 @@ string TrimLeft(const string& what, bool (callback)(char))
     return "";
 }
 
+
+// see TrimLeft()
 string TrimRight(const string& what, bool (callback)(char))
 {
     string ret = what;
@@ -104,10 +107,14 @@ string TrimRight(const string& what, bool (callback)(char))
     return "";
 }
 
+
+// remove certain symbols ('what') from the beggining and at the end of the string with
+// a custom function ('callback') which inserted there
 string Trim(const string& what, bool (callback)(char))
 {
     return TrimRight(TrimLeft(what, callback));
 }
+
 
 /*
     utils::IsWhitespace: вспомогательна€ функци€ дл€ Trim*

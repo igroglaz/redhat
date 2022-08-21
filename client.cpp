@@ -1090,10 +1090,12 @@ bool CLCMD_SendServerList(Client* conn)
     return (SOCK_SendPacket(conn->Socket, pack, conn->Version) == 0);
 }
 
+
+// trims to the right and to the left
 std::string TrimNickname(std::string nickname)
 {
     size_t clanSep = nickname.find_first_of('|');
-    if (clanSep != std::string::npos)
+    if (clanSep != std::string::npos) // non-position (-1)
     {
         return Trim(nickname.substr(0, clanSep))+"|"+Trim(nickname.substr(clanSep+1));
     }
@@ -1103,6 +1105,21 @@ std::string TrimNickname(std::string nickname)
     }
 }
 
+/*
+
+bool CL_Process(conn)    <- (Client* conn)
+
+bool CL_CheckNickname(conn, pack)    <- (Client* conn, Packet& pack)
+
+std::string TrimNickname(nickname)   <- (std::string nickname)
+
+---> uint32_t CheckNickname(nickname, conn->HatID)   <- (std::string nickname, int hatId, bool secondary)
+
+bool CLCMD_SendNicknameResult(conn, result)  <- (Client* conn, unsigned long result)
+
+int SOCK_SendPacket(conn->Socket, pack, conn->Version)   <- (SOCKET socket, Packet& packet, unsigned long protover)
+
+*/
 uint32_t CheckNickname(std::string nickname, int hatId, bool secondary)
 {
     size_t w = nickname.find_first_of('|');
