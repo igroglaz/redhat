@@ -100,6 +100,7 @@ bool CL_Process(Client* conn);
 void CL_Disconnect(Client* conn);
 
 std::string TrimNickname(std::string nickname);
+uint32_t CheckNickname_creation(std::string nickname, int hatId, bool secondary = false);
 uint32_t CheckNickname(std::string nickname, int hatId, bool secondary = false);
 
 bool CL_Login(Client* conn, Packet& pack);

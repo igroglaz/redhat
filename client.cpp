@@ -1105,6 +1105,58 @@ std::string TrimNickname(std::string nickname)
     }
 }
 
+
+// character creation nickname check
+// (see chain of functions at CheckNickname())
+uint32_t CheckNickname_creation(std::string nickname, int hatId, bool secondary)
+{
+    size_t w = nickname.find_first_of('|');
+    if (w == nickname.npos)
+        w = nickname.length();
+
+    bool in_clan = false;
+
+    if (nickname[nickname.length()-1] == '|')
+        return P_WRONG_NAME;
+
+    unsigned long result = 0;
+
+    if (w < 3 && !secondary)       // min. lenght
+        result = P_SHORT_NAME;
+    else if (w > 10 && !secondary) // max. lenght
+        result = P_BAD_CHARACTER;
+    else                           // check characters
+    {
+        for (size_t i = 0; i < nickname.length(); i++)
+        {
+            uint8_t ch = nickname[i];
+            if (ch == '|' && !in_clan)
+            {
+                in_clan = true;
+                continue;
+            }
+
+            if (ch < 0x20)
+                return P_WRONG_NAME;
+
+            // characters which are allowed in nickname
+            bool allowed = ((ch >= 0x41 && ch <= 0x5A) ||   // A..Z
+                            (ch >= 0x61 && ch <= 0x7A));    // a..z
+
+            if (!allowed) return P_WRONG_NAME;
+        }
+    }
+
+    if (!secondary)
+    {
+        if (w < nickname.length())
+            nickname.erase(w);
+        if (Login_NickExists(nickname, hatId)) result = P_NAME_EXISTS;
+    }
+
+    return result;
+}
+
 /*
 
 bool CL_Process(conn)    <- (Client* conn)
@@ -1120,6 +1172,7 @@ bool CLCMD_SendNicknameResult(conn, result)  <- (Client* conn, unsigned long res
 int SOCK_SendPacket(conn->Socket, pack, conn->Version)   <- (SOCKET socket, Packet& packet, unsigned long protover)
 
 */
+// regular character's nickname check
 uint32_t CheckNickname(std::string nickname, int hatId, bool secondary)
 {
     size_t w = nickname.find_first_of('|');
@@ -1316,11 +1369,14 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         return false;
     }
 
+    // Do we create a new character?
     bool is_created = !Login_CharExists(conn->Login, p_id1, p_id2);
 
-    if(is_created)
+    // yes, new character
+    if (is_created)
     {
-        if(CheckNickname(p_nickname, conn->HatID) != 0)
+        // check new character's nickname
+        if (CheckNickname_creation(p_nickname, conn->HatID) != 0)
         {
             Printf(LOG_Hacking, "[CL] %s (%s) - Hacking: tried to create bad nickname \"%s\"!\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str());
             CLCMD_Kick(conn, P_FUCK_OFF);
@@ -1400,6 +1456,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         delete[] data;
         Printf(LOG_Info, "[CL] %s (%s) - Created character \"%s\".\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str());
     }
+    // character already exists
     else
     {
         int wrC = 0;
@@ -1502,6 +1559,8 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                             return false;
                         }
 
+                        // check for stat points for particular server:
+                        // if((srv->Info.ServerMode & SVF_NOOBSRV) == SVF_NOOBSRV)
                         float points_total = 132.0;
                         for(int i = 0; i < chrtc.Body; i++)
                             points_total -= CL_NeedPointsFrom(i);
