@@ -1536,6 +1536,107 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                         }
                     }
 
+
+///////////////////////////////////////////////////////////////////////
+
+                    // If character got top stats at certain difficulty - he can not enter this (#1-9) server
+
+                    uint32_t exp_total = 0;
+                    exp_total += chrtc.ExpFireBlade;
+                    exp_total += chrtc.ExpWaterAxe;
+                    exp_total += chrtc.ExpAirBludgeon;
+                    exp_total += chrtc.ExpEarthPike;
+                    exp_total += chrtc.ExpAstralShooting;
+
+                    // 6+ server flag (due most often check which is used for all high tiers maps)
+                    bool too_weak_for_high_maps = 0;
+                    if ((chrtc.Body < 43 || chrtc.Reaction < 43 || chrtc.Mind < 43 || chrtc.Spirit < 43) ||
+                         exp_total < 1)
+                            too_weak_for_high_maps = 1;
+
+                    // flag to check if char drinked all stat pots at this particular server
+                    bool no_enter_server = 0;
+
+                    if      (srv->Number == 1 &&
+                            // it takes 'pure' stats, without boni from items
+                            (chrtc.Body > 15 || chrtc.Reaction > 15 || chrtc.Mind > 15 || chrtc.Spirit > 1))
+                                no_enter_server = 1;
+                    else if (srv->Number == 2 &&
+                            ((chrtc.Body > 15 && chrtc.Reaction > 15 && chrtc.Mind > 15 && chrtc.Spirit > 15) ||
+                             exp_total < 1))
+                                no_enter_server = 1;
+                    else if (srv->Number == 3 &&
+                            ((chrtc.Body > 25 && chrtc.Reaction > 25 && chrtc.Mind > 25 && chrtc.Spirit > 25) ||
+                             chrtc.Spirit < 15 ||
+                             exp_total < 1))
+                                no_enter_server = 1;
+                    else if (srv->Number == 4 &&
+                            ((chrtc.Body > 34 && chrtc.Reaction > 34 && chrtc.Mind > 34 && chrtc.Spirit > 34) ||
+                             (chrtc.Body < 25 || chrtc.Reaction < 25 || chrtc.Mind < 25 || chrtc.Spirit < 25) ||
+                              exp_total < 1))
+                                no_enter_server = 1;
+                    else if (srv->Number == 5 &&
+                            ((chrtc.Body > 43 && chrtc.Reaction > 43 && chrtc.Mind > 43 && chrtc.Spirit > 43) ||
+                             (chrtc.Body < 34 || chrtc.Reaction < 34 || chrtc.Mind < 34 || chrtc.Spirit < 34) ||
+                              exp_total < 1))
+                                no_enter_server = 1;
+                    else if (srv->Number == 6 && (too_weak_for_high_maps ||
+                            (chrtc.Body > 52 && chrtc.Reaction > 52 && chrtc.Mind > 52 && chrtc.Spirit > 43)))
+                                no_enter_server = 1;
+                    else if (srv->Number == 7 && (too_weak_for_high_maps ||
+                            (chrtc.Body > 52 && chrtc.Reaction > 52 && chrtc.Mind > 52 && chrtc.Spirit > 52)))
+                                no_enter_server = 1;
+                    else if (srv->Number == 8)
+                    {
+                        if (chrtc.Sex == 0 &&       // warrior
+                           ((chrtc.Body > 54 && chrtc.Reaction > 52 && chrtc.Mind > 62 && chrtc.Spirit > 52) ||
+                             too_weak_for_high_maps))
+                                no_enter_server = 1;
+                        else if (chrtc.Sex == 64 && // mage
+                          ((chrtc.Body > 53 && chrtc.Reaction > 52 && chrtc.Mind > 62 && chrtc.Spirit > 52) ||
+                            too_weak_for_high_maps))
+                                no_enter_server = 1;
+                        else if (chrtc.Sex == 128 && // amazon
+                          ((chrtc.Body > 52 && chrtc.Reaction > 62 && chrtc.Mind > 52 && chrtc.Spirit > 52) ||
+                            too_weak_for_high_maps))
+                                no_enter_server = 1;
+                        else if (chrtc.Sex == 192 && // witch
+                          ((chrtc.Body > 52 && chrtc.Reaction > 62 && chrtc.Mind > 52 && chrtc.Spirit > 52) ||
+                            too_weak_for_high_maps))
+                                no_enter_server = 1;
+                    }
+                    else if (srv->Number == 9)
+                    {
+                        if (chrtc.Sex == 0 &&       // warrior
+                           ((chrtc.Body > 55 && chrtc.Reaction > 52 && chrtc.Mind > 76 && chrtc.Spirit > 76) ||
+                             too_weak_for_high_maps))
+                                no_enter_server = 1;
+                        else if (chrtc.Sex == 64 && // mage
+                           ((chrtc.Body > 54 && chrtc.Reaction > 76 && chrtc.Mind > 62 && chrtc.Spirit > 62) ||
+                             too_weak_for_high_maps))
+                                no_enter_server = 1;
+                        else if (chrtc.Sex == 128 && // amazon
+                           ((chrtc.Body > 52 && chrtc.Reaction > 76 && chrtc.Mind > 52 && chrtc.Spirit > 52) ||
+                             too_weak_for_high_maps))
+                                no_enter_server = 1;
+                        else if (chrtc.Sex == 192 && // witch
+                           ((chrtc.Body > 52 && chrtc.Reaction > 76 && chrtc.Mind > 52 && chrtc.Spirit > 62) ||
+                             too_weak_for_high_maps))
+                                no_enter_server = 1;
+                    }
+
+                    // character can't enter server if he finished drinking stat potions for this particular server
+                    if (no_enter_server)
+                    {
+                        Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
+                        CLCMD_Kick(conn, P_TOO_STRONG);
+                        return false;
+                    }
+
+///////////////////////////////////////////////////////////////////////
+
+
+                    /* newbie server flag */
                     if((srv->Info.ServerMode & SVF_NOOBSRV) == SVF_NOOBSRV)
                     {
                         if(chrtc.Spells & ~0x09010422)
@@ -1559,8 +1660,6 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                             return false;
                         }
 
-                        // check for stat points for particular server:
-                        // if((srv->Info.ServerMode & SVF_NOOBSRV) == SVF_NOOBSRV)
                         float points_total = 132.0;
                         for(int i = 0; i < chrtc.Body; i++)
                             points_total -= CL_NeedPointsFrom(i);
