@@ -1478,6 +1478,17 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         std::string addr = Format("%s:%u", srv->Address.c_str(), srv->Port);
         if(addr == p_srvname)
         {
+            
+            // new char should at first enter only 1st server
+            // (or it will exploit having 34-34-34-34 at server 3 right on)
+            if (is_created && srv->Number != 1)
+            {
+                Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (new char: go play 1 server).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
+                CLCMD_Kick(conn, P_TOO_STRONG);
+                return false;
+            }
+
+            // existing char
             if(!is_created)
             {
                 CCharacter chrtc;
