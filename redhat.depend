@@ -560,3 +560,251 @@
 	"socket.hpp"
 	"status.hpp"
 
+1661076155 source:c:\github\redhat\binarystream.cpp
+	"BinaryStream.hpp"
+	<fstream>
+
+1661076155 c:\github\redhat\binarystream.hpp
+	<string>
+	<vector>
+
+1661076155 source:c:\github\redhat\ccharacter.cpp
+	"CCharacter.hpp"
+	<ctime>
+	<cstdlib>
+	"utils.hpp"
+
+1661076155 c:\github\redhat\ccharacter.hpp
+	<string>
+	<vector>
+	"BinaryStream.hpp"
+
+1661076155 c:\github\redhat\utils.hpp
+	<string>
+	<vector>
+	<dirent.h>
+	<cstdlib>
+
+1661076155 source:c:\github\redhat\character.cpp
+	<cstdio>
+	<cstring>
+	<fstream>
+	"character.hpp"
+
+1661076155 c:\github\redhat\character.hpp
+	<cstdlib>
+	<string>
+	<vector>
+	<map>
+
+1661076155 source:c:\github\redhat\config.cpp
+	"config.hpp"
+	<fstream>
+	<algorithm>
+	"utils.hpp"
+	"server.hpp"
+
+1661076155 c:\github\redhat\config.hpp
+	<string>
+	<vector>
+
+1661076155 c:\github\redhat\server.hpp
+	"listener.hpp"
+	"config.hpp"
+	"socket.hpp"
+	<windows.h>
+
+1661076155 c:\github\redhat\listener.hpp
+	<vector>
+	"socket.hpp"
+
+1661076155 c:\github\redhat\socket.hpp
+	<string>
+	"packet.hpp"
+	"serialize.hpp"
+
+1661076155 c:\github\redhat\packet.hpp
+	"serialize.hpp"
+
+1661076155 c:\github\redhat\serialize.hpp
+	<vector>
+	<string>
+	<stdint.h>
+
+1661076155 source:c:\github\redhat\crc_32.cpp
+	"CRC_32.h"
+	<io.h>
+	<fcntl.h>
+	<share.h>
+	<tchar.h>
+	<commctrl.h>
+
+1661076155 c:\github\redhat\crc_32.h
+	<windows.h>
+
+1661076155 source:c:\github\redhat\hat2.cpp
+	"packet.hpp"
+	<winsock2.h>
+
+1661076155 source:c:\github\redhat\lgn.cpp
+	<cstring>
+	"lgn.hpp"
+	"utils.hpp"
+
+1661076155 c:\github\redhat\lgn.hpp
+	<string>
+	<fstream>
+	<vector>
+	"character.hpp"
+
+1661076155 source:c:\github\redhat\listener.cpp
+	"config.hpp"
+	"listener.hpp"
+	"socket.hpp"
+	"utils.hpp"
+	"client.hpp"
+	"server.hpp"
+	<winsock2.h>
+
+1661176143 c:\github\redhat\client.hpp
+	<string>
+	<vector>
+	"socket.hpp"
+	"server.hpp"
+	"listener.hpp"
+	<fstream>
+
+1661077142 source:c:\github\redhat\login.cpp
+	"login.hpp"
+	"sql.hpp"
+	"utils.hpp"
+	"config.hpp"
+	"sha1.h"
+	<windows.h>
+	"CCharacter.hpp"
+
+1661076155 c:\github\redhat\login.hpp
+	<string>
+	<vector>
+	"sql.hpp"
+	"CCharacter.hpp"
+
+1661076155 c:\github\redhat\sql.hpp
+	<winsock2.h>
+	<mysql.h>
+	<string>
+
+1661076155 c:\github\redhat\mysql\include\mysql.h
+	<standards.h>
+	<sys/types.h>
+	<winsock2.h>
+	"mysql_version.h"
+	"mysql_com.h"
+	"mysql_time.h"
+	"my_list.h"
+	"typelib.h"
+	"my_alloc.h"
+
+1661076155 c:\github\redhat\mysql\include\mysql_version.h
+	<custom_conf.h>
+
+1661076155 c:\github\redhat\mysql\include\mysql_com.h
+
+1661076155 c:\github\redhat\mysql\include\mysql_time.h
+
+1661076155 c:\github\redhat\mysql\include\my_list.h
+
+1661076155 c:\github\redhat\mysql\include\typelib.h
+	"my_alloc.h"
+
+1661076155 c:\github\redhat\mysql\include\my_alloc.h
+
+1661076155 c:\github\redhat\sha1.h
+
+1661076155 source:c:\github\redhat\packet.cpp
+	"packet.hpp"
+
+1661076155 source:c:\github\redhat\redhat.cpp
+	"config.hpp"
+	"socket.hpp"
+	"sql.hpp"
+	"utils.hpp"
+	"listener.hpp"
+	"status.hpp"
+	"login.hpp"
+
+1661076155 c:\github\redhat\status.hpp
+
+1661076155 source:c:\github\redhat\serialize.cpp
+	"serialize.hpp"
+	"utils.hpp"
+	<cstring>
+	<string>
+	<fstream>
+	<iostream>
+
+1661077142 source:c:\github\redhat\server.cpp
+	"server.hpp"
+	"login.hpp"
+	"utils.hpp"
+	"session.hpp"
+	"character.hpp"
+	"socket.hpp"
+	"status.hpp"
+
+1661076155 c:\github\redhat\session.hpp
+	<string>
+
+1661076155 source:c:\github\redhat\session.cpp
+	"session.hpp"
+	<windows.h>
+	<vector>
+
+1661076155 source:c:\github\redhat\sha1.cpp
+	"sha1.h"
+
+1661076155 source:c:\github\redhat\socket.cpp
+	"config.hpp"
+	"socket.hpp"
+	<winsock2.h>
+	<fstream>
+	"utils.hpp"
+	"hat2.hpp"
+
+1661076155 c:\github\redhat\hat2.hpp
+
+1661076155 source:c:\github\redhat\sql.cpp
+	"config.hpp"
+	"sql.hpp"
+	"utils.hpp"
+	<iostream>
+	<mysql.h>
+	<windows.h>
+	"CCharacter.hpp"
+	"login.hpp"
+
+1661076155 source:c:\github\redhat\status.cpp
+	"status.hpp"
+	<fstream>
+	<string>
+	"server.hpp"
+	"utils.hpp"
+	<ctime>
+	"BinaryStream.hpp"
+
+1661176143 source:c:\github\redhat\utils.cpp
+	"utils.hpp"
+	"config.hpp"
+	<cstdarg>
+	<cstdio>
+	<ctime>
+	<fstream>
+	<windows.h>
+
+1661076155 source:c:\github\redhat\version.cpp
+	"version.hpp"
+	<map>
+
+1661076155 c:\github\redhat\version.hpp
+	<stdint.h>
+

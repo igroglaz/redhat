@@ -11,3 +11,5 @@ obj
 *.depend
 *.layout
 logs/
+redhat.layout
+redhat.depend
