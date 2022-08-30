@@ -1558,51 +1558,51 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                             (chrtc.Body > 15 || chrtc.Reaction > 15 || chrtc.Mind > 15 || chrtc.Spirit > 1))
                                 no_enter_server = 1;
                     else if (srv->Number == 2 &&
-                            (chrtc.Body > 15 && chrtc.Reaction > 15 && chrtc.Mind > 15 && chrtc.Spirit > 15))
+                            (chrtc.Body > 15 || chrtc.Reaction > 15 || chrtc.Mind > 15 || chrtc.Spirit > 15))
                                 no_enter_server = 1;
                     else if (srv->Number == 3 &&
-                            (chrtc.Body > 25 && chrtc.Reaction > 25 && chrtc.Mind > 25 && chrtc.Spirit > 25))
+                            (chrtc.Body > 25 || chrtc.Reaction > 25 || chrtc.Mind > 25 || chrtc.Spirit > 25))
                                 no_enter_server = 1;
                     else if (srv->Number == 4 &&
-                            (chrtc.Body > 34 && chrtc.Reaction > 34 && chrtc.Mind > 34 && chrtc.Spirit > 34))
+                            (chrtc.Body > 34 || chrtc.Reaction > 34 || chrtc.Mind > 34 || chrtc.Spirit > 34))
                                 no_enter_server = 1;
                     else if (srv->Number == 5 &&
-                            (chrtc.Body > 43 && chrtc.Reaction > 43 && chrtc.Mind > 43 && chrtc.Spirit > 43))
+                            (chrtc.Body > 43 || chrtc.Reaction > 43 || chrtc.Mind > 43 || chrtc.Spirit > 43))
                                 no_enter_server = 1;
                     else if (srv->Number == 6 &&
-                            (chrtc.Body > 52 && chrtc.Reaction > 52 && chrtc.Mind > 52 && chrtc.Spirit > 43))
+                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52 || chrtc.Spirit > 43))
                                 no_enter_server = 1;
                     else if (srv->Number == 7 && 
-                            (chrtc.Body > 52 && chrtc.Reaction > 52 && chrtc.Mind > 52 && chrtc.Spirit > 52))
+                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52 || chrtc.Spirit > 52))
                                 no_enter_server = 1;
                     else if (srv->Number == 8)
                     {
                         if      (chrtc.Sex == 0 &&      // warrior
-                                (chrtc.Body > 54 && chrtc.Reaction > 52 && chrtc.Mind > 62 && chrtc.Spirit > 52))
+                                (chrtc.Body > 54 || chrtc.Reaction > 52 || chrtc.Mind > 62 || chrtc.Spirit > 52))
                                     no_enter_server = 1;
                         else if (chrtc.Sex == 64 &&     // mage
-                                (chrtc.Body > 53 && chrtc.Reaction > 52 && chrtc.Mind > 62 && chrtc.Spirit > 52))
+                                (chrtc.Body > 53 || chrtc.Reaction > 52 || chrtc.Mind > 62 || chrtc.Spirit > 52))
                                     no_enter_server = 1;
                         else if (chrtc.Sex == 128 &&    // amazon
-                                (chrtc.Body > 52 && chrtc.Reaction > 62 && chrtc.Mind > 52 && chrtc.Spirit > 52))
+                                (chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52 || chrtc.Spirit > 52))
                                     no_enter_server = 1;
                         else if (chrtc.Sex == 192 &&    // witch
-                                (chrtc.Body > 52 && chrtc.Reaction > 62 && chrtc.Mind > 52 && chrtc.Spirit > 52))
+                                (chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52 || chrtc.Spirit > 52))
                                     no_enter_server = 1;
                     }
                     else if (srv->Number == 9)
                     {
                         if      (chrtc.Sex == 0 &&      // warrior
-                                (chrtc.Body > 55 && chrtc.Reaction > 52 && chrtc.Mind > 76 && chrtc.Spirit > 76))
+                                (chrtc.Body > 55 || chrtc.Reaction > 52 || chrtc.Mind > 76 || chrtc.Spirit > 76))
                                     no_enter_server = 1;
                         else if (chrtc.Sex == 64 &&     // mage
-                                (chrtc.Body > 54 && chrtc.Reaction > 76 && chrtc.Mind > 62 && chrtc.Spirit > 62))
+                                (chrtc.Body > 54 || chrtc.Reaction > 76 || chrtc.Mind > 62 || chrtc.Spirit > 62))
                                     no_enter_server = 1;
                         else if (chrtc.Sex == 128 &&    // amazon
-                                (chrtc.Body > 52 && chrtc.Reaction > 76 && chrtc.Mind > 52 && chrtc.Spirit > 52))
+                                (chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52 || chrtc.Spirit > 52))
                                     no_enter_server = 1;
                         else if (chrtc.Sex == 192 &&    // witch
-                                (chrtc.Body > 52 && chrtc.Reaction > 76 && chrtc.Mind > 52 && chrtc.Spirit > 62))
+                                (chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52 || chrtc.Spirit > 62))
                                     no_enter_server = 1;
                     }
 
