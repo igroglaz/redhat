@@ -1588,46 +1588,46 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                              ((chrtc.Body < 34 || chrtc.Reaction < 34 || chrtc.Mind < 34 || chrtc.Spirit < 34) && exp_total > 0)))
                                 no_enter_server = 1;
                     else if (srv->Number == 6 && (too_weak_for_high_maps ||
-                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52 || chrtc.Spirit > 43)))
+                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52))) // removed spirit check
                                 no_enter_server = 1;
                     else if (srv->Number == 7 && (too_weak_for_high_maps ||
-                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52 || chrtc.Spirit > 52)))
+                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52))) // removed spirit check
                                 no_enter_server = 1;
                     else if (srv->Number == 8)
                     {
                         if (chrtc.Sex == 0 &&       // warrior
-                           ((chrtc.Body > 54 || chrtc.Reaction > 52 || chrtc.Mind > 62 || chrtc.Spirit > 52) ||
+                           ((chrtc.Body > 54 || chrtc.Reaction > 52 || chrtc.Mind > 62) || // removed spirit check
                              too_weak_for_high_maps))
                                 no_enter_server = 1;
                         else if (chrtc.Sex == 64 && // mage
-                          ((chrtc.Body > 53 || chrtc.Reaction > 52 || chrtc.Mind > 62 || chrtc.Spirit > 52) ||
+                          ((chrtc.Body > 53 || chrtc.Reaction > 52 || chrtc.Mind > 62) || // removed spirit check
                             too_weak_for_high_maps))
                                 no_enter_server = 1;
                         else if (chrtc.Sex == 128 && // amazon
-                          ((chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52 || chrtc.Spirit > 52) ||
+                          ((chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52) || // removed spirit check
                             too_weak_for_high_maps))
                                 no_enter_server = 1;
                         else if (chrtc.Sex == 192 && // witch
-                          ((chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52 || chrtc.Spirit > 52) ||
+                          ((chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52) || // removed spirit check
                             too_weak_for_high_maps))
                                 no_enter_server = 1;
                     }
                     else if (srv->Number == 9)
                     {
                         if (chrtc.Sex == 0 &&       // warrior
-                           ((chrtc.Body > 55 || chrtc.Reaction > 52 || chrtc.Mind > 76 || chrtc.Spirit > 76) ||
+                           ((chrtc.Body > 55 || chrtc.Reaction > 52 || chrtc.Mind > 76) || // removed spirit check
                              too_weak_for_high_maps))
                                 no_enter_server = 1;
                         else if (chrtc.Sex == 64 && // mage
-                           ((chrtc.Body > 54 || chrtc.Reaction > 76 || chrtc.Mind > 62 || chrtc.Spirit > 62) ||
+                           ((chrtc.Body > 54 || chrtc.Reaction > 76 || chrtc.Mind > 62) || // removed spirit check
                              too_weak_for_high_maps))
                                 no_enter_server = 1;
                         else if (chrtc.Sex == 128 && // amazon
-                           ((chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52 || chrtc.Spirit > 52) ||
+                           ((chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52) || // removed spirit check
                              too_weak_for_high_maps))
                                 no_enter_server = 1;
                         else if (chrtc.Sex == 192 && // witch
-                           ((chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52 || chrtc.Spirit > 62) ||
+                           ((chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52) || // removed spirit check
                              too_weak_for_high_maps))
                                 no_enter_server = 1;
                     }
