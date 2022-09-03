@@ -1632,6 +1632,12 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                                 no_enter_server = 1;
                     }
 
+                    // additional exception for mules
+                    if (srv->Number == 1 || srv->Number == 2)
+                        ;
+                    else if (chrtc.Reaction > 1 && exp_total == 0)
+                                no_enter_server = 1;
+
                     // character can't enter server if he finished drinking stat potions for this particular server
                     if (no_enter_server)
                     {
