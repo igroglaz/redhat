@@ -1570,7 +1570,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
 
                     if      (srv->Number == 1 &&
                             // it takes 'pure' stats, without boni from items
-                            (chrtc.Body > 15 || chrtc.Reaction > 15 || chrtc.Mind > 15 || chrtc.Spirit > 1))
+                            (chrtc.Body > 15 || chrtc.Reaction > 1 || chrtc.Mind > 15 || chrtc.Spirit > 1))
                                 no_enter_server = 1;
                     else if (srv->Number == 2 &&
                             (chrtc.Body > 15 || chrtc.Reaction > 15 || chrtc.Mind > 15 || chrtc.Spirit > 15))
