@@ -1478,7 +1478,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         std::string addr = Format("%s:%u", srv->Address.c_str(), srv->Port);
         if(addr == p_srvname)
         {
-            
+
             // new char should at first enter only 1st server
             // (or it will exploit having 34-34-34-34 at server 3 right on)
             if (is_created && srv->Number != 1)
@@ -1550,101 +1550,54 @@ bool CL_EnterServer(Client* conn, Packet& pack)
 
 ///////////////////////////////////////////////////////////////////////
 
-                    // If character got top stats at certain difficulty - he can not enter this (#1-9) server
+// If character got top stats at certain difficulty - he can not enter this (#1-9) server
 
-                    uint32_t exp_total = 0;
-                    exp_total += chrtc.ExpFireBlade;
-                    exp_total += chrtc.ExpWaterAxe;
-                    exp_total += chrtc.ExpAirBludgeon;
-                    exp_total += chrtc.ExpEarthPike;
-                    exp_total += chrtc.ExpAstralShooting;
+uint32_t exp_total = 0;
+exp_total += chrtc.ExpFireBlade;
+exp_total += chrtc.ExpWaterAxe;
+exp_total += chrtc.ExpAirBludgeon;
+exp_total += chrtc.ExpEarthPike;
+exp_total += chrtc.ExpAstralShooting;
 
-                    // 6+ server flag (due most often check which is used for all high tiers maps)
-                    bool too_weak_for_high_maps = 0;
-                    if ((chrtc.Body < 43 || chrtc.Reaction < 43 || chrtc.Mind < 43 || chrtc.Spirit < 43) &&
-                         exp_total > 0)
-                            too_weak_for_high_maps = 1;
+// flag to check if char drinked all stat pots at this particular server
+bool no_enter_server = 0;
 
-                    // flag to check if char drinked all stat pots at this particular server
-                    bool no_enter_server = 0;
+// newborn chars must enter "town" server 1st (#1)
+if (srv->Number > 1 && exp_total == 0)
+{
+    Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
+    CLCMD_Kick(conn, P_TOO_STRONG);
+    return false;
+}
 
-                    if      (srv->Number == 1 &&
-                            // it takes 'pure' stats, without boni from items
-                            (chrtc.Body > 15 || chrtc.Reaction > 1 || chrtc.Mind > 15 || chrtc.Spirit > 1))
-                                no_enter_server = 1;
-                    else if (srv->Number == 2 &&
-                            (chrtc.Body > 15 || chrtc.Reaction > 15 || chrtc.Mind > 15 || chrtc.Spirit > 15))
-                                no_enter_server = 1;
-                    else if (srv->Number == 3 &&
-                            ((chrtc.Body > 25 || chrtc.Reaction > 25 || chrtc.Mind > 25 || chrtc.Spirit > 25) ||
-                             (chrtc.Spirit < 15 && exp_total > 0)))
-                                no_enter_server = 1;
-                    else if (srv->Number == 4 &&
-                            ((chrtc.Body > 34 || chrtc.Reaction > 34 || chrtc.Mind > 34 || chrtc.Spirit > 34) ||
-                             ((chrtc.Body < 25 || chrtc.Reaction < 25 || chrtc.Mind < 25 || chrtc.Spirit < 25) && exp_total > 0)))
-                                no_enter_server = 1;
-                    else if (srv->Number == 5 &&
-                            ((chrtc.Body > 43 || chrtc.Reaction > 43 || chrtc.Mind > 43 || chrtc.Spirit > 43) ||
-                             ((chrtc.Body < 34 || chrtc.Reaction < 34 || chrtc.Mind < 34 || chrtc.Spirit < 34) && exp_total > 0)))
-                                no_enter_server = 1;
-                    else if (srv->Number == 6 && (too_weak_for_high_maps ||
-                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52))) // removed spirit check
-                                no_enter_server = 1;
-                    else if (srv->Number == 7 && (too_weak_for_high_maps ||
-                            (chrtc.Body > 52 || chrtc.Reaction > 52 || chrtc.Mind > 52))) // removed spirit check
-                                no_enter_server = 1;
-                    else if (srv->Number == 8)
-                    {
-                        if (chrtc.Sex == 0 &&       // warrior
-                           ((chrtc.Body > 54 || chrtc.Reaction > 52 || chrtc.Mind > 62) || // removed spirit check
-                             too_weak_for_high_maps))
-                                no_enter_server = 1;
-                        else if (chrtc.Sex == 64 && // mage
-                          ((chrtc.Body > 53 || chrtc.Reaction > 52 || chrtc.Mind > 62) || // removed spirit check
-                            too_weak_for_high_maps))
-                                no_enter_server = 1;
-                        else if (chrtc.Sex == 128 && // amazon
-                          ((chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52) || // removed spirit check
-                            too_weak_for_high_maps))
-                                no_enter_server = 1;
-                        else if (chrtc.Sex == 192 && // witch
-                          ((chrtc.Body > 52 || chrtc.Reaction > 62 || chrtc.Mind > 52) || // removed spirit check
-                            too_weak_for_high_maps))
-                                no_enter_server = 1;
-                    }
-                    else if (srv->Number == 9)
-                    {
-                        if (chrtc.Sex == 0 &&       // warrior
-                           ((chrtc.Body > 55 || chrtc.Reaction > 52 || chrtc.Mind > 76) || // removed spirit check
-                             too_weak_for_high_maps))
-                                no_enter_server = 1;
-                        else if (chrtc.Sex == 64 && // mage
-                           ((chrtc.Body > 54 || chrtc.Reaction > 76 || chrtc.Mind > 62) || // removed spirit check
-                             too_weak_for_high_maps))
-                                no_enter_server = 1;
-                        else if (chrtc.Sex == 128 && // amazon
-                           ((chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52) || // removed spirit check
-                             too_weak_for_high_maps))
-                                no_enter_server = 1;
-                        else if (chrtc.Sex == 192 && // witch
-                           ((chrtc.Body > 52 || chrtc.Reaction > 76 || chrtc.Mind > 52) || // removed spirit check
-                             too_weak_for_high_maps))
-                                no_enter_server = 1;
-                    }
+if      (srv->Number == 1 &&
+        // it takes 'pure' stats, without boni from items
+        (chrtc.Body > 1 || chrtc.Reaction > 1 || chrtc.Mind > 1 || chrtc.Spirit > 1 ||
+         exp_total > 0))
+            no_enter_server = 1;
+else if (srv->Number == 2 &&
+        (chrtc.Body > 10 || chrtc.Reaction > 10 || chrtc.Mind > 10 || chrtc.Spirit > 10))
+            no_enter_server = 1;
+else if (srv->Number == 3 &&
+        (chrtc.Body > 20 || chrtc.Reaction > 20 || chrtc.Mind > 20 || chrtc.Spirit > 20))
+            no_enter_server = 1;
+else if (srv->Number == 4 &&
+        (chrtc.Body > 30 || chrtc.Reaction > 30 || chrtc.Mind > 30 || chrtc.Spirit > 30))
+            no_enter_server = 1;
+else if (srv->Number == 5 &&
+        (chrtc.Body > 40 || chrtc.Reaction > 40 || chrtc.Mind > 40 || chrtc.Spirit > 40))
+            no_enter_server = 1;
+else if (srv->Number == 6 &&
+        (chrtc.Body > 50 || chrtc.Reaction > 50 || chrtc.Mind > 50 || chrtc.Spirit > 50))
+            no_enter_server = 1;
 
-                    // additional exception for mules
-                    if (srv->Number == 1 || srv->Number == 2)
-                        ;
-                    else if (chrtc.Reaction > 1 && exp_total == 0)
-                                no_enter_server = 1;
-
-                    // character can't enter server if he finished drinking stat potions for this particular server
-                    if (no_enter_server)
-                    {
-                        Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
-                        CLCMD_Kick(conn, P_TOO_STRONG);
-                        return false;
-                    }
+// character can't enter server if he finished drinking stat potions for this particular server
+if (no_enter_server)
+{
+    Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
+    CLCMD_Kick(conn, P_TOO_STRONG);
+    return false;
+}
 
 ///////////////////////////////////////////////////////////////////////
 
