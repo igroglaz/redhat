@@ -1576,7 +1576,7 @@ if      (srv->Number == 1 &&
          exp_total > 0))
             no_enter_server = 1;
 else if (srv->Number == 2 &&
-        (chrtc.Body > 10 || chrtc.Reaction > 10 || chrtc.Mind > 10 || chrtc.Spirit > 10))
+        (chrtc.Body > 15 || chrtc.Reaction > 10 || chrtc.Mind > 10 || chrtc.Spirit > 10))
             no_enter_server = 1;
 else if (srv->Number == 3 &&
         (chrtc.Body > 20 || chrtc.Reaction > 20 || chrtc.Mind > 20 || chrtc.Spirit > 20))
