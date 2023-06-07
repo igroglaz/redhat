@@ -1570,6 +1570,13 @@ if (srv->Number > 1 && exp_total == 0)
     return false;
 }
 
+// mage? mages can not enter high tier maps until they fully drink stat pots. warriors - can.
+bool mag = false;
+if (chrtc.Sex == 64 || chrtc.Sex == 192)
+{
+    mag = true;
+}
+
 if      (srv->Number == 1 &&
         // it takes 'pure' stats, without boni from items
         (chrtc.Body > 1 || chrtc.Reaction > 1 || chrtc.Mind > 1 || chrtc.Spirit > 1 ||
@@ -1579,16 +1586,23 @@ else if (srv->Number == 2 &&
         (chrtc.Body > 15 || chrtc.Reaction > 10 || chrtc.Mind > 10 || chrtc.Spirit > 10))
             no_enter_server = 1;
 else if (srv->Number == 3 &&
-        (chrtc.Body > 20 || chrtc.Reaction > 20 || chrtc.Mind > 20 || chrtc.Spirit > 20))
+        ((chrtc.Body > 20 || chrtc.Reaction > 20 || chrtc.Mind > 20 || chrtc.Spirit > 20) ||
+         (mag && (chrtc.Body < 15 || chrtc.Reaction < 10 || chrtc.Mind < 10 || chrtc.Spirit < 10))))
             no_enter_server = 1;
 else if (srv->Number == 4 &&
-        (chrtc.Body > 30 || chrtc.Reaction > 30 || chrtc.Mind > 30 || chrtc.Spirit > 30))
+        ((chrtc.Body > 30 || chrtc.Reaction > 30 || chrtc.Mind > 30 || chrtc.Spirit > 30) ||
+         (mag && (chrtc.Body < 20 || chrtc.Reaction < 20 || chrtc.Mind < 20 || chrtc.Spirit < 20))))
             no_enter_server = 1;
 else if (srv->Number == 5 &&
-        (chrtc.Body > 40 || chrtc.Reaction > 40 || chrtc.Mind > 40 || chrtc.Spirit > 40))
+        ((chrtc.Body > 40 || chrtc.Reaction > 40 || chrtc.Mind > 40 || chrtc.Spirit > 40) ||
+         (mag && (chrtc.Body < 30 || chrtc.Reaction < 30 || chrtc.Mind < 30 || chrtc.Spirit < 30))))
             no_enter_server = 1;
 else if (srv->Number == 6 &&
-        (chrtc.Body > 50 || chrtc.Reaction > 50 || chrtc.Mind > 50 || chrtc.Spirit > 50))
+        ((chrtc.Body > 50 || chrtc.Reaction > 50 || chrtc.Mind > 50 || chrtc.Spirit > 50) ||
+         (mag && (chrtc.Body < 40 || chrtc.Reaction < 40 || chrtc.Mind < 40 || chrtc.Spirit < 40))))
+            no_enter_server = 1;
+else if (srv->Number > 6 &&
+         (mag && (chrtc.Body < 50 || chrtc.Reaction < 50 || chrtc.Mind < 50 || chrtc.Spirit < 50)))
             no_enter_server = 1;
 
 // character can't enter server if he finished drinking stat potions for this particular server
