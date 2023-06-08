@@ -633,7 +633,7 @@ CItemList Login_UnserializeItems(std::string list)
     return items;
 }
 
-bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname)
+bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, unsigned long srvid)
 {
     //Printf("Login_SetCharacter()\n");
     if(!SQL_CheckConnected()) return false;
@@ -829,6 +829,12 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             }
             else
             {
+                // remove 1000 starting gold
+                if (srvid == 1)
+                {
+                    chr.Money = 0;
+                }
+                
                 chr_query_update = Format("UPDATE `characters` SET \
                                                 `id1`='%u', `id2`='%u', `hat_id`='%u', \
                                                 `unknown_value_1`='%u', `unknown_value_2`='%u', `unknown_value_3`='%u', \

@@ -286,7 +286,7 @@ bool SV_ReturnCharacter(ServerConnection* conn, Packet& pack)
         should_unlock = false;
     }
 
-    if(should_save && !Login_SetCharacter(p_logname, p_id1, p_id2, p_chrlen, p_chrdata, chr.Nick))
+    if(should_save && !Login_SetCharacter(p_logname, p_id1, p_id2, p_chrlen, p_chrdata, chr.Nick, p__srvid))
         Printf(LOG_Error, "[DB] Error: Login_SetCharacter(\"%s\", %u, %u, %u, %08X, \"%s\").\n", p_logname.c_str(), p_id1, p_id2, p_chrlen, p_chrdata, chr.Nick.c_str());
     else
     {

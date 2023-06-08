@@ -1445,7 +1445,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         *(unsigned long*)(data + 16) = p_id2;
         memcpy(data + 20, p_nickname.c_str(), p_nickname.length());
 
-        if(!Login_SetCharacter(conn->Login, p_id1, p_id2, 0x30, data, p_nickname))
+        if(!Login_SetCharacter(conn->Login, p_id1, p_id2, 0x30, data, p_nickname, l_srvid))
         {
             delete[] data;
             Printf(LOG_Error, "[DB] Error: Login_SetCharacter(\"%s\", %u, %u, 0x30, <data>, \"%s\").\n", conn->Login.c_str(), p_id1, p_id2, p_nickname.c_str());

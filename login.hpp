@@ -29,7 +29,7 @@ bool Login_SetBanned(std::string login, bool banned, unsigned long date_ban, uns
 bool Login_GetBanned(std::string login, bool& banned, unsigned long& date_ban, unsigned long& date_unban, std::string& reason);
 bool Login_SetMuted(std::string login, bool muted, unsigned long date_mute, unsigned long date_unmute, std::string reason);
 bool Login_GetMuted(std::string login, bool& muted, unsigned long& date_mute, unsigned long& date_unmute, std::string& reason);
-bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname);
+bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, unsigned long srvid);
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, CCharacter& character);
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long& size, char*& data, std::string& nickname, bool genericId = false);
 bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2);
