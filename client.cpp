@@ -1576,26 +1576,18 @@ if      (srv->Number == 1 &&
          exp_total > 0))
             no_enter_server = 1;
 else if (srv->Number == 2 &&
-        (chrtc.Body > 14 || chrtc.Reaction > 9 || chrtc.Mind > 9 || chrtc.Spirit > 14))
+        (chrtc.Body > 14 && chrtc.Reaction > 9 && chrtc.Mind > 9 && chrtc.Spirit > 14))
             no_enter_server = 1;
-else if (srv->Number == 3 &&
-        ((chrtc.Body > 19 || chrtc.Reaction > 19 || chrtc.Mind > 19 || chrtc.Spirit > 19) ||
+else if (srv->Number == 3 && ((chrtc.Body > 19) ||
          (chrtc.Body < 15 || chrtc.Reaction < 10 || chrtc.Mind < 10 || chrtc.Spirit < 15)))
             no_enter_server = 1;
-else if (srv->Number == 4 &&
-        ((chrtc.Body > 29 || chrtc.Reaction > 29 || chrtc.Mind > 29 || chrtc.Spirit > 29) ||
-         (chrtc.Body < 20 || chrtc.Reaction < 20 || chrtc.Mind < 20 || chrtc.Spirit < 20)))
+else if (srv->Number == 4 && (chrtc.Body > 29 || chrtc.Body < 20))
             no_enter_server = 1;
-else if (srv->Number == 5 &&
-        ((chrtc.Body > 39 || chrtc.Reaction > 39 || chrtc.Mind > 39 || chrtc.Spirit > 39) ||
-         (chrtc.Body < 30 || chrtc.Reaction < 30 || chrtc.Mind < 30 || chrtc.Spirit < 30)))
+else if (srv->Number == 5 && (chrtc.Body > 39 || chrtc.Body < 30))
             no_enter_server = 1;
-else if (srv->Number == 6 &&
-        ((chrtc.Body > 49 || chrtc.Reaction > 49 || chrtc.Mind > 49 || chrtc.Spirit > 49) ||
-         (chrtc.Body < 40 || chrtc.Reaction < 40 || chrtc.Mind < 40 || chrtc.Spirit < 40)))
+else if (srv->Number == 6 && (chrtc.Body > 49 || chrtc.Body < 40))
             no_enter_server = 1;
-else if (srv->Number > 6 &&
-         (chrtc.Body < 50 || chrtc.Reaction < 50 || chrtc.Mind < 50 || chrtc.Spirit < 50))
+else if (srv->Number  > 6 && chrtc.Body < 50)
             no_enter_server = 1;
 
 // character can't enter server if he finished drinking stat potions for this particular server
