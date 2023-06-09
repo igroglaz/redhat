@@ -840,15 +840,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpAirBludgeon = 0;
                     chr.ExpEarthPike = 0;
                     chr.ExpAstralShooting = 0;
-                    std::string serializedBag = "[0,0,0,0]"; // wipe inventory
-                    chr.Bag = Login_UnserializeItems(serializedBag);
+                    std::string serializedBag = "[0,0,0,0]"; 
+                    chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                    std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                    chr.Dress = Login_UnserializeItems(serializedDress); // wipe equipped
 
                     if (chr.Sex == 64 || chr.Sex == 192) // mage
                     {
-                        // wipe equipped items
-                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
-
                         // give attack spell
                         switch (chr.MainSkill) {
                             case 1: chr.Spells = 16777218; break; // fire
@@ -856,12 +854,6 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             case 3: chr.Spells = 16778240; break; // air
                             case 4: chr.Spells = 16842752; break; // earth
                         }
-                    }
-                    else // warrior
-                    {
-                        // replace equipped items for bow
-                        std::string serializedDress = "[0,0,40,12];[33044,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
                     }
                 }
 
