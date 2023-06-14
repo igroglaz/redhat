@@ -1575,10 +1575,10 @@ if      (srv->Number == 1 &&
         (chrtc.Body > 1 || chrtc.Reaction > 1 || chrtc.Mind > 1 || chrtc.Spirit > 1 ||
          exp_total > 0))
             no_enter_server = 1;
-else if (srv->Number == 2 && chrtc.Reaction > 9)
+else if (srv->Number == 2 && chrtc.Mind > 14)
             no_enter_server = 1;
 else if (srv->Number == 3 &&
-        (chrtc.Reaction < 10 || chrtc.Reaction > 19))
+        (chrtc.Mind < 15 || chrtc.Reaction > 19))
             no_enter_server = 1;
 else if (srv->Number == 4 &&
         (chrtc.Reaction < 20 || chrtc.Reaction > 29))
