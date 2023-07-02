@@ -868,6 +868,12 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     else if (chr.Sex == 192) { // witch
                         chr.Picture = 6;
                     }
+                // fix problem when newbie character died at server 2 and stack due exp loosing
+                } else if (srvid == 2) {
+                    if (chr.ExpFireBlade == 0 && chr.ExpWaterAxe == 0 && chr.ExpAirBludgeon == 0 &&
+                        chr.ExpEarthPike == 0 && chr.ExpAstralShooting == 0) {
+                        chr.ExpFireBlade = 1;
+                    }
                 }
 
                 chr_query_update = Format("UPDATE `characters` SET \
