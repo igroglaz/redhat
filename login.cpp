@@ -855,6 +855,19 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             case 4: chr.Spells = 16842752; break; // earth
                         }
                     }
+                    
+                    if (chr.Sex == 0) { // warr
+                        chr.Picture = 32;
+                    }
+                    else if (chr.Sex == 64) { // mage
+                        chr.Picture = 15;
+                    }
+                    else if (chr.Sex == 128) { // ama
+                        chr.Picture = 11;
+                    }
+                    else if (chr.Sex == 192) { // witch
+                        chr.Picture = 6;
+                    }
                 }
 
                 chr_query_update = Format("UPDATE `characters` SET \
