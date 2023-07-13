@@ -1587,9 +1587,10 @@ else if (srv->Number == 5 &&
         (chrtc.Reaction < 30 || chrtc.Reaction > 39))
             no_enter_server = 1;
 else if (srv->Number == 6 &&
-        (chrtc.Reaction < 40 || chrtc.Reaction > 49))
+        (chrtc.Reaction < 40 || (chrtc.Body > 49 && chrtc.Reaction > 49 && chrtc.Mind > 49 && chrtc.Spirit > 49)))
             no_enter_server = 1;
-else if (srv->Number > 6 && chrtc.Reaction < 50)
+else if (srv->Number > 6 &&
+        (chrtc.Body < 50 || chrtc.Reaction < 50 || chrtc.Mind < 50 || chrtc.Spirit < 50))
             no_enter_server = 1;
 
 // character can't enter server if he finished drinking stat potions for this particular server
