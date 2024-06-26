@@ -684,7 +684,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
         }
 
         // Query to check if character exists
-        std::string query_checkchr = Format("SELECT `login_id` FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
+        std::string query_checkchr = Format("SELECT `login_id`, `ascended` FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
         if(SQL_Query(query_checkchr.c_str()) != 0) // Execute query
         {
             SQL_Unlock();
@@ -694,13 +694,28 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
         // FLAG to determine if character needs to be created
         bool create = true;
 
+        // Has this character ascended?
+        bool has_ascended = false;
+
         result = SQL_StoreResult(); // Store result of query
         if(result)
         {
             // If character exists, set create FLAG to false
-            if(SQL_NumRows(result) == 1) create = false;
+            if(SQL_NumRows(result) == 1) {
+                create = false;
+                has_ascended = (bool)SQL_FetchInt(row, result, "ascended");
+            }
             SQL_FreeResult(result); // Free result memory
         }
+
+        // We use this value to check if an ascended mage has the staff.
+        const std::string ascensionStaff = "[53709,1,2,1,{2:3:0:0}]";
+        // The dress that the mage gets upon ascension.
+        const std::string ascensionDressStaff = "[0,0,40,12];" + ascensionStaff + ";[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+        // The dress that the warrior gets upon ascension.
+        const std::string ascensionDressCrown = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+        // Empty dress.
+        const std::string rebirthDressEmpty = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
 
         // RETARDED CHARACTER
         if(size == 0x30 && *(unsigned long*)(data) == 0xFFDDAA11)
@@ -876,8 +891,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     std::string serializedBag = "[0,0,0,0]";
                     chr.Bag = Login_UnserializeItems(serializedBag);
                     // wipe equipped
-                    std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                    chr.Dress = Login_UnserializeItems(serializedDress);
+                    chr.Dress = Login_UnserializeItems(rebirthDressEmpty);
 
                     if (chr.Sex == 64 || chr.Sex == 192) // mage
                     {
@@ -934,8 +948,6 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     // WARRIOR/MAGE (no reclass OR ascend)
                     if (chr.Sex == 0 || chr.Sex == 64) {
                         chr.Money = 0; // wipe gold
-                        std::string serializedBag = "[0,0,0,0]";
-                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
 
                         // Wipe experience for the main skill
                         switch (chr.MainSkill) {
@@ -956,7 +968,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         // Mage
                         if (chr.Sex == 64) {
                             // mages lose equipment too...
-                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                            std::string serializedDress = rebirthDressEmpty;
+                            if (has_ascended) {
+                                // Except for the ascended staff.
+                                if (Login_SerializeItems(chr.Dress).find(ascensionStaff) != std::string::npos || Login_SerializeItems(chr.Bag).find(ascensionStaff) != std::string::npos) {
+                                    serializedDress = ascensionDressStaff;
+                                }
+                            }
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
                             // ...and all spellbooks (leave only basic arrow)
@@ -967,12 +985,14 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                 case 4: chr.Spells = 16842752; break; // earth
                             }
                         }
+
+                        // We wipe the inventory after wiping the dress, because we need to check if the ascension staff is in the bag.
+                        std::string serializedBag = "[0,0,0,0]";
+                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
                     }
                     // RECLASSED chars reborn (AMA/WITCH)
                     else if (chr.Sex == 128 || chr.Sex == 192) {
                         chr.Money = 0; // wipe gold
-                        std::string serializedBag = "[0,0,0,0]";
-                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
 
                         chr.ExpFireBlade = 1; // wipe ALL exp
                         chr.ExpWaterAxe = 1;
@@ -983,7 +1003,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         // Witch
                         if (chr.Sex == 192) {
                             // witch lose equipment too...
-                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                            std::string serializedDress = rebirthDressEmpty;
+                            if (has_ascended) {
+                                // Except for the ascended staff.
+                                if (Login_SerializeItems(chr.Dress).find(ascensionStaff) != std::string::npos || Login_SerializeItems(chr.Bag).find(ascensionStaff) != std::string::npos) {
+                                    serializedDress = ascensionDressStaff;
+                                }
+                            }
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
                             // ...and all spellbooks (leave only basic arrow)
@@ -994,6 +1020,10 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                 case 4: chr.Spells = 16842752; break; // earth
                             }
                         }
+
+                        // We wipe the inventory after wiping the dress, because we need to check if the ascension staff is in the bag.
+                        std::string serializedBag = "[0,0,0,0]";
+                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
                     }
                 }
 
@@ -1004,7 +1034,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
                 unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
                                          chr.ExpEarthPike + chr.ExpAstralShooting;
-                
+
                 // RECLASS: warrior/mage become ama/witch
                 if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
 
@@ -1022,8 +1052,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     std::string serializedBag = "[0,0,0,0]";
                     chr.Bag = Login_UnserializeItems(serializedBag);
                     // wipe equipped
-                    std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                    chr.Dress = Login_UnserializeItems(serializedDress);
+                    chr.Dress = Login_UnserializeItems(rebirthDressEmpty);
 
                     // reclass: war/mage change class
                     if (chr.Sex == 0) { // warr become ama
@@ -1041,7 +1070,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 // ASCEND: ama/witch become again war/mage and receive crown
                 } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                            stats_sum == 283 && total_exp > 177777777) {  
+                            stats_sum == 283 && total_exp > 177777777) {
 
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
@@ -1063,13 +1092,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange
                         chr.Sex = 0;
                         chr.Picture = 32;
-                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
-                    } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
+                        chr.Dress = Login_UnserializeItems(ascensionDressCrown);
+                    } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Staff of Poison Cloud) body
                         chr.Sex = 64;
-                        chr.Picture = 15; // TODO: problem.. after RECLASSING ascended mage - staff will be destroyed
-                        std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
+                        chr.Picture = 15;
+                        chr.Dress = Login_UnserializeItems(ascensionDressStaff);
                     }
                 }
 
