@@ -907,10 +907,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 }
 
                 // Reborn characters when they go to next difficulty
-                // (we check there _!from which server!_ we received character)
                 if (chr.diffLvl_svrID < srvid) {
                     bool reborn = false;
 
+                    // note: we check there _!from which server!_ we received character
+                    // eg if we receved char from srvid 2 and char finished its stay there
+                    // (by drinking mind to 15) - he will be reborned.. and his next login
+                    // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
                     if (srvid == 2 && chr.Mind > 14)
                         reborn = true;
                     else if (srvid == 3 && 
@@ -927,15 +930,34 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         reborn = true;
 
                     if (reborn) {
-                        chr.Money = 0;
-                        chr.ExpFireBlade = 1;
-                        chr.ExpWaterAxe = 0;
-                        chr.ExpAirBludgeon = 0;
-                        chr.ExpEarthPike = 0;
-                        chr.ExpAstralShooting = 0;
+
+                        chr.Money = 0; // wipe gold
                         chr.Bag = Login_UnserializeItems("[0,0,0,0]"); // wipe inventory
 
+                        // Wipe experience for the main skill
+                        switch (chr.MainSkill) {
+                            case 1: chr.ExpFireBlade = 1; break;
+                            case 2: chr.ExpWaterAxe = 1; break;
+                            case 3: chr.ExpAirBludgeon = 1; break;
+                            case 4: chr.ExpEarthPike = 1; break;
+                        }
+
+                        // Reduce all other skills in 2 times...
+                        if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
+                        if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
+                        if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
+                        if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
+                        // ...and astral/shooting in srvID times
+                        chr.ExpAstralShooting /= srvid;
+
+                        // Mages
                         if (chr.Sex == 64 || chr.Sex == 192) { // mage
+
+                            // mages loose equipment too...
+                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                            chr.Dress = Login_UnserializeItems(serializedDress);
+
+                            // ...and all spellbooks except astral
                             switch (chr.MainSkill) {
                                 case 1: chr.Spells = 16777218; break; // fire
                                 case 2: chr.Spells = 16777248; break; // water
