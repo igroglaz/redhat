@@ -975,6 +975,19 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
     return true; // Default return true
 }
 
+/**
+ * Retrieves character data in binary format.
+ *
+ * @param login The login name of the user.
+ * @param id1 The first part of the character's ID.
+ * @param id2 The second part of the character's ID.
+ * @param size Reference to store the size of the binary data.
+ * @param data Reference to store the pointer to the binary data.
+ * @param nickname Reference to store the character's nickname.
+ * @param genericId Flag to determine whether to use a generic HatID.
+ * @return true if the character data was successfully retrieved, false otherwise.
+ */
+// Called for operations like sending data over the network or saving it in a compact form.
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long& size, char*& data, std::string& nickname, bool genericId)
 {
     //Printf("Login_GetCharacter()\n");
@@ -1133,6 +1146,18 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
     return true;
 }
 
+
+/**
+ * Retrieves character data directly into a CCharacter object.
+ *
+ * @param login The login name of the user.
+ * @param id1 The first part of the character's ID.
+ * @param id2 The second part of the character's ID.
+ * @param character Reference to store the retrieved character object.
+ * @return true if the character data was successfully retrieved, false otherwise.
+ */
+// Called to get direct access to character attributes.
+// It returns a populated CCharacter object that can be manipulated or accessed within the application.
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, CCharacter& character)
 {
     if(!SQL_CheckConnected()) return false;
