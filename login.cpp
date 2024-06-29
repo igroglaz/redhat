@@ -811,7 +811,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`, `exp_water_axe`, \
                                                 `exp_air_bludgeon`, `exp_earth_pike`, \
                                                 `exp_astral_shooting`, `bag`, `dress`, `clantag`, \
-                                                `sec_55555555`, `sec_40A40A40`, `retarded`, `deleted`) VALUES ( \
+                                                `sec_55555555`, `sec_40A40A40`, `retarded`, `deleted`, \
+                                                `reborned_6_hard`) VALUES ( \
                                                     '%u', '%u', '%u', '%u', \
                                                     '%u', '%u', '%u', \
                                                     '%s', '%s', \
@@ -831,7 +832,10 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                         chr.ExpFireBlade, chr.ExpWaterAxe,
                                                         chr.ExpAirBludgeon, chr.ExpEarthPike,
                                                         chr.ExpAstralShooting,
-                                                        Login_SerializeItems(chr.Bag).c_str(), Login_SerializeItems(chr.Dress).c_str(), SQL_Escape(chr.ClanTag).c_str());
+                                                        Login_SerializeItems(chr.Bag).c_str(),
+                                                        Login_SerializeItems(chr.Dress).c_str(),
+                                                        SQL_Escape(chr.ClanTag).c_str());
+
 
                 // Append section data to query
                 for(size_t i = 0; i < data_55555555.size(); i++)
@@ -913,7 +917,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `spells`='%u', `active_spell`='%u', `money`='%u', \
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
-                                                `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0'",
+                                                `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
+                                                `reborned_6_hard`='%u'",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -924,7 +929,9 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpFireBlade, chr.ExpWaterAxe,
                                                     chr.ExpAirBludgeon, chr.ExpEarthPike,
                                                     chr.ExpAstralShooting,
-                                                    Login_SerializeItems(chr.Bag).c_str(), Login_SerializeItems(chr.Dress).c_str());
+                                                    Login_SerializeItems(chr.Bag).c_str(),
+                                                    Login_SerializeItems(chr.Dress).c_str(),
+                                                    chr.Reborned6Hard);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
