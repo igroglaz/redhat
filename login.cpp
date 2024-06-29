@@ -691,17 +691,19 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             return false;
         }
 
-        bool create = true; // Flag to determine if character needs to be created
+        // FLAG to determine if character needs to be created
+        bool create = true;
 
         result = SQL_StoreResult(); // Store result of query
         if(result)
         {
-            // If character exists, set create to false
+            // If character exists, set create FLAG to false
             if(SQL_NumRows(result) == 1) create = false;
             SQL_FreeResult(result); // Free result memory
         }
 
-        if(size == 0x30 && *(unsigned long*)(data) == 0xFFDDAA11) // Check for special data format
+        // RETARDED CHARACTER
+        if(size == 0x30 && *(unsigned long*)(data) == 0xFFDDAA11)
         {
             // Extract character attributes from data
             uint8_t p_nickname_length = *(uint8_t*)(data + 4);
@@ -732,20 +734,21 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 p_clan = "";
             }
 
+            // SQL query for creating or updating a character
             std::string chr_query_create1;
 
+            // if create FLAG is true - create a new character
             if(create)
             {
-                // Query to create a new character
                 chr_query_create1 = Format("INSERT INTO `characters` (`login_id`, `retarded`, `body`, `reaction`, `mind`, `spirit`, \
                                            `mainskill`, `picture`, `class`, `id1`, `id2`, `nick`, `clan`, `clantag`, `deleted`) VALUES \
                                            ('%u', '1', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%s', '%s', '', '0')", login_id,
                                                 p_body, p_reaction, p_mind, p_spirit, p_base, p_picture, p_sex, p_id1, p_id2,
                                                 p_nick.c_str(), p_clan.c_str());
             }
+            // create FLAG is false - update an existing character
             else
             {
-                // Query to update an existing character
                 chr_query_create1 = Format("UPDATE `characters` SET `login_id`='%u', `retarded`='1', `body`='%u', `reaction`='%u', `mind`='%u', `spirit`='%u', \
                                            `mainskill`='%u', `picture`='%u', `class`='%u', `id1`='%u', `id2`='%u', `nick`='%s', `clan`='%s', `clantag`='', `deleted`='0'", login_id,
                                                 p_body, p_reaction, p_mind, p_spirit, p_base, p_picture, p_sex, p_id1, p_id2,
@@ -758,6 +761,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 return false;
             }
         }
+        // REGULAR CHARACTER
         else
         {
             BinaryStream strm; // Stream for handling binary data
@@ -785,12 +789,14 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 }
             }
 
+            // SQL query for updating a character
             std::string chr_query_update;
 
             // Extract sections from character data
             std::vector<uint8_t>& data_40A40A40 = chr.Section40A40A40.GetBuffer();
             std::vector<uint8_t>& data_55555555 = chr.Section55555555.GetBuffer();
 
+            // if create FLAG is true - create a new character
             if(create)
             {
                 // Query to insert character with all attributes
@@ -846,6 +852,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 chr_query_update += "', '0', '0')";
             }
+            // create FLAG is false - update an existing character
             else
             {
                 // Reset character attributes for #1 server (remove 1000 starting gold)
