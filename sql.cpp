@@ -199,7 +199,7 @@ void SQL_CreateTables()
         `retarded` INT(1) UNSIGNED NOT NULL, \
         `deleted` INT(1) UNSIGNED NOT NULL, \
         `clantag` VARCHAR(16) CHARACTER SET cp866 COLLATE cp866_bin NOT NULL, \
-        `reborned_6_hard` BOOLEAN NOT NULL DEFAULT FALSE, \
+        `diffLvl_svrID` INT(1) UNSIGNED NOT NULL DEFAULT 1, \
         UNIQUE(`id`))"; // long query to create characters table
 
     std::string query_table_authlog = "CREATE TABLE IF NOT EXISTS `authlog` ( \
