@@ -906,6 +906,48 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                 }
 
+                // Reborn characters when they go to next difficulty
+                // (we check there _!from which server!_ we received character)
+                if (chr.diffLvl_svrID < srvid) {
+                    bool reborn = false;
+
+                    if (srvid == 2 && chr.Mind > 14)
+                        reborn = true;
+                    else if (srvid == 3 && 
+                             (chr.Reaction > 19))
+                        reborn = true;
+                    else if (srvid == 4 && 
+                             (chr.Reaction > 29))
+                        reborn = true;
+                    else if (srvid == 5 && 
+                             (chr.Reaction > 39))
+                        reborn = true;
+                    else if (srvid == 6 && 
+                             (chr.Body > 49 && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
+                        reborn = true;
+
+                    if (reborn) {
+                        chr.Money = 0;
+                        chr.ExpFireBlade = 1;
+                        chr.ExpWaterAxe = 0;
+                        chr.ExpAirBludgeon = 0;
+                        chr.ExpEarthPike = 0;
+                        chr.ExpAstralShooting = 0;
+                        chr.Bag = Login_UnserializeItems("[0,0,0,0]"); // wipe inventory
+
+                        if (chr.Sex == 64 || chr.Sex == 192) { // mage
+                            switch (chr.MainSkill) {
+                                case 1: chr.Spells = 16777218; break; // fire
+                                case 2: chr.Spells = 16777248; break; // water
+                                case 3: chr.Spells = 16778240; break; // air
+                                case 4: chr.Spells = 16842752; break; // earth
+                            }
+                        }
+
+                        chr.diffLvl_svrID = srvid; // update diffLvl_svrID
+                    }
+                }
+
                 // Query to update character with new attributes
                 chr_query_update = Format("UPDATE `characters` SET \
                                                 `id1`='%u', `id2`='%u', `hat_id`='%u', \
@@ -931,7 +973,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    chr.Reborned6Hard);
+                                                    chr.diffLvl_svrID);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
