@@ -733,7 +733,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             else
             {
                 // Query to update an existing character
-                chr_query_create1 = Format("UPDATE `characters` SET `login_id`='%u' `retarded`='1', `body`='%u', `reaction`='%u', `mind`='%u', `spirit`='%u', \
+                chr_query_create1 = Format("UPDATE `characters` SET `login_id`='%u', `retarded`='1', `body`='%u', `reaction`='%u', `mind`='%u', `spirit`='%u', \
                                            `mainskill`='%u', `picture`='%u', `class`='%u', `id1`='%u', `id2`='%u', `nick`='%s', `clan`='%s', `clantag`='', `deleted`='0'", login_id,
                                                 p_body, p_reaction, p_mind, p_spirit, p_base, p_picture, p_sex, p_id1, p_id2,
                                                 p_nick.c_str(), p_clan.c_str());
@@ -947,7 +947,6 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
     return true; // Default return true
 }
-
 
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long& size, char*& data, std::string& nickname, bool genericId)
 {
