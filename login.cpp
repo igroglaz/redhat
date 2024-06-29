@@ -991,74 +991,83 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long& size, char*& data, std::string& nickname, bool genericId)
 {
     //Printf("Login_GetCharacter()\n");
+
+    // Check if SQL connection is active
     if(!SQL_CheckConnected()) return false;
 
     try
     {
-        login = SQL_Escape(login);
+        login = SQL_Escape(login); // Escape SQL characters in login string
 
-        SQL_Lock();
+        SQL_Lock(); // Lock SQL to prevent concurrent access
+
+        // Query to check if login exists
         std::string query_checklgn = Format("SELECT `id` FROM `logins` WHERE LOWER(`name`)=LOWER('%s')", login.c_str());
-        if(SQL_Query(query_checklgn.c_str()) != 0)
+        if(SQL_Query(query_checklgn.c_str()) != 0) // Execute query
         {
-            SQL_Unlock();
-            return false;
-        }
-        MYSQL_RES* result = SQL_StoreResult();
-        if(!result)
-        {
-            SQL_Unlock();
+            SQL_Unlock(); // Unlock SQL if query fails
             return false;
         }
 
-        if(!SQL_NumRows(result))
+        MYSQL_RES* result = SQL_StoreResult(); // Store query result
+        if(!result) // Check if result is valid
+        {
+            SQL_Unlock(); // Unlock SQL if no result
+            return false;
+        }
+
+        if(!SQL_NumRows(result)) // Check if login exists in result
         {
             SQL_Unlock();
-            SQL_FreeResult(result);
+            SQL_FreeResult(result); // Free result memory
             return false; // login does not exist
         }
 
-        MYSQL_ROW row = SQL_FetchRow(result);
-        int login_id = SQL_FetchInt(row, result, "id");
-        SQL_FreeResult(result);
+        MYSQL_ROW row = SQL_FetchRow(result); // Fetch row from result
+        int login_id = SQL_FetchInt(row, result, "id"); // Get login id from row
+        SQL_FreeResult(result); // Free result memory
+
+        // Check if login id is valid
         if(login_id == -1)
         {
             SQL_Unlock();
             return false;
         }
 
+        // Query to get character data
         std::string query_character = Format("SELECT * FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u' AND `deleted`='0'", login_id, id1, id2);
-        if(SQL_Query(query_character.c_str()) != 0)
+        if(SQL_Query(query_character.c_str()) != 0) // Execute query
         {
             SQL_Unlock();
             return false;
         }
 
-        result = SQL_StoreResult();
-        if(!result)
+        result = SQL_StoreResult(); // Store query result
+        if(!result) // Check if result is valid
         {
             SQL_Unlock();
             return false;
         }
 
-        if(SQL_NumRows(result) != 1)
+        if(SQL_NumRows(result) != 1) // Ensure exactly one character found
         {
             SQL_Unlock();
             return false;
         }
 
-        row = SQL_FetchRow(result);
+        row = SQL_FetchRow(result); // Fetch row from result
 
+        // Check if character is flagged as "retarded"
         bool p_retarded = (bool)SQL_FetchInt(row, result, "retarded");
-        if(p_retarded) // server creation msg
+        if(p_retarded)
         {
-            size = 0x30;
-            data = new char[size];
-            std::string p_nick = SQL_FetchString(row, result, "nick");
-            std::string p_clan = SQL_FetchString(row, result, "clan");
-            std::string p_nickname = p_nick;
+            size = 0x30; // Set size for binary data
+            data = new char[size]; // Allocate memory for binary data
+            std::string p_nick = SQL_FetchString(row, result, "nick"); // Fetch nickname
+            std::string p_clan = SQL_FetchString(row, result, "clan"); // Fetch clan
+            std::string p_nickname = p_nick; // Combine nickname and clan if clan exists
             if(p_clan.length()) p_nickname += "|" + p_clan;
-            *(uint32_t*)(data) = 0xFFDDAA11;
+            *(uint32_t*)(data) = 0xFFDDAA11; // Set magic number for binary data
             *(uint8_t*)(data + 4) = (uint8_t)p_nickname.size();
             *(uint8_t*)(data + 5) = (uint8_t)SQL_FetchInt(row, result, "body");
             *(uint8_t*)(data + 6) = (uint8_t)SQL_FetchInt(row, result, "reaction");
@@ -1069,9 +1078,10 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
             *(uint8_t*)(data + 11) = (uint8_t)SQL_FetchInt(row, result, "class");
             *(uint32_t*)(data + 12) = (uint32_t)SQL_FetchInt(row, result, "id1");
             *(uint32_t*)(data + 16) = (uint32_t)SQL_FetchInt(row, result, "id2");
-            memcpy(data + 20, p_nickname.data(), p_nickname.size());
-            nickname = p_nick;
+            memcpy(data + 20, p_nickname.data(), p_nickname.size()); // Copy nickname to binary data
+            nickname = p_nick; // Set nickname
         }
+        // Handle normal characters
         else
         {
             CCharacter chr;
@@ -1106,6 +1116,7 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
             chr.ExpEarthPike = SQL_FetchInt(row, result, "exp_earth_pike");
             chr.ExpAstralShooting = SQL_FetchInt(row, result, "exp_astral_shooting");
 
+            // Handle additional sections
             std::string data_55555555 = SQL_FetchString(row, result, "sec_55555555");
             std::string data_40A40A40 = SQL_FetchString(row, result, "sec_40A40A40");
             chr.Section55555555.Reset();
@@ -1116,6 +1127,7 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
             chr.Bag = Login_UnserializeItems(SQL_FetchString(row, result, "bag"));
             chr.Dress = Login_UnserializeItems(SQL_FetchString(row, result, "dress"));
 
+            // Serialize character to binary stream
             BinaryStream strm;
             if(!chr.SaveToStream(strm))
             {
@@ -1124,28 +1136,28 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 return false;
             }
 
+            // Copy binary stream to data
             std::vector<uint8_t>& buf = strm.GetBuffer();
             size = buf.size();
             data = new char[size];
             for(uint32_t i = 0; i < size; i++)
                 data[i] = buf[i];
 
-            nickname = chr.Nick;
+            nickname = chr.Nick; // Set nickname
         }
 
-        SQL_FreeResult(result);
-        SQL_Unlock();
+        SQL_FreeResult(result); // Free query result
+        SQL_Unlock(); // Unlock SQL after successful operation
         return true;
     }
     catch(...)
     {
-        SQL_Unlock();
+        SQL_Unlock(); // Unlock SQL in case of exception
         return false;
     }
 
-    return true;
+    return true; // Default return true
 }
-
 
 /**
  * Retrieves character data directly into a CCharacter object.
@@ -1160,64 +1172,72 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
 // It returns a populated CCharacter object that can be manipulated or accessed within the application.
 bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2, CCharacter& character)
 {
+    // Check if SQL connection is active
     if(!SQL_CheckConnected()) return false;
 
     try
     {
-        login = SQL_Escape(login);
+        login = SQL_Escape(login); // Escape SQL characters in login string
 
-        SQL_Lock();
+        SQL_Lock(); // Lock SQL to prevent concurrent access
+
+        // Query to check if login exists
         std::string query_checklgn = Format("SELECT `id` FROM `logins` WHERE LOWER(`name`)=LOWER('%s')", login.c_str());
-        if(SQL_Query(query_checklgn.c_str()) != 0)
+        if(SQL_Query(query_checklgn.c_str()) != 0) // Execute query
         {
-            SQL_Unlock();
+            SQL_Unlock(); // Unlock SQL if query fails
             return false;
         }
-        MYSQL_RES* result = SQL_StoreResult();
-        if(!result)
+
+        MYSQL_RES* result = SQL_StoreResult(); // Store query result
+        if(!result) // Check if result is valid
         {
             SQL_Unlock();
             return false;
         }
 
-        if(!SQL_NumRows(result))
+        if(!SQL_NumRows(result)) // Check if login exists in result
         {
             SQL_Unlock();
-            SQL_FreeResult(result);
+            SQL_FreeResult(result); // Free result memory
             return false; // login does not exist
         }
 
-        MYSQL_ROW row = SQL_FetchRow(result);
-        int login_id = SQL_FetchInt(row, result, "id");
-        SQL_FreeResult(result);
+        MYSQL_ROW row = SQL_FetchRow(result); // Fetch row from result
+        int login_id = SQL_FetchInt(row, result, "id"); // Get login id from row
+        SQL_FreeResult(result); // Free result memory
+
+        // Check if login id is valid
         if(login_id == -1)
         {
             SQL_Unlock();
             return false;
         }
 
+        // Query to get character data
         std::string query_character = Format("SELECT * FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u' AND `deleted`='0'", login_id, id1, id2);
-        if(SQL_Query(query_character.c_str()) != 0)
+        if(SQL_Query(query_character.c_str()) != 0) // Execute query
         {
             SQL_Unlock();
             return false;
         }
 
-        result = SQL_StoreResult();
-        if(!result)
+        result = SQL_StoreResult(); // Store query result
+        if(!result) // Check if result is valid
         {
             SQL_Unlock();
             return false;
         }
 
-        if(SQL_NumRows(result) != 1)
+        if(SQL_NumRows(result) != 1) // Ensure exactly one character found
         {
             SQL_Unlock();
             return false;
         }
 
-        row = SQL_FetchRow(result);
+        row = SQL_FetchRow(result); // Fetch row from result
 
+        // Populate CCharacter object with character data
         bool p_retarded = (bool)SQL_FetchInt(row, result, "retarded");
         CCharacter chr;
         chr.Retarded = p_retarded;
@@ -1252,6 +1272,7 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
         chr.ExpEarthPike = SQL_FetchInt(row, result, "exp_earth_pike");
         chr.ExpAstralShooting = SQL_FetchInt(row, result, "exp_astral_shooting");
 
+        // Handle additional sections
         std::string data_55555555 = SQL_FetchString(row, result, "sec_55555555");
         std::string data_40A40A40 = SQL_FetchString(row, result, "sec_40A40A40");
         chr.Section55555555.Reset();
@@ -1262,20 +1283,21 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
         chr.Bag = Login_UnserializeItems(SQL_FetchString(row, result, "bag"));
         chr.Dress = Login_UnserializeItems(SQL_FetchString(row, result, "dress"));
 
-        character = chr;
+        character = chr; // Set the character object
 
-        SQL_FreeResult(result);
-        SQL_Unlock();
+        SQL_FreeResult(result); // Free query result
+        SQL_Unlock(); // Unlock SQL after successful operation
         return true;
     }
     catch(...)
     {
-        SQL_Unlock();
+        SQL_Unlock(); // Unlock SQL in case of exception
         return false;
     }
 
-    return true;
+    return true; // Default return true
 }
+
 
 bool Login_GetCharacterList(std::string login, std::vector<CharacterInfo>& info, int hatId)
 {
