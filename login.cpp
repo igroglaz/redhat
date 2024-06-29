@@ -644,14 +644,20 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
         nickname = SQL_Escape(nickname); // Escape SQL characters in nickname string
 
         SQL_Lock(); // Lock SQL to prevent concurrent access
-        std::string query_checklgn = Format("SELECT `id` FROM `logins` WHERE LOWER(`name`)=LOWER('%s')", login.c_str()); // Query to check if login exists
+
+        // Query to check if login exists
+        std::string query_checklgn = Format("SELECT `id` FROM `logins` WHERE LOWER(`name`)=LOWER('%s')", login.c_str());
         if(SQL_Query(query_checklgn.c_str()) != 0) // Execute query
         {
             SQL_Unlock(); // Unlock SQL if query fails
             return false;
         }
-        MYSQL_RES* result = SQL_StoreResult(); // Store result of query
-        if(!result) // Check if result is valid
+
+        // Store result of query
+        MYSQL_RES* result = SQL_StoreResult();
+
+        // Check if result is valid
+        if(!result)
         {
             SQL_Unlock(); // Unlock SQL if no result
             return false;
@@ -664,16 +670,21 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             return false; // login does not exist
         }
 
-        MYSQL_ROW row = SQL_FetchRow(result); // Fetch row from result
-        int login_id = SQL_FetchInt(row, result, "id"); // Get login id from row
+        // Fetch row from result
+        MYSQL_ROW row = SQL_FetchRow(result);
+        // Get login id from row
+        int login_id = SQL_FetchInt(row, result, "id");
         SQL_FreeResult(result); // Free result memory
-        if(login_id == -1) // Check if login id is valid
+
+        // Check if login id is valid
+        if(login_id == -1)
         {
             SQL_Unlock();
             return false;
         }
 
-        std::string query_checkchr = Format("SELECT `login_id` FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2); // Query to check if character exists
+        // Query to check if character exists
+        std::string query_checkchr = Format("SELECT `login_id` FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
         if(SQL_Query(query_checkchr.c_str()) != 0) // Execute query
         {
             SQL_Unlock();
@@ -685,7 +696,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
         result = SQL_StoreResult(); // Store result of query
         if(result)
         {
-            if(SQL_NumRows(result) == 1) create = false; // If character exists, set create to false
+            // If character exists, set create to false
+            if(SQL_NumRows(result) == 1) create = false;
             SQL_FreeResult(result); // Free result memory
         }
 
@@ -705,7 +717,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             std::string p_nickname(data+20, p_nickname_length);
             std::string p_nick, p_clan;
 
-            size_t splw = p_nickname.find('|'); // Check for clan separator in nickname
+            // Check for clan separator in nickname
+            size_t splw = p_nickname.find('|');
             if(splw != std::string::npos)
             {
                 p_nick = p_nickname;
