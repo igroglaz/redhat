@@ -142,7 +142,7 @@ void SQL_CreateTables()
         `banned_date` BIGINT(1) UNSIGNED NOT NULL, \
         `banned_unbandate` BIGINT(1) UNSIGNED NOT NULL, \
         `banned_reason` TEXT CHARACTER SET cp866 COLLATE cp866_bin NOT NULL, \
-        `muted` TINYINT(1) NOT NULL \
+        `muted` TINYINT(1) NOT NULL, \
         `muted_date` BIGINT(1) UNSIGNED NOT NULL, \
         `muted_unmutedate` BIGINT(1) UNSIGNED NOT NULL, \
         `muted_reason` TEXT CHARACTER SET cp866 COLLATE cp866_bin NOT NULL, \
@@ -154,6 +154,10 @@ void SQL_CreateTables()
         `password` VARCHAR(256) NOT NULL, \
         `ip_filter` TEXT NOT NULL, \
         `locked_hat` INT(1) UNSIGNED NOT NULL, \
+        `discordName` VARCHAR(255) DEFAULT NULL, \
+        `discordUserId` VARCHAR(255) DEFAULT NULL, \
+        `discordRole` VARCHAR(1020) DEFAULT NULL, \
+        `changes` TINYINT(4) NOT NULL DEFAULT '0', \
         UNIQUE(`id`))"; // long query to create logins table
 
     std::string query_table_characters = "CREATE TABLE IF NOT EXISTS `characters` ( \
