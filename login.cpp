@@ -893,11 +893,16 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Picture = 15;
                     }
                     else if (chr.Sex == 128) { // ama
-                        chr.Picture = 11;
+                        chr.Sex == 0
+                        chr.Picture = 32;
+                        //chr.Picture = 11; pic for ama (will be used after major reborn)
                     }
                     else if (chr.Sex == 192) { // witch
-                        chr.Picture = 6;
+                        chr.Sex == 64
+                        chr.Picture = 15;
+                        //chr.Picture = 6; pic for witch (will be used after major reborn)
                     }
+
                 // fix problem when newbie character died at server 2 and stack due exp loosing
                 } else if (srvid == 2) {
                     if (chr.ExpFireBlade == 0 && chr.ExpWaterAxe == 0 && chr.ExpAirBludgeon == 0 &&
