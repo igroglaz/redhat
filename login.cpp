@@ -897,11 +897,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Picture = 15;
                     }
                     else if (chr.Sex == 128) { // ama become warr
-                        chr.Sex == 0
+                        chr.Sex = 0;
                         chr.Picture = 32;
                     }
                     else if (chr.Sex == 192) { // witch become mage
-                        chr.Sex == 64
+                        chr.Sex = 64;
                         chr.Picture = 15;
                     }
                 // fix problem when newbie character died at server 2 and stack due exp loosing
@@ -1002,11 +1002,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                     // ascend #1: war/mage change class
                     if (chr.Sex == 0) { // #1 ascend warr become ama
-                        chr.Sex == 128
+                        chr.Sex = 128;
                         chr.Picture = 11;
                     }
                     else if (chr.Sex == 64) { // #1 ascend mage becomes witch
-                        chr.Sex == 192
+                        chr.Sex = 192;
                         chr.Picture = 6;
                     }
                 // ascend #2: ama/witch become again war/mage and receive crown
@@ -1028,13 +1028,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     std::string serializedBag = "[0,0,0,0]";
                     chr.Bag = Login_UnserializeItems(serializedBag);
                     // wipe equipment and award...
-                    if chr.Sex == 128 { // amazon become warrior and get CROWN (Good Gold Helm) +3 body
-                        chr.Sex == 0
+                    if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body
+                        chr.Sex = 0;
                         chr.Picture = 32;
                         std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                         chr.Dress = Login_UnserializeItems(serializedDress);
-                    } else if chr.Sex == 192 { // witch become mage and get STAFF +3 (Good Bone Staff) body
-                        chr.Sex == 64
+                    } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
+                        chr.Sex = 64;
                         chr.Picture = 15;
                         std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                         chr.Dress = Login_UnserializeItems(serializedDress);
@@ -1069,7 +1069,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    chr.ascended);
+                                                    ascended);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
@@ -1112,6 +1112,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
     return true; // Default return true
 }
+
 
 /**
  * Retrieves character data in binary format.
