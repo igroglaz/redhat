@@ -812,7 +812,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_air_bludgeon`, `exp_earth_pike`, \
                                                 `exp_astral_shooting`, `bag`, `dress`, `clantag`, \
                                                 `sec_55555555`, `sec_40A40A40`, `retarded`, `deleted`, \
-                                                `diffLvl_svrID`) VALUES ( \
+                                                `ascended`) VALUES ( \
                                                     '%u', '%u', '%u', '%u', \
                                                     '%u', '%u', '%u', \
                                                     '%s', '%s', \
@@ -911,7 +911,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 // REBORN before entering next difficulty
                 // .... also we do not reborn "ascended" characters (war -> ama, mage -> witch)
-                if (chr.diffLvl_svrID < srvid) {
+                if (chr.ascended < srvid) {
                     bool reborn = false;
 
                     // note: we check there _!from which server!_ we received character
@@ -968,7 +968,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             }
                         }
 
-                        chr.diffLvl_svrID = srvid; // update diffLvl_svrID
+                        chr.ascended = srvid; // update ascended
                     }
                 }
 
@@ -1028,7 +1028,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
                                                 `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
-                                                `diffLvl_svrID`='%u'",
+                                                `ascended`='%u'",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -1041,7 +1041,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    chr.diffLvl_svrID);
+                                                    chr.ascended);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
