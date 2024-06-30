@@ -800,6 +800,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             if(create)
             {
                 // Query to insert character with all attributes
+                // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
+                // when we receive character from the server (down below))). There we just init it as 0)
                 chr_query_update = Format("INSERT INTO `characters` ( \
                                                 `login_id`, `id1`, `id2`, `hat_id`, \
                                                 `unknown_value_1`, `unknown_value_2`, `unknown_value_3`, \
@@ -908,71 +910,71 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                 }
 
-
-                // REBORN before entering next difficulty
+                ////////////
+                // REBORN //
+                //////////// before entering next difficulty
                 // .... also we do not reborn "ascended" characters (war -> ama, mage -> witch)
-                if (chr.ascended < srvid) {
-                    bool reborn = false;
+                bool reborn = false;
 
-                    // note: we check there _!from which server!_ we received character
-                    // eg if we received char from srvid 2 and char finished its stay there
-                    // (by drinking mind to 15) - he will be reborned.. and his next login
-                    // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
-                    if (srvid == 2 && chr.Mind > 14)
-                        reborn = true;
-                    else if (srvid == 3 && 
-                             (chr.Reaction > 19))
-                        reborn = true;
-                    else if (srvid == 4 && 
-                             (chr.Reaction > 29))
-                        reborn = true;
-                    else if (srvid == 5 && 
-                             (chr.Reaction > 39))
-                        reborn = true;
-                    else if (srvid == 6 && 
-                             (chr.Body > 49 && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
-                        reborn = true;
+                // note: we check there _!from which server!_ we received character
+                // eg if we received char from srvid 2 and char finished its stay there
+                // (by drinking mind to 15) - he will be reborned.. and his next login
+                // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
+                if (srvid == 2 && chr.Mind > 14)
+                    reborn = true;
+                else if (srvid == 3 && 
+                         (chr.Reaction > 19))
+                    reborn = true;
+                else if (srvid == 4 && 
+                         (chr.Reaction > 29))
+                    reborn = true;
+                else if (srvid == 5 && 
+                         (chr.Reaction > 39))
+                    reborn = true;
+                else if (srvid == 6 && 
+                         (chr.Body > 49 && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
+                    reborn = true;
 
-                    if (reborn) {
-                        chr.Money = 0; // wipe gold
-                        chr.Bag = Login_UnserializeItems("[0,0,0,0]"); // wipe inventory
+                if (reborn) {
+                    chr.Money = 0; // wipe gold
+                    chr.Bag = Login_UnserializeItems("[0,0,0,0]"); // wipe inventory
 
-                        // Wipe experience for the main skill
+                    // Wipe experience for the main skill
+                    switch (chr.MainSkill) {
+                        case 1: chr.ExpFireBlade = 1; break;
+                        case 2: chr.ExpWaterAxe = 1; break;
+                        case 3: chr.ExpAirBludgeon = 1; break;
+                        case 4: chr.ExpEarthPike = 1; break;
+                    }
+
+                    // Reduce all other skills in 2 times...
+                    if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
+                    if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
+                    if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
+                    if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
+                    // ...and astral/shooting in srvID times
+                    chr.ExpAstralShooting /= srvid;
+
+                    // Mages
+                    if (chr.Sex == 64 || chr.Sex == 192) { // mage
+                        // mages lose equipment too...
+                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                        chr.Dress = Login_UnserializeItems(serializedDress);
+
+                        // ...and all spellbooks except astral
                         switch (chr.MainSkill) {
-                            case 1: chr.ExpFireBlade = 1; break;
-                            case 2: chr.ExpWaterAxe = 1; break;
-                            case 3: chr.ExpAirBludgeon = 1; break;
-                            case 4: chr.ExpEarthPike = 1; break;
+                            case 1: chr.Spells = 16777218; break; // fire
+                            case 2: chr.Spells = 16777248; break; // water
+                            case 3: chr.Spells = 16778240; break; // air
+                            case 4: chr.Spells = 16842752; break; // earth
                         }
-
-                        // Reduce all other skills in 2 times...
-                        if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
-                        if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
-                        if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
-                        if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
-                        // ...and astral/shooting in srvID times
-                        chr.ExpAstralShooting /= srvid;
-
-                        // Mages
-                        if (chr.Sex == 64 || chr.Sex == 192) { // mage
-                            // mages lose equipment too...
-                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                            chr.Dress = Login_UnserializeItems(serializedDress);
-
-                            // ...and all spellbooks except astral
-                            switch (chr.MainSkill) {
-                                case 1: chr.Spells = 16777218; break; // fire
-                                case 2: chr.Spells = 16777248; break; // water
-                                case 3: chr.Spells = 16778240; break; // air
-                                case 4: chr.Spells = 16842752; break; // earth
-                            }
-                        }
-
-                        chr.ascended = srvid; // update ascended
                     }
                 }
 
-                // ASCEND after maxing exp
+                /////////////////////////////
+                // ASCEND after maxing exp //
+                /////////////////////////////
+
                 if (chr.Clan == "ascend" && 
                 (chr.ExpFireBlade + chr.ExpWaterAxe +
                  chr.ExpAirBludgeon + chr.ExpEarthPike +
@@ -994,29 +996,30 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     
                     // change class
                     if (chr.Sex == 0) { // #1 ascend warr become ama
-                        // add acsend flag
                         chr.Sex == 128
                         chr.Picture = 11;
                     }
                     else if (chr.Sex == 64) { // #1 ascend mage becomes witch
-                        // add acsend flag
                         chr.Sex == 192
                         chr.Picture = 6;
                     }
                     else if (chr.Sex == 128) { // #2 ascend ama becomes warr
-                        // add acsend flag
                         chr.Sex == 0
                         chr.Picture = 32;
                     }
                     else if (chr.Sex == 192) { // #2 ascend witch becomes mage
-                        // add acsend flag
                         chr.Sex == 64
                         chr.Picture = 15;
                     }
+                    
+                    // increment ascended DB-only field to mark that character was ascended (for ladder score)
+                    chr.ascended++;
                 }
 
 
                 // Query to update character with new attributes
+                // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
+                // when we receive character from the server - in this query)))
                 chr_query_update = Format("UPDATE `characters` SET \
                                                 `id1`='%u', `id2`='%u', `hat_id`='%u', \
                                                 `unknown_value_1`='%u', `unknown_value_2`='%u', `unknown_value_3`='%u', \
