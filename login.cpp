@@ -872,10 +872,12 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpAirBludgeon = 0;
                     chr.ExpEarthPike = 0;
                     chr.ExpAstralShooting = 0;
+                    // wipe inventory
                     std::string serializedBag = "[0,0,0,0]";
-                    chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                    chr.Bag = Login_UnserializeItems(serializedBag);
+                    // wipe equipped
                     std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                    chr.Dress = Login_UnserializeItems(serializedDress); // wipe equipped
+                    chr.Dress = Login_UnserializeItems(serializedDress);
 
                     if (chr.Sex == 64 || chr.Sex == 192) // mage
                     {
@@ -913,7 +915,6 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 ////////////
                 // REBORN //
                 //////////// before entering next difficulty
-                // .... also we do not reborn "ascended" characters (war -> ama, mage -> witch)
                 bool reborn = false;
 
                 // note: we check there _!from which server!_ we received character
@@ -937,7 +938,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 if (reborn) {
                     chr.Money = 0; // wipe gold
-                    chr.Bag = Login_UnserializeItems("[0,0,0,0]"); // wipe inventory
+                    std::string serializedBag = "[0,0,0,0]";
+                    chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
 
                     // Wipe experience for the main skill
                     switch (chr.MainSkill) {
@@ -974,11 +976,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 /////////////////////////////
                 // ASCEND after maxing exp //
                 /////////////////////////////
-
-                if (chr.Clan == "ascend" && 
-                (chr.ExpFireBlade + chr.ExpWaterAxe +
-                 chr.ExpAirBludgeon + chr.ExpEarthPike +
-                 chr.ExpAstralShooting) > 177777777) {
+                unsigned int ascended;
+                unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
+                unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
+                                         chr.ExpEarthPike + chr.ExpAstralShooting;
+                
+                // warrior/mage #1 ascend (become ama/witch)
+                if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "ascend" && total_exp > 177777777) {                   
                     chr.Money = 0; // Reset Money
                     chr.Body = 1; // stats
                     chr.Reaction = 1;
@@ -989,12 +993,14 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpAirBludgeon = 1;
                     chr.ExpEarthPike = 1;
                     chr.ExpAstralShooting = 1;
+                    // wipe inventory
                     std::string serializedBag = "[0,0,0,0]";
-                    chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                    chr.Bag = Login_UnserializeItems(serializedBag);
+                    // wipe equipped
                     std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                    chr.Dress = Login_UnserializeItems(serializedDress); // wipe equipped
-                    
-                    // change class
+                    chr.Dress = Login_UnserializeItems(serializedDress);
+
+                    // ascend #1: war/mage change class
                     if (chr.Sex == 0) { // #1 ascend warr become ama
                         chr.Sex == 128
                         chr.Picture = 11;
@@ -1003,17 +1009,36 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Sex == 192
                         chr.Picture = 6;
                     }
-                    else if (chr.Sex == 128) { // #2 ascend ama becomes warr
+                // ascend #2: ama/witch become again war/mage and receive crown
+                } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" && stats_sum > 283) {  
+                    // increment ascended DB-only field to mark that character was ascended (for ladder score)
+                    ascended = 1;
+
+                    chr.Money = 0; // Reset Money
+                    chr.Body = 1; // stats
+                    chr.Reaction = 1;
+                    chr.Mind = 1;
+                    chr.Spirit = 1;
+                    chr.ExpFireBlade = 1; // exp
+                    chr.ExpWaterAxe = 1;
+                    chr.ExpAirBludgeon = 1;
+                    chr.ExpEarthPike = 1;
+                    chr.ExpAstralShooting = 1;
+                    // wipe inventory
+                    std::string serializedBag = "[0,0,0,0]";
+                    chr.Bag = Login_UnserializeItems(serializedBag);
+                    // wipe equipment and award...
+                    if chr.Sex == 128 { // amazon become warrior and get CROWN (Good Gold Helm) +3 body
                         chr.Sex == 0
                         chr.Picture = 32;
-                    }
-                    else if (chr.Sex == 192) { // #2 ascend witch becomes mage
+                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                        chr.Dress = Login_UnserializeItems(serializedDress);
+                    } else if chr.Sex == 192 { // witch become mage and get STAFF +3 (Good Bone Staff) body
                         chr.Sex == 64
                         chr.Picture = 15;
+                        std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                        chr.Dress = Login_UnserializeItems(serializedDress);
                     }
-                    
-                    // increment ascended DB-only field to mark that character was ascended (for ladder score)
-                    chr.ascended++;
                 }
 
 
