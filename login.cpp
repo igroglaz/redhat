@@ -973,16 +973,17 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                 }
 
-                /////////////////////////////
-                // ASCEND after maxing exp //
-                /////////////////////////////
-                unsigned int ascended;
+                //////////////////////////////
+                // RECLASS after maxing EXP //
+                //////////////////////////////
+                unsigned int ascended = 0;
                 unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
                 unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
                                          chr.ExpEarthPike + chr.ExpAstralShooting;
                 
-                // warrior/mage #1 ascend (become ama/witch)
-                if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "ascend" && total_exp > 177777777) {                   
+                // RECLASS: warrior/mage become ama/witch
+                if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
+
                     chr.Money = 0; // Reset Money
                     chr.Body = 1; // stats
                     chr.Reaction = 1;
@@ -1000,17 +1001,23 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                     chr.Dress = Login_UnserializeItems(serializedDress);
 
-                    // ascend #1: war/mage change class
-                    if (chr.Sex == 0) { // #1 ascend warr become ama
+                    // reclass: war/mage change class
+                    if (chr.Sex == 0) { // warr become ama
                         chr.Sex = 128;
                         chr.Picture = 11;
                     }
-                    else if (chr.Sex == 64) { // #1 ascend mage becomes witch
+                    else if (chr.Sex == 64) { // mage becomes witch
                         chr.Sex = 192;
                         chr.Picture = 6;
                     }
-                // ascend #2: ama/witch become again war/mage and receive crown
+
+                ///////////////////////////////
+                // ASCEND after maxing STATS //
+                ///////////////////////////////
+
+                // ASCEND: ama/witch become again war/mage and receive crown
                 } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" && stats_sum > 283) {  
+
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
 
