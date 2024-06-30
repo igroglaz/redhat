@@ -892,17 +892,14 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     else if (chr.Sex == 64) { // mage
                         chr.Picture = 15;
                     }
-                    else if (chr.Sex == 128) { // ama
+                    else if (chr.Sex == 128) { // ama become warr
                         chr.Sex == 0
                         chr.Picture = 32;
-                        //chr.Picture = 11; pic for ama (will be used after major reborn)
                     }
-                    else if (chr.Sex == 192) { // witch
+                    else if (chr.Sex == 192) { // witch become mage
                         chr.Sex == 64
                         chr.Picture = 15;
-                        //chr.Picture = 6; pic for witch (will be used after major reborn)
                     }
-
                 // fix problem when newbie character died at server 2 and stack due exp loosing
                 } else if (srvid == 2) {
                     if (chr.ExpFireBlade == 0 && chr.ExpWaterAxe == 0 && chr.ExpAirBludgeon == 0 &&
@@ -911,12 +908,14 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                 }
 
-                // Reborn characters when they go to next difficulty
+
+                // REBORN before entering next difficulty
+                // .... also we do not reborn "ascended" characters (war -> ama, mage -> witch)
                 if (chr.diffLvl_svrID < srvid) {
                     bool reborn = false;
 
                     // note: we check there _!from which server!_ we received character
-                    // eg if we receved char from srvid 2 and char finished its stay there
+                    // eg if we received char from srvid 2 and char finished its stay there
                     // (by drinking mind to 15) - he will be reborned.. and his next login
                     // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
                     if (srvid == 2 && chr.Mind > 14)
@@ -935,7 +934,6 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         reborn = true;
 
                     if (reborn) {
-
                         chr.Money = 0; // wipe gold
                         chr.Bag = Login_UnserializeItems("[0,0,0,0]"); // wipe inventory
 
@@ -957,8 +955,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                         // Mages
                         if (chr.Sex == 64 || chr.Sex == 192) { // mage
-
-                            // mages loose equipment too...
+                            // mages lose equipment too...
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
@@ -974,6 +971,50 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.diffLvl_svrID = srvid; // update diffLvl_svrID
                     }
                 }
+
+                // ASCEND after maxing exp
+                if (chr.Clan == "ascend" && 
+                (chr.ExpFireBlade + chr.ExpWaterAxe +
+                 chr.ExpAirBludgeon + chr.ExpEarthPike +
+                 chr.ExpAstralShooting) > 177777777) {
+                    chr.Money = 0; // Reset Money
+                    chr.Body = 1; // stats
+                    chr.Reaction = 1;
+                    chr.Mind = 1;
+                    chr.Spirit = 1;
+                    chr.ExpFireBlade = 1; // exp
+                    chr.ExpWaterAxe = 1;
+                    chr.ExpAirBludgeon = 1;
+                    chr.ExpEarthPike = 1;
+                    chr.ExpAstralShooting = 1;
+                    std::string serializedBag = "[0,0,0,0]";
+                    chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                    std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                    chr.Dress = Login_UnserializeItems(serializedDress); // wipe equipped
+                    
+                    // change class
+                    if (chr.Sex == 0) { // #1 ascend warr become ama
+                        // add acsend flag
+                        chr.Sex == 128
+                        chr.Picture = 11;
+                    }
+                    else if (chr.Sex == 64) { // #1 ascend mage becomes witch
+                        // add acsend flag
+                        chr.Sex == 192
+                        chr.Picture = 6;
+                    }
+                    else if (chr.Sex == 128) { // #2 ascend ama becomes warr
+                        // add acsend flag
+                        chr.Sex == 0
+                        chr.Picture = 32;
+                    }
+                    else if (chr.Sex == 192) { // #2 ascend witch becomes mage
+                        // add acsend flag
+                        chr.Sex == 64
+                        chr.Picture = 15;
+                    }
+                }
+
 
                 // Query to update character with new attributes
                 chr_query_update = Format("UPDATE `characters` SET \
