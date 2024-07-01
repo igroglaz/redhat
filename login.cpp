@@ -959,7 +959,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
-                            // ...and all spellbooks except astral
+                            // ...and all spellbooks (leave only basic arrow)
                             switch (chr.MainSkill) {
                                 case 1: chr.Spells = 16777218; break; // fire
                                 case 2: chr.Spells = 16777248; break; // water
@@ -986,7 +986,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
-                            // ...and all spellbooks except astral
+                            // ...and all spellbooks (leave only basic arrow)
                             switch (chr.MainSkill) {
                                 case 1: chr.Spells = 16777218; break; // fire
                                 case 2: chr.Spells = 16777248; break; // water
@@ -1041,7 +1041,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 // ASCEND: ama/witch become again war/mage and receive crown
                 } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                            stats_sum > 283 && total_exp > 177777777) {  
+                            stats_sum == 283 && total_exp > 177777777) {  
 
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
@@ -1067,7 +1067,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Dress = Login_UnserializeItems(serializedDress);
                     } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
                         chr.Sex = 64;
-                        chr.Picture = 15;
+                        chr.Picture = 15; // TODO: problem.. after RECLASSING ascended mage - staff will be destroyed
                         std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                         chr.Dress = Login_UnserializeItems(serializedDress);
                     }
