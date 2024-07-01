@@ -921,54 +921,78 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 // eg if we received char from srvid 2 and char finished its stay there
                 // (by drinking mind to 15) - he will be reborned.. and his next login
                 // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
-                if (srvid == 2 && chr.Mind > 14)
+                if ((srvid == 2 && chr.Mind > 14) ||
+                    (srvid == 3 && chr.Reaction > 19) ||
+                    (srvid == 4 && chr.Reaction > 29) ||
+                    (srvid == 5 && chr.Reaction > 39) ||
+                    (srvid == 6 && chr.Body > 49 && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
+                {
                     reborn = true;
-                else if (srvid == 3 && 
-                         (chr.Reaction > 19))
-                    reborn = true;
-                else if (srvid == 4 && 
-                         (chr.Reaction > 29))
-                    reborn = true;
-                else if (srvid == 5 && 
-                         (chr.Reaction > 39))
-                    reborn = true;
-                else if (srvid == 6 && 
-                         (chr.Body > 49 && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
-                    reborn = true;
+                }
 
                 if (reborn) {
-                    chr.Money = 0; // wipe gold
-                    std::string serializedBag = "[0,0,0,0]";
-                    chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                    // WARRIOR/MAGE (no reclass OR ascend)
+                    if (chr.Sex == 0 || chr.Sex == 64) {
+                        chr.Money = 0; // wipe gold
+                        std::string serializedBag = "[0,0,0,0]";
+                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
 
-                    // Wipe experience for the main skill
-                    switch (chr.MainSkill) {
-                        case 1: chr.ExpFireBlade = 1; break;
-                        case 2: chr.ExpWaterAxe = 1; break;
-                        case 3: chr.ExpAirBludgeon = 1; break;
-                        case 4: chr.ExpEarthPike = 1; break;
-                    }
-
-                    // Reduce all other skills in 2 times...
-                    if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
-                    if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
-                    if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
-                    if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
-                    // ...and astral/shooting in srvID times
-                    chr.ExpAstralShooting /= srvid;
-
-                    // Mages
-                    if (chr.Sex == 64 || chr.Sex == 192) { // mage
-                        // mages lose equipment too...
-                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
-
-                        // ...and all spellbooks except astral
+                        // Wipe experience for the main skill
                         switch (chr.MainSkill) {
-                            case 1: chr.Spells = 16777218; break; // fire
-                            case 2: chr.Spells = 16777248; break; // water
-                            case 3: chr.Spells = 16778240; break; // air
-                            case 4: chr.Spells = 16842752; break; // earth
+                            case 1: chr.ExpFireBlade = 1; break;
+                            case 2: chr.ExpWaterAxe = 1; break;
+                            case 3: chr.ExpAirBludgeon = 1; break;
+                            case 4: chr.ExpEarthPike = 1; break;
+                        }
+
+                        // Reduce all other skills in 2 times...
+                        if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
+                        if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
+                        if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
+                        if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
+                        // ...and astral/shooting in srvID times
+                        chr.ExpAstralShooting /= srvid;
+
+                        // Mage
+                        if (chr.Sex == 64) {
+                            // mages lose equipment too...
+                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                            chr.Dress = Login_UnserializeItems(serializedDress);
+
+                            // ...and all spellbooks except astral
+                            switch (chr.MainSkill) {
+                                case 1: chr.Spells = 16777218; break; // fire
+                                case 2: chr.Spells = 16777248; break; // water
+                                case 3: chr.Spells = 16778240; break; // air
+                                case 4: chr.Spells = 16842752; break; // earth
+                            }
+                        }
+                    }
+                    // RECLASSED chars reborn (AMA/WITCH)
+                    else if (chr.Sex == 128 || chr.Sex == 192) {
+                        chr.Money = 0; // wipe gold
+                        std::string serializedBag = "[0,0,0,0]";
+                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+
+                        chr.ExpFireBlade = 1; // wipe ALL exp
+                        chr.ExpWaterAxe = 1;
+                        chr.ExpAirBludgeon = 1;
+                        chr.ExpEarthPike = 1;
+                        chr.ExpAstralShooting = 1;
+
+                        // Witch
+                        if (chr.Sex == 192) {
+                            // witch lose equipment too...
+                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                            chr.Dress = Login_UnserializeItems(serializedDress);
+
+                            // ...and all spellbooks except astral
+                            switch (chr.MainSkill) {
+                                case 1: chr.Spells = 16777218; break; // fire
+                                case 2: chr.Spells = 16777248; break; // water
+                                case 3: chr.Spells = 16778240; break; // air
+                                case 4: chr.Spells = 16842752; break; // earth
+                            }
                         }
                     }
                 }
@@ -976,7 +1000,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 //////////////////////////////
                 // RECLASS after maxing EXP //
                 //////////////////////////////
-                unsigned int ascended = 0;
+                unsigned int ascended = 0; // DB-only flag to ladder score
                 unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
                 unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
                                          chr.ExpEarthPike + chr.ExpAstralShooting;
@@ -1016,7 +1040,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 ///////////////////////////////
 
                 // ASCEND: ama/witch become again war/mage and receive crown
-                } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" && stats_sum > 283) {  
+                } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
+                            stats_sum > 283 && total_exp > 177777777) {  
 
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
