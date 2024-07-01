@@ -1060,10 +1060,10 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     std::string serializedBag = "[0,0,0,0]";
                     chr.Bag = Login_UnserializeItems(serializedBag);
                     // wipe equipment and award...
-                    if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body
+                    if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange
                         chr.Sex = 0;
                         chr.Picture = 32;
-                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                         chr.Dress = Login_UnserializeItems(serializedDress);
                     } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
                         chr.Sex = 64;
