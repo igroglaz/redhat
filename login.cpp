@@ -1046,20 +1046,24 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
 
-                    chr.Money = 0; // Reset Money
-                    chr.Body = 1; // stats
-                    chr.Reaction = 1;
-                    chr.Mind = 1;
-                    chr.Spirit = 1;
-                    chr.ExpFireBlade = 1; // exp
+                    // Loose some stats as price for ascend, 
+                    // but still save some be able stay on #7;
+                    // otherwise (eg if we reset stats to 1)...
+                    // ...reborn will cause mage staff to dissapear
+                    chr.Body = 50;
+                    chr.Reaction = 50;
+                    chr.Mind = 50;
+                    chr.Spirit = 50;
+
+                    chr.ExpFireBlade = 1; // pay with exp too
                     chr.ExpWaterAxe = 1;
                     chr.ExpAirBludgeon = 1;
                     chr.ExpEarthPike = 1;
                     chr.ExpAstralShooting = 1;
-                    // wipe inventory
-                    std::string serializedBag = "[0,0,0,0]";
-                    chr.Bag = Login_UnserializeItems(serializedBag);
-                    // wipe equipment and award...
+
+                    // (we do not wipe inventory/gold at this point...
+                    // ..as players anyway will save items on mule, so why to make hastle.
+                    // So we wipe only equipment to be able to award player with crown/staff
                     if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange
                         chr.Sex = 0;
                         chr.Picture = 32;
@@ -1067,7 +1071,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Dress = Login_UnserializeItems(serializedDress);
                     } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
                         chr.Sex = 64;
-                        chr.Picture = 15; // TODO: problem.. after RECLASSING ascended mage - staff will be destroyed
+                        chr.Picture = 15;
                         std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                         chr.Dress = Login_UnserializeItems(serializedDress);
                     }
