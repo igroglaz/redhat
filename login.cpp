@@ -1041,7 +1041,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 // ASCEND: ama/witch become again war/mage and receive crown
                 } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                            stats_sum == 283 && total_exp > 177777777) {  
+                            stats_sum == 284 && total_exp > 177777777) {  
 
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
