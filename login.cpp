@@ -928,6 +928,37 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     (srvid == 6 && chr.Body > 49 && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
                 {
                     reborn = true;
+
+                    // As we receive character from server - we can control, should it
+                    // go to next lvl or not; so we can revert its stats back if reqs
+                    // not satisfied. so...
+
+                    // ..Revert stats for AMA/WITCH if exp is lower than
+                    if (chr.Sex == 128 || chr.Sex == 192) {
+                        if (srvid == 2 && total_exp < 100000) {
+                            reborn = false;
+                            chr.Mind = 14; // revert stats
+                        }
+                        else if (srvid == 3 && total_exp < 1000000) {
+                            reborn = false;
+                            chr.Reaction = 19; // revert stats
+                        }
+                        else if (srvid == 4 && total_exp < 2000000) {
+                            reborn = false;
+                            chr.Reaction = 29; // revert stats
+                        }
+                        else if (srvid == 5 && total_exp < 5000000) {
+                            reborn = false;
+                            chr.Reaction = 39; // revert stats
+                        }
+                        else if (srvid == 6 && total_exp < 50000000) {
+                            reborn = false;
+                            chr.Reaction = 49; // revert stats
+                            chr.Body = 49;
+                            chr.Mind = 49;
+                            chr.Spirit = 49;
+                        }
+                    }
                 }
 
                 if (reborn) {
