@@ -916,6 +916,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 // REBORN //
                 //////////// before entering next difficulty
                 bool reborn = false;
+                unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
+                         chr.ExpEarthPike + chr.ExpAstralShooting;
 
                 // note: we check there _!from which server!_ we received character
                 // eg if we received char from srvid 2 and char finished its stay there
@@ -1035,9 +1037,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 //////////////////////////////
                 unsigned int ascended = 0; // DB-only flag to ladder score
                 unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
-                unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
-                                         chr.ExpEarthPike + chr.ExpAstralShooting;
-                
+
                 // RECLASS: warrior/mage become ama/witch
                 if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
 
@@ -1074,12 +1074,12 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                 // ASCEND: ama/witch become again war/mage and receive crown
                 } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                            stats_sum == 284 && total_exp > 177777777) {  
+                            stats_sum == 284 && total_exp > 177777777) {
 
                     // increment ascended DB-only field to mark that character was ascended (for ladder score)
                     ascended = 1;
 
-                    // Loose some stats as price for ascend, 
+                    // Loose some stats as price for ascend,
                     // but still save some be able stay on #7;
                     // otherwise (eg if we reset stats to 1)...
                     // ...reborn will cause mage staff to dissapear
