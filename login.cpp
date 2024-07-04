@@ -891,18 +891,18 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
 
                     if (chr.Sex == 0) { // warr
-                        chr.Picture = 63; // zombie
+                        chr.Picture = 64; // zombie
                     }
                     else if (chr.Sex == 64) { // mage
-                        chr.Picture = 63; // zombie
+                        chr.Picture = 64; // zombie
                     }
                     else if (chr.Sex == 128) { // ama become warr
                         chr.Sex = 0;
-                        chr.Picture = 63; // zombie
+                        chr.Picture = 64; // zombie
                     }
                     else if (chr.Sex == 192) { // witch become mage
                         chr.Sex = 64;
-                        chr.Picture = 63; // zombie
+                        chr.Picture = 64; // zombie
                     }
                 // fix problem when newbie character died at server 2 and stack due exp loosing
                 } else if (srvid == 2) {
