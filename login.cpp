@@ -981,11 +981,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
                         if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
                         if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
-                        // ...and astral/shooting in srvID times
+                        // ... WARRIOR: astral/shooting in srvID times
                         chr.ExpAstralShooting /= srvid;
 
                         // Mage
                         if (chr.Sex == 64) {
+                            chr.ExpAstralShooting = 1; // MAGE wipe astral skill
+
                             // mages lose equipment too...
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
