@@ -1039,6 +1039,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
 
                 // RECLASS: warrior/mage become ama/witch
+                // (note it can't happen simultaneously with reborn as
+                // at reborn we "half" the exp)
                 if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
 
                     chr.Money = 0; // Reset Money
