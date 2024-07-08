@@ -960,6 +960,31 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             chr.Mind = 49;
                             chr.Spirit = 49;
                         }
+                    // ..also have min.exp for Hardcore chars (0 or 1 death)
+                    } else if (chr.Deaths <= 1) {
+                        if (srvid == 2 && total_exp < 50000) {
+                            reborn = false;
+                            chr.Mind = 14; // revert stats
+                        }
+                        else if (srvid == 3 && total_exp < 100000) {
+                            reborn = false;
+                            chr.Reaction = 19; // revert stats
+                        }
+                        else if (srvid == 4 && total_exp < 500000) {
+                            reborn = false;
+                            chr.Reaction = 29; // revert stats
+                        }
+                        else if (srvid == 5 && total_exp < 2000000) {
+                            reborn = false;
+                            chr.Reaction = 39; // revert stats
+                        }
+                        else if (srvid == 6 && total_exp < 25000000) {
+                            reborn = false;
+                            chr.Reaction = 49; // revert stats
+                            chr.Body = 49;
+                            chr.Mind = 49;
+                            chr.Spirit = 49;
+                        }
                     }
                 }
 
