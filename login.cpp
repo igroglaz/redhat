@@ -872,7 +872,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpAirBludgeon = 0;
                     chr.ExpEarthPike = 0;
                     chr.ExpAstralShooting = 0;
-                    // wipe inventory
+                    // wipe bag
                     std::string serializedBag = "[0,0,0,0]";
                     chr.Bag = Login_UnserializeItems(serializedBag);
                     // wipe equipped
@@ -891,6 +891,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
 
                     if (chr.Sex == 0) { // warr
+                    /////// NOTE: if change avatar number there - don't forget to change
+                    /////// at rom2.ru code
                         chr.Picture = 64; // zombie
                     }
                     else if (chr.Sex == 64) { // mage
@@ -993,7 +995,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     if (chr.Sex == 0 || chr.Sex == 64) {
                         chr.Money = 0; // wipe gold
                         std::string serializedBag = "[0,0,0,0]";
-                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
 
                         // Wipe experience for the main skill
                         switch (chr.MainSkill) {
@@ -1015,7 +1017,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         if (chr.Sex == 64) {
                             chr.ExpAstralShooting = 1; // MAGE wipe astral skill
 
-                            // mages lose equipment too...
+                            // mages lose equipped items
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
@@ -1032,7 +1034,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     else if (chr.Sex == 128 || chr.Sex == 192) {
                         chr.Money = 0; // wipe gold
                         std::string serializedBag = "[0,0,0,0]";
-                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe inventory
+                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
 
                         chr.ExpFireBlade = 1; // wipe ALL exp
                         chr.ExpWaterAxe = 1;
@@ -1042,7 +1044,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                         // Witch
                         if (chr.Sex == 192) {
-                            // witch lose equipment too...
+                            // witch lose equipped items
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
@@ -1078,7 +1080,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpAirBludgeon = 1;
                     chr.ExpEarthPike = 1;
                     chr.ExpAstralShooting = 1;
-                    // wipe inventory
+                    // wipe bag
                     std::string serializedBag = "[0,0,0,0]";
                     chr.Bag = Login_UnserializeItems(serializedBag);
                     // wipe equipped
