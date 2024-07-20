@@ -1032,22 +1032,35 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
                 if (reborn && !meets_reborn_criteria) {
                     reborn = false;
+
+                    uint8_t stat_ceiling = 0;
+
                     switch (srvid) {
                     case 2:
-                        chr.Mind = 14;
+                        stat_ceiling = 14;
                         break;
                     case 3:
-                        chr.Reaction = 19;
+                        stat_ceiling = 19;
                         break;
                     case 4:
-                        chr.Reaction = 29;
+                        stat_ceiling = 29;
                         break;
                     case 5:
-                        chr.Reaction = 39;
+                        stat_ceiling = 39;
                         break;
                     case 6:
-                        chr.Reaction = 49;
+                        stat_ceiling = 49;
                         break;
+                    }
+
+                    // Make stats at most "max-1".
+                    chr.Reaction = std::min(chr.Reaction, stat_ceiling);
+
+                    // We don't need to touch other stats on #6 as all stats are acquired independently there.
+                    if (srvid != 6) {
+                        chr.Body = std::min(chr.Body, stat_ceiling);
+                        chr.Mind = std::min(chr.Mind, stat_ceiling);
+                        chr.Spirit = std::min(chr.Spirit, stat_ceiling);
                     }
                 }
 
