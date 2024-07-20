@@ -966,7 +966,16 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 {
                     reborn = true;
 
-                    uint32_t min_gold_regular[] = {0, 0, 30000, 200000, 1000000, 3000000, 10000000};
+                    // Min gold per server. Other `min_*` arrays have the same structure.
+                    uint32_t min_gold_regular[] = {
+                        0, // unused
+                        0, // unused
+                        30000, // server 2
+                        200000, // server 3
+                        1000000, // server 4
+                        3000000, // server 5
+                        10000000 // server 6
+                    };
                     uint32_t min_gold_ama_witch[] = {0, 0, 50000, 500000, 2000000, 10000000, 50000000};
 
                     uint32_t min_kills_ama_witch[] = {0, 0, 1000, 1200, 1500, 2000, 4000};
