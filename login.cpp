@@ -1053,11 +1053,15 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         break;
                     }
 
-                    // Make all stats at most "max-1".
-                    chr.Body = std::min(chr.Body, stat_ceiling);
+                    // Make stats at most "max-1".
                     chr.Reaction = std::min(chr.Reaction, stat_ceiling);
-                    chr.Mind = std::min(chr.Mind, stat_ceiling);
-                    chr.Spirit = std::min(chr.Spirit, stat_ceiling);
+
+                    // We don't need to touch other stats on #6 as all stats are acquired independently there.
+                    if (srvid != 6) {
+                        chr.Body = std::min(chr.Body, stat_ceiling);
+                        chr.Mind = std::min(chr.Mind, stat_ceiling);
+                        chr.Spirit = std::min(chr.Spirit, stat_ceiling);
+                    }
                 }
 
                 if (reborn) {
