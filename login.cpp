@@ -966,67 +966,27 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 {
                     reborn = true;
 
-                    // As we receive character from server - we can control, should it
-                    // go to next lvl or not; so we can revert its stats back if reqs
-                    // not satisfied. so...
+                    uint32_t min_gold_regular[] = {0, 0, 30000, 200000, 1000000, 3000000, 10000000};
+                    uint32_t min_gold_ama_witch[] = {0, 0, 50000, 500000, 2000000, 10000000, 50000000};
 
-                    // pay for the ticket (for !normal! characters too)
-                    if (srvid == 2 && chr.Money < 30000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 3 && chr.Money < 200000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 4 && chr.Money < 1000000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 5 && chr.Money < 3000000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 6 && chr.Money < 10000000) {
-                        meets_reborn_criteria = false;
+                    uint32_t min_kills_ama_witch[] = {0, 0, 1000, 1200, 1500, 2000, 4000};
+
+                    uint32_t min_exp_ama_witch[] = {0, 0, 100000, 500000, 2000000, 5000000, 30000000};
+                    uint32_t min_exp_hardcore[] = {0, 0, 50000, 100000, 500000, 2000000, 25000000};
+
+                    uint32_t min_gold = min_gold_regular[srvid];
+                    uint32_t min_exp = 0;
+                    uint32_t min_kills = 0;
+
+                    if (chr.Sex == 128 || chr.Sex == 192) { // Amazon and witch.
+                        min_gold = min_gold_ama_witch[srvid];
+                        min_exp = min_exp_ama_witch[srvid];
+                        min_kills = min_kills_ama_witch[srvid];
+                    } else if (chr.Deaths <= 1) { // Hardcore.
+                        min_exp = min_exp_hardcore[srvid];
                     }
 
-                    // ..Revert stats for AMA/WITCH if exp is lower than
-                    if (chr.Sex == 128 || chr.Sex == 192) {
-                        if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
-                                 chr.Money < 50000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
-                                 chr.Money < 500000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
-                                 chr.Money < 2000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 5 && (total_exp < 5000000 || chr.MonstersKills < 2000 ||
-                                 chr.Money < 10000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 6 && (total_exp < 30000000 || chr.MonstersKills < 4000 ||
-                                 chr.Money < 50000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                    // ..also have min.exp for Hardcore chars (0 or 1 death)
-                    } else if (chr.Deaths <= 1) {
-                        if (srvid == 2 && total_exp < 50000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 3 && total_exp < 100000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 4 && total_exp < 500000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 5 && total_exp < 2000000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 6 && total_exp < 25000000) {
-                            meets_reborn_criteria = false;
-                        }
-                    }
+                    meets_reborn_criteria = foundBossKey && chr.Money >= min_gold && chr.MonstersKills >= min_kills && total_exp >= min_exp;
                 }
 
                 // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
