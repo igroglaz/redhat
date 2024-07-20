@@ -943,7 +943,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             reborn = false;
                             chr.Mind = 14; // revert stats
                         }
-                        else if (srvid == 3 && total_exp < 1000000) {
+                        else if (srvid == 3 && total_exp < 500000) {
                             reborn = false;
                             chr.Reaction = 19; // revert stats
                         }
