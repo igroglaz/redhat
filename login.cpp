@@ -1029,7 +1029,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                 }
 
-                if (!meets_reborn_criteria) {
+                // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
+                if (reborn && !meets_reborn_criteria) {
                     reborn = false;
                     switch (srvid) {
                     case 2:
