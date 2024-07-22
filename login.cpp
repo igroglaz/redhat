@@ -966,22 +966,22 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             reborn = false;
                             chr.Mind = 14; // revert stats
                         }
-                        else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 2500 ||
+                        else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1500 ||
                                  chr.Money < 500000)) {
                             reborn = false;
                             chr.Reaction = 19; // revert stats
                         }
-                        else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 5000 ||
+                        else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 2500 ||
                                  chr.Money < 2000000)) {
                             reborn = false;
                             chr.Reaction = 29; // revert stats
                         }
-                        else if (srvid == 5 && (total_exp < 5000000 || chr.MonstersKills < 9000 ||
+                        else if (srvid == 5 && (total_exp < 5000000 || chr.MonstersKills < 5000 ||
                                  chr.Money < 10000000)) {
                             reborn = false;
                             chr.Reaction = 39; // revert stats
                         }
-                        else if (srvid == 6 && (total_exp < 30000000 || chr.MonstersKills < 15000 ||
+                        else if (srvid == 6 && (total_exp < 30000000 || chr.MonstersKills < 10000 ||
                                  chr.Money < 50000000)) {
                             reborn = false;
                             chr.Reaction = 49; // revert stats
@@ -1061,6 +1061,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                     // RECLASSED chars reborn (AMA/WITCH)
                     else if (chr.Sex == 128 || chr.Sex == 192) {
+                        chr.MonstersKills = 0; // reset monster kills for reborn restriction
                         chr.Money = 0; // wipe gold
                         std::string serializedBag = "[0,0,0,0]";
                         chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
