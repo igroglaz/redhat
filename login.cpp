@@ -937,6 +937,28 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     // go to next lvl or not; so we can revert its stats back if reqs
                     // not satisfied. so...
 
+                    // pay for the ticket (for !normal! characters too)
+                    if (srvid == 2 && chr.Money < 30000) {
+                        reborn = false;
+                        chr.Mind = 14; // revert stats
+                    }
+                    else if (srvid == 3 && chr.Money < 200000) {
+                        reborn = false;
+                        chr.Reaction = 19; // revert stats
+                    }
+                    else if (srvid == 4 && chr.Money < 1000000) {
+                        reborn = false;
+                        chr.Reaction = 29; // revert stats
+                    }
+                    else if (srvid == 5 && chr.Money < 3000000) {
+                        reborn = false;
+                        chr.Reaction = 39; // revert stats
+                    }
+                    else if (srvid == 6 && chr.Money < 10000000) {
+                        reborn = false;
+                        chr.Reaction = 49; // revert stats
+                    }
+
                     // ..Revert stats for AMA/WITCH if exp is lower than
                     if (chr.Sex == 128 || chr.Sex == 192) {
                         if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000)) {
