@@ -914,9 +914,50 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     }
                 }
 
+
                 ////////////
                 // REBORN //
                 //////////// before entering next difficulty
+
+                ////////////////////////////////////////////
+                // 1) check for "Boss key" - potion
+                bool FoundAntipoisonPotion = false;
+                const std::string targetItem = "[3648,0,0,1]";
+                std::string serializedBag = Login_SerializeItems(chr.Bag);
+
+                // Check if the item exists in the bag
+                if (serializedBag.find(targetItem) != std::string::npos) {
+                    FoundAntipoisonPotion = true;
+
+                    // Remove the target item from the bag
+                    size_t pos = serializedBag.find(targetItem);
+                    if (pos != std::string::npos) {
+                        serializedBag.erase(pos, targetItem.length());
+                        
+                        // Remove any leading or trailing delimiters if needed
+                        if (pos != 0 && serializedBag[pos - 1] == ';') {
+                            serializedBag.erase(pos - 1, 1);
+                        } else if (pos < serializedBag.length() && serializedBag[pos] == ';') {
+                            serializedBag.erase(pos, 1);
+                        }
+
+                        // Update the inventory count
+                        size_t countStart = serializedBag.find('[') + 1;
+                        size_t countEnd = serializedBag.find(']', countStart);
+                        if (countStart != std::string::npos && countEnd != std::string::npos) {
+                            std::string countStr = serializedBag.substr(countStart, countEnd - countStart);
+                            int itemCount = std::stoi(countStr);
+                            itemCount = (itemCount > 0) ? itemCount - 1 : 0;
+                            serializedBag.replace(countStart, countEnd - countStart, std::to_string(itemCount));
+                        }
+                    }
+
+                    // Update the character's bag
+                    chr.Bag = Login_UnserializeItems(serializedBag);
+                }
+                
+                ////////////////////////////////////////////
+                // 2) now check for reborn
                 bool reborn = false;
                 unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
                          chr.ExpEarthPike + chr.ExpAstralShooting;
@@ -925,11 +966,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 // eg if we received char from srvid 2 and char finished its stay there
                 // (by drinking mind to 15) - he will be reborned.. and his next login
                 // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
-                if ((srvid == 2 && chr.Mind > 14) ||
+                if (((srvid == 2 && chr.Mind > 14) ||
                     (srvid == 3 && chr.Reaction > 19) ||
                     (srvid == 4 && chr.Reaction > 29) ||
                     (srvid == 5 && chr.Reaction > 39) ||
-                    (srvid == 6 && chr.Reaction > 49))
+                    (srvid == 6 && chr.Reaction > 49)) && FoundAntipoisonPotion)
                 {
                     reborn = true;
 
