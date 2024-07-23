@@ -950,6 +950,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 // 2) now check for reborn
 
                 bool reborn = false;
+                bool meets_reborn_criteria = foundBossKey;
                 unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
                          chr.ExpEarthPike + chr.ExpAstralShooting;
 
@@ -957,11 +958,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 // eg if we received char from srvid 2 and char finished its stay there
                 // (by drinking mind to 15) - he will be reborned.. and his next login
                 // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
-                if (((srvid == 2 && chr.Mind > 14) ||
+                if ((srvid == 2 && chr.Mind > 14) ||
                     (srvid == 3 && chr.Reaction > 19) ||
                     (srvid == 4 && chr.Reaction > 29) ||
                     (srvid == 5 && chr.Reaction > 39) ||
-                    (srvid == 6 && chr.Reaction > 49)) && foundBossKey)
+                    (srvid == 6 && chr.Reaction > 49))
                 {
                     reborn = true;
 
@@ -971,75 +972,82 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
 
                     // pay for the ticket (for !normal! characters too)
                     if (srvid == 2 && chr.Money < 30000) {
-                        reborn = false;
-                        chr.Mind = 14; // revert stats
+                        meets_reborn_criteria = false;
                     }
                     else if (srvid == 3 && chr.Money < 200000) {
-                        reborn = false;
-                        chr.Reaction = 19; // revert stats
+                        meets_reborn_criteria = false;
                     }
                     else if (srvid == 4 && chr.Money < 1000000) {
-                        reborn = false;
-                        chr.Reaction = 29; // revert stats
+                        meets_reborn_criteria = false;
                     }
                     else if (srvid == 5 && chr.Money < 3000000) {
-                        reborn = false;
-                        chr.Reaction = 39; // revert stats
+                        meets_reborn_criteria = false;
                     }
                     else if (srvid == 6 && chr.Money < 10000000) {
-                        reborn = false;
-                        chr.Reaction = 49; // revert stats
+                        meets_reborn_criteria = false;
                     }
 
                     // ..Revert stats for AMA/WITCH if exp is lower than
                     if (chr.Sex == 128 || chr.Sex == 192) {
                         if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
                                  chr.Money < 50000)) {
-                            reborn = false;
-                            chr.Mind = 14; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
                                  chr.Money < 500000)) {
-                            reborn = false;
-                            chr.Reaction = 19; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
                                  chr.Money < 2000000)) {
-                            reborn = false;
-                            chr.Reaction = 29; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 5 && (total_exp < 5000000 || chr.MonstersKills < 2000 ||
                                  chr.Money < 10000000)) {
-                            reborn = false;
-                            chr.Reaction = 39; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 6 && (total_exp < 30000000 || chr.MonstersKills < 4000 ||
                                  chr.Money < 50000000)) {
-                            reborn = false;
-                            chr.Reaction = 49; // revert stats
+                            meets_reborn_criteria = false;
                         }
                     // ..also have min.exp for Hardcore chars (0 or 1 death)
                     } else if (chr.Deaths <= 1) {
                         if (srvid == 2 && total_exp < 50000) {
-                            reborn = false;
-                            chr.Mind = 14; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 3 && total_exp < 100000) {
-                            reborn = false;
-                            chr.Reaction = 19; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 4 && total_exp < 500000) {
-                            reborn = false;
-                            chr.Reaction = 29; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 5 && total_exp < 2000000) {
-                            reborn = false;
-                            chr.Reaction = 39; // revert stats
+                            meets_reborn_criteria = false;
                         }
                         else if (srvid == 6 && total_exp < 25000000) {
-                            reborn = false;
-                            chr.Reaction = 49; // revert stats
+                            meets_reborn_criteria = false;
                         }
+                    }
+                }
+
+                // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
+                if (reborn && !meets_reborn_criteria) {
+                    reborn = false;
+                    switch (srvid) {
+                    case 2:
+                        chr.Mind = 14;
+                        break;
+                    case 3:
+                        chr.Reaction = 19;
+                        break;
+                    case 4:
+                        chr.Reaction = 29;
+                        break;
+                    case 5:
+                        chr.Reaction = 39;
+                        break;
+                    case 6:
+                        chr.Reaction = 49;
+                        break;
                     }
                 }
 
