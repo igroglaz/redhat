@@ -1005,7 +1005,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                  chr.Money < 10000000)) {
                             meets_reborn_criteria = false;
                         }
-                        else if (srvid == 6 && (total_exp < 30000000 || chr.MonstersKills < 4000 ||
+                        else if (srvid == 6 && (total_exp < 50000000 || chr.MonstersKills < 4000 ||
                                  chr.Money < 50000000)) {
                             meets_reborn_criteria = false;
                         }
