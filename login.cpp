@@ -906,14 +906,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Sex = 64;
                         chr.Picture = 64; // zombie
                     }
-                // fix problem when newbie character died at server 2 and stack due exp loosing
-                } else if (srvid == 2) {
-                    if (chr.ExpFireBlade == 0 && chr.ExpWaterAxe == 0 && chr.ExpAirBludgeon == 0 &&
-                        chr.ExpEarthPike == 0 && chr.ExpAstralShooting == 0) {
-                        chr.ExpFireBlade = 1;
-                    }
                 }
-
 
                 ////////////
                 // REBORN //
@@ -953,6 +946,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 bool meets_reborn_criteria = foundBossKey;
                 unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
                          chr.ExpEarthPike + chr.ExpAstralShooting;
+
+                // fix problem when 0-exp character (eg due nullifing) stuck in limbo
+                if (total_exp == 0) {
+                    chr.ExpFireBlade = 1;
+                }
 
                 // note: we check there _!from which server!_ we received character
                 // eg if we received char from srvid 2 and char finished its stay there
