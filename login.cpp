@@ -972,39 +972,39 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     if (srvid == 2 && chr.Money < 30000) {
                         meets_reborn_criteria = false;
                     }
-                    else if (srvid == 3 && chr.Money < 200000) {
+                    else if (srvid == 3 && chr.Money < 300000) {
                         meets_reborn_criteria = false;
                     }
-                    else if (srvid == 4 && chr.Money < 1000000) {
+                    else if (srvid == 4 && chr.Money < 1500000) {
                         meets_reborn_criteria = false;
                     }
-                    else if (srvid == 5 && chr.Money < 3000000) {
+                    else if (srvid == 5 && chr.Money < 10000000) {
                         meets_reborn_criteria = false;
                     }
-                    else if (srvid == 6 && chr.Money < 10000000) {
+                    else if (srvid == 6 && chr.Money < 50000000) {
                         meets_reborn_criteria = false;
                     }
 
                     // ..Revert stats for AMA/WITCH if exp is lower than
                     if (chr.Sex == 128 || chr.Sex == 192) {
                         if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
-                                 chr.Money < 50000)) {
+                                 chr.Money < 100000)) {
                             meets_reborn_criteria = false;
                         }
                         else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
-                                 chr.Money < 500000)) {
+                                 chr.Money < 1000000)) {
                             meets_reborn_criteria = false;
                         }
                         else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
-                                 chr.Money < 2000000)) {
+                                 chr.Money < 5000000)) {
                             meets_reborn_criteria = false;
                         }
-                        else if (srvid == 5 && (total_exp < 5000000 || chr.MonstersKills < 2000 ||
-                                 chr.Money < 10000000)) {
+                        else if (srvid == 5 && (total_exp < 30000000 || chr.MonstersKills < 2000 ||
+                                 chr.Money < 30000000)) {
                             meets_reborn_criteria = false;
                         }
-                        else if (srvid == 6 && (total_exp < 50000000 || chr.MonstersKills < 4000 ||
-                                 chr.Money < 50000000)) {
+                        else if (srvid == 6 && (total_exp < 100000000 || chr.MonstersKills < 4000 ||
+                                 chr.Money < 100000000)) {
                             meets_reborn_criteria = false;
                         }
                     // ..also have min.exp for Hardcore chars (0 or 1 death)
