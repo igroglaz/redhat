@@ -42,5 +42,6 @@ bool Login_SetIPF(std::string login, std::string ipf);
 std::string Login_SerializeItems(CItemList& list);
 CItemList Login_UnserializeItems(std::string data);
 bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid);
+void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended);
 
 #endif // LOGIN_HPP_INCLUDED
