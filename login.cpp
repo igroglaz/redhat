@@ -5,6 +5,7 @@
 
 #include "sha1.h"
 
+#include <stdint.h>
 #include <windows.h>
 
 std::string Login_MakePassword(std::string password)
@@ -190,8 +191,7 @@ bool Login_Delete(std::string login)
         if(login_id == -1)
         {
             SQL_Unlock();
-            return true; // тут спорно, возвращать false или true. с одной стороны, логин таки удалён,
-                         // с другой - запись в базе явно неправильная.
+            return true; // Unclear if this should be `true` or `false`. On the one hand, the login was deleted, on the other --- the DB entry is clearly wrong.
         }
 
         std::string query_deletecharacters = Format("DELETE FROM `characters` WHERE `login_id`='%d'", login_id);
@@ -861,363 +861,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             // create FLAG is false - update an existing character
             else
             {
-                // Reset character attributes for #1 server (remove 1000 starting gold)
-                if (srvid == 1)
-                {
-                    chr.Money = 0;
-                    chr.MonstersKills = 0;
-                    chr.Deaths = 0;
-                    chr.ExpFireBlade = 1;
-                    chr.ExpWaterAxe = 0;
-                    chr.ExpAirBludgeon = 0;
-                    chr.ExpEarthPike = 0;
-                    chr.ExpAstralShooting = 0;
-                    // wipe bag
-                    std::string serializedBag = "[0,0,0,0]";
-                    chr.Bag = Login_UnserializeItems(serializedBag);
-                    // wipe equipped
-                    std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                    chr.Dress = Login_UnserializeItems(serializedDress);
-
-                    if (chr.Sex == 64 || chr.Sex == 192) // mage
-                    {
-                        // give attack spell
-                        switch (chr.MainSkill) {
-                            case 1: chr.Spells = 16777218; break; // fire
-                            case 2: chr.Spells = 16777248; break; // water
-                            case 3: chr.Spells = 16778240; break; // air
-                            case 4: chr.Spells = 16842752; break; // earth
-                        }
-                    }
-
-                    if (chr.Sex == 0) { // warr
-                    /////// NOTE: if change avatar number there - don't forget to change
-                    /////// at rom2.ru code
-                        chr.Picture = 64; // zombie
-                    }
-                    else if (chr.Sex == 64) { // mage
-                        chr.Picture = 64; // zombie
-                    }
-                    else if (chr.Sex == 128) { // ama become warr
-                        chr.Sex = 0;
-                        chr.Picture = 64; // zombie
-                    }
-                    else if (chr.Sex == 192) { // witch become mage
-                        chr.Sex = 64;
-                        chr.Picture = 64; // zombie
-                    }
-                }
-
-                ////////////
-                // REBORN //
-                //////////// before entering next difficulty
-
-                ////////////////////////////////////////////
-                // 1) check for "Boss key" - potion
-                bool foundBossKey = false;
-
-                const unsigned long bossKeyItem = 3667;  // "Quest Treasure".
-
-                for (const auto &item: chr.Bag.Items) {
-                    if (item.Id == bossKeyItem) {
-                        foundBossKey = true;
-                        break;
-                    }
-                }
-
-                if (foundBossKey) {
-                    // Remove all quest treasures from the player's bag.
-                    std::vector<CItem> newItems;
-                    newItems.reserve(chr.Bag.Items.size());
-
-                    for (const auto& item: chr.Bag.Items) {
-                        if (item.Id != bossKeyItem) {
-                            newItems.push_back(item);
-                        }
-                    }
-
-                    chr.Bag.Items = newItems;
-                }
-
-                ////////////////////////////////////////////
-                // 2) now check for reborn
-
-                bool reborn = false;
-                bool meets_reborn_criteria = foundBossKey;
-                unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
-                         chr.ExpEarthPike + chr.ExpAstralShooting;
-
-                // fix problem when 0-exp character (eg due nullifing) stuck in limbo
-                if (total_exp == 0) {
-                    chr.ExpFireBlade = 1;
-                }
-
-                // note: we check there _!from which server!_ we received character
-                // eg if we received char from srvid 2 and char finished its stay there
-                // (by drinking mind to 15) - he will be reborned.. and his next login
-                // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
-                if ((srvid == 2 && chr.Mind > 14) ||
-                    (srvid == 3 && chr.Reaction > 19) ||
-                    (srvid == 4 && chr.Reaction > 29) ||
-                    (srvid == 5 && chr.Reaction > 39) ||
-                    (srvid == 6 && chr.Reaction > 49))
-                {
-                    reborn = true;
-
-                    // As we receive character from server - we can control, should it
-                    // go to next lvl or not; so we can revert its stats back if reqs
-                    // not satisfied. so...
-
-                    // pay for the ticket (for !normal! characters too)
-                    if (srvid == 2 && chr.Money < 30000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 3 && chr.Money < 300000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 4 && chr.Money < 1500000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 5 && chr.Money < 10000000) {
-                        meets_reborn_criteria = false;
-                    }
-                    else if (srvid == 6 && chr.Money < 50000000) {
-                        meets_reborn_criteria = false;
-                    }
-
-                    // ..Revert stats for AMA/WITCH if exp is lower than
-                    if (chr.Sex == 128 || chr.Sex == 192) {
-                        if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
-                                 chr.Money < 100000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
-                                 chr.Money < 1000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
-                                 chr.Money < 5000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 5 && (total_exp < 30000000 || chr.MonstersKills < 2000 ||
-                                 chr.Money < 30000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 6 && (total_exp < 100000000 || chr.MonstersKills < 4000 ||
-                                 chr.Money < 100000000)) {
-                            meets_reborn_criteria = false;
-                        }
-                    // ..also have min.exp for Hardcore chars (0 or 1 death)
-                    } else if (chr.Deaths <= 1) {
-                        if (srvid == 2 && total_exp < 50000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 3 && total_exp < 100000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 4 && total_exp < 500000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 5 && total_exp < 2000000) {
-                            meets_reborn_criteria = false;
-                        }
-                        else if (srvid == 6 && total_exp < 25000000) {
-                            meets_reborn_criteria = false;
-                        }
-                    }
-                }
-
-                // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
-                if (reborn && !meets_reborn_criteria) {
-                    reborn = false;
-
-                    uint8_t stat_ceiling = 0;
-
-                    switch (srvid) {
-                    case 2:
-                        stat_ceiling = 14;
-                        break;
-                    case 3:
-                        stat_ceiling = 19;
-                        break;
-                    case 4:
-                        stat_ceiling = 29;
-                        break;
-                    case 5:
-                        stat_ceiling = 39;
-                        break;
-                    case 6:
-                        stat_ceiling = 49;
-                        break;
-                    }
-
-                    // Make stats at most "max-1".
-                    chr.Reaction = std::min(chr.Reaction, stat_ceiling);
-
-                    // We don't need to touch other stats on #6 as all stats are acquired independently there.
-                    if (srvid != 6) {
-                        chr.Body = std::min(chr.Body, stat_ceiling);
-                        chr.Mind = std::min(chr.Mind, stat_ceiling);
-                        chr.Spirit = std::min(chr.Spirit, stat_ceiling);
-                    }
-                }
-
-                if (reborn) {
-                    // WARRIOR/MAGE (no reclass OR ascend)
-                    if (chr.Sex == 0 || chr.Sex == 64) {
-                        chr.Money = 0; // wipe gold
-                        std::string serializedBag = "[0,0,0,0]";
-                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
-
-                        // Wipe experience for the main skill
-                        switch (chr.MainSkill) {
-                            case 1: chr.ExpFireBlade = 1; break;
-                            case 2: chr.ExpWaterAxe = 1; break;
-                            case 3: chr.ExpAirBludgeon = 1; break;
-                            case 4: chr.ExpEarthPike = 1; break;
-                        }
-
-                        // Reduce all other skills in 2 times...
-                        if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
-                        if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
-                        if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
-                        if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
-
-                        // Mage
-                        if (chr.Sex == 64) {
-                            // mages lose equipped items
-                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                            chr.Dress = Login_UnserializeItems(serializedDress);
-
-                            // ...and all spellbooks (leave only basic arrow)
-                            switch (chr.MainSkill) {
-                                case 1: chr.Spells = 16777218; break; // fire
-                                case 2: chr.Spells = 16777248; break; // water
-                                case 3: chr.Spells = 16778240; break; // air
-                                case 4: chr.Spells = 16842752; break; // earth
-                            }
-                        }
-                        
-                        // astral/shooting skill
-                        if (chr.Deaths == 0) {
-                            chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
-                        } else if (chr.Sex == 0) {
-                            chr.ExpAstralShooting /= srvid; // WARR divide in srvid times
-                        } else if (chr.Sex == 64) {
-                                chr.ExpAstralShooting = 1; // MAGE wipe astral skill
-                        }
-                    }
-                    // RECLASSED chars reborn (AMA/WITCH)
-                    else if (chr.Sex == 128 || chr.Sex == 192) {
-                        chr.MonstersKills = 0; // reset monster kills for reborn restriction
-                        chr.Money = 0; // wipe gold
-                        std::string serializedBag = "[0,0,0,0]";
-                        chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
-
-                        chr.ExpFireBlade = 1; // wipe ALL exp
-                        chr.ExpWaterAxe = 1;
-                        chr.ExpAirBludgeon = 1;
-                        chr.ExpEarthPike = 1;
-                        chr.ExpAstralShooting = 1;
-
-                        // Witch
-                        if (chr.Sex == 192) {
-                            // witch lose equipped items
-                            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                            chr.Dress = Login_UnserializeItems(serializedDress);
-
-                            // ...and all spellbooks (leave only basic arrow)
-                            switch (chr.MainSkill) {
-                                case 1: chr.Spells = 16777218; break; // fire
-                                case 2: chr.Spells = 16777248; break; // water
-                                case 3: chr.Spells = 16778240; break; // air
-                                case 4: chr.Spells = 16842752; break; // earth
-                            }
-                        }
-                    }
-                }
-
-                //////////////////////////////
-                // RECLASS after maxing EXP //
-                //////////////////////////////
-                unsigned int ascended = 0; // DB-only flag to ladder score
-                unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
-
-                // RECLASS: warrior/mage become ama/witch
-                // (note it can't happen simultaneously with reborn as
-                // at reborn we "half" the exp)
-                if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
-
-                    chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
-                    chr.Money = 0; // Reset Money
-                    chr.Body = 1; // stats
-                    chr.Reaction = 1;
-                    chr.Mind = 1;
-                    chr.Spirit = 1;
-                    chr.ExpFireBlade = 1; // exp
-                    chr.ExpWaterAxe = 1;
-                    chr.ExpAirBludgeon = 1;
-                    chr.ExpEarthPike = 1;
-                    chr.ExpAstralShooting = 1;
-                    // wipe bag
-                    std::string serializedBag = "[0,0,0,0]";
-                    chr.Bag = Login_UnserializeItems(serializedBag);
-                    // wipe equipped
-                    std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                    chr.Dress = Login_UnserializeItems(serializedDress);
-
-                    // reclass: war/mage change class
-                    if (chr.Sex == 0) { // warr become ama
-                        chr.Sex = 128;
-                        chr.Picture = 11; // and become human
-                    }
-                    else if (chr.Sex == 64) { // mage becomes witch
-                        chr.Sex = 192;
-                        chr.Picture = 6; // and become human
-                    }
-
-                ///////////////////////////////
-                // ASCEND after maxing STATS //
-                ///////////////////////////////
-
-                // ASCEND: ama/witch become again war/mage and receive crown
-                } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                            stats_sum == 284 && total_exp > 177777777) {
-
-                    // increment ascended DB-only field to mark that character was ascended (for ladder score)
-                    ascended = 1;
-
-                    // Loose some stats as price for ascend,
-                    // but still save some be able stay on #7;
-                    // otherwise (eg if we reset stats to 1)...
-                    // ...reborn will cause mage staff to dissapear
-                    chr.Body = 50;
-                    chr.Reaction = 50;
-                    chr.Mind = 50;
-                    chr.Spirit = 50;
-
-                    chr.ExpFireBlade = 1; // pay with exp too
-                    chr.ExpWaterAxe = 1;
-                    chr.ExpAirBludgeon = 1;
-                    chr.ExpEarthPike = 1;
-                    chr.ExpAstralShooting = 1;
-
-                    // (we do not wipe inventory/gold at this point...
-                    // ..as players anyway will save items on mule, so why to make hastle.
-                    // So we wipe only equipment to be able to award player with crown/staff
-                    if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange
-                        chr.Sex = 0;
-                        chr.Picture = 32;
-                        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
-                    } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
-                        chr.Sex = 64;
-                        chr.Picture = 15;
-                        std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                        chr.Dress = Login_UnserializeItems(serializedDress);
-                    }
-                }
-
+                unsigned int ascended;
+                UpdateCharacter(chr, srvid, ascended);
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -2066,5 +1711,370 @@ bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid
     {
         SQL_Unlock();
         return false;
+    }
+}
+
+/** Update the character in the database, after creation or after leaving a map.
+ *
+ *  Parameters:
+ *      chr: the character. Will be updated inplace.
+ *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, mind <= 15).
+ *      ascended: output parameter to signify that the character has ascended.
+ */
+void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Reset character attributes for #1 server (remove 1000 starting gold)
+    if (srvid == 1)
+    {
+        chr.Money = 0;
+        chr.MonstersKills = 0;
+        chr.Deaths = 0;
+        chr.ExpFireBlade = 1;
+        chr.ExpWaterAxe = 0;
+        chr.ExpAirBludgeon = 0;
+        chr.ExpEarthPike = 0;
+        chr.ExpAstralShooting = 0;
+        // wipe bag
+        std::string serializedBag = "[0,0,0,0]";
+        chr.Bag = Login_UnserializeItems(serializedBag);
+        // wipe equipped
+        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+        chr.Dress = Login_UnserializeItems(serializedDress);
+
+        if (chr.Sex == 64 || chr.Sex == 192) // mage
+        {
+            // give attack spell
+            switch (chr.MainSkill) {
+                case 1: chr.Spells = 16777218; break; // fire
+                case 2: chr.Spells = 16777248; break; // water
+                case 3: chr.Spells = 16778240; break; // air
+                case 4: chr.Spells = 16842752; break; // earth
+            }
+        }
+
+        if (chr.Sex == 0) { // warr
+        /////// NOTE: if change avatar number there - don't forget to change
+        /////// at rom2.ru code
+            chr.Picture = 64; // zombie
+        }
+        else if (chr.Sex == 64) { // mage
+            chr.Picture = 64; // zombie
+        }
+        else if (chr.Sex == 128) { // ama become warr
+            chr.Sex = 0;
+            chr.Picture = 64; // zombie
+        }
+        else if (chr.Sex == 192) { // witch become mage
+            chr.Sex = 64;
+            chr.Picture = 64; // zombie
+        }
+    }
+
+    ////////////
+    // REBORN //
+    //////////// before entering next difficulty
+
+    ////////////////////////////////////////////
+    // 1) check for "Boss key" - potion
+    bool foundBossKey = false;
+
+    const unsigned long bossKeyItem = 3667;  // "Quest Treasure".
+
+    for (const auto &item: chr.Bag.Items) {
+        if (item.Id == bossKeyItem) {
+            foundBossKey = true;
+            break;
+        }
+    }
+
+    if (foundBossKey) {
+        // Remove all quest treasures from the player's bag.
+        std::vector<CItem> newItems;
+        newItems.reserve(chr.Bag.Items.size());
+
+        for (const auto& item: chr.Bag.Items) {
+            if (item.Id != bossKeyItem) {
+                newItems.push_back(item);
+            }
+        }
+
+        chr.Bag.Items = newItems;
+    }
+
+    ////////////////////////////////////////////
+    // 2) now check for reborn
+
+    bool reborn = false;
+    bool meets_reborn_criteria = foundBossKey;
+    unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
+             chr.ExpEarthPike + chr.ExpAstralShooting;
+
+    // fix problem when 0-exp character (eg due nullifing) stuck in limbo
+    if (total_exp == 0) {
+        chr.ExpFireBlade = 1;
+    }
+
+    // note: we check there _!from which server!_ we received character
+    // eg if we received char from srvid 2 and char finished its stay there
+    // (by drinking mind to 15) - he will be reborned.. and his next login
+    // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
+    if ((srvid == 2 && chr.Mind > 14) ||
+        (srvid == 3 && chr.Reaction > 19) ||
+        (srvid == 4 && chr.Reaction > 29) ||
+        (srvid == 5 && chr.Reaction > 39) ||
+        (srvid == 6 && chr.Reaction > 49))
+    {
+        reborn = true;
+
+        // As we receive character from server - we can control, should it
+        // go to next lvl or not; so we can revert its stats back if reqs
+        // not satisfied. so...
+
+        // pay for the ticket (for !normal! characters too)
+        if (srvid == 2 && chr.Money < 30000) {
+            meets_reborn_criteria = false;
+        }
+        else if (srvid == 3 && chr.Money < 300000) {
+            meets_reborn_criteria = false;
+        }
+        else if (srvid == 4 && chr.Money < 1500000) {
+            meets_reborn_criteria = false;
+        }
+        else if (srvid == 5 && chr.Money < 10000000) {
+            meets_reborn_criteria = false;
+        }
+        else if (srvid == 6 && chr.Money < 50000000) {
+            meets_reborn_criteria = false;
+        }
+
+        // ..Revert stats for AMA/WITCH if exp is lower than
+        if (chr.Sex == 128 || chr.Sex == 192) {
+            if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
+                     chr.Money < 100000)) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
+                     chr.Money < 1000000)) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
+                     chr.Money < 5000000)) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 5 && (total_exp < 30000000 || chr.MonstersKills < 2000 ||
+                     chr.Money < 30000000)) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 6 && (total_exp < 100000000 || chr.MonstersKills < 4000 ||
+                     chr.Money < 100000000)) {
+                meets_reborn_criteria = false;
+            }
+        // ..also have min.exp for Hardcore chars (0 or 1 death)
+        } else if (chr.Deaths <= 1) {
+            if (srvid == 2 && total_exp < 50000) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 3 && total_exp < 100000) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 4 && total_exp < 500000) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 5 && total_exp < 2000000) {
+                meets_reborn_criteria = false;
+            }
+            else if (srvid == 6 && total_exp < 25000000) {
+                meets_reborn_criteria = false;
+            }
+        }
+    }
+
+    // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
+    if (reborn && !meets_reborn_criteria) {
+        reborn = false;
+
+        uint8_t stat_ceiling = 0;
+
+        switch (srvid) {
+        case 2:
+            stat_ceiling = 14;
+            break;
+        case 3:
+            stat_ceiling = 19;
+            break;
+        case 4:
+            stat_ceiling = 29;
+            break;
+        case 5:
+            stat_ceiling = 39;
+            break;
+        case 6:
+            stat_ceiling = 49;
+            break;
+        }
+
+        // Make stats at most "max-1".
+        chr.Reaction = std::min(chr.Reaction, stat_ceiling);
+
+        // We don't need to touch other stats on #6 as all stats are acquired independently there.
+        if (srvid != 6) {
+            chr.Body = std::min(chr.Body, stat_ceiling);
+            chr.Mind = std::min(chr.Mind, stat_ceiling);
+            chr.Spirit = std::min(chr.Spirit, stat_ceiling);
+        }
+    }
+
+    if (reborn) {
+        // WARRIOR/MAGE (no reclass OR ascend)
+        if (chr.Sex == 0 || chr.Sex == 64) {
+            chr.Money = 0; // wipe gold
+            std::string serializedBag = "[0,0,0,0]";
+            chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
+
+            // Wipe experience for the main skill
+            switch (chr.MainSkill) {
+                case 1: chr.ExpFireBlade = 1; break;
+                case 2: chr.ExpWaterAxe = 1; break;
+                case 3: chr.ExpAirBludgeon = 1; break;
+                case 4: chr.ExpEarthPike = 1; break;
+            }
+
+            // Reduce all other skills in 2 times...
+            if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
+            if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
+            if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
+            if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
+
+            // Mage
+            if (chr.Sex == 64) {
+                // mages lose equipped items
+                std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                chr.Dress = Login_UnserializeItems(serializedDress);
+
+                // ...and all spellbooks (leave only basic arrow)
+                switch (chr.MainSkill) {
+                    case 1: chr.Spells = 16777218; break; // fire
+                    case 2: chr.Spells = 16777248; break; // water
+                    case 3: chr.Spells = 16778240; break; // air
+                    case 4: chr.Spells = 16842752; break; // earth
+                }
+            }
+
+            // astral/shooting skill
+            if (chr.Deaths == 0) {
+                chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
+            } else if (chr.Sex == 0) {
+                chr.ExpAstralShooting /= srvid; // WARR divide in srvid times
+            } else if (chr.Sex == 64) {
+                    chr.ExpAstralShooting = 1; // MAGE wipe astral skill
+            }
+        }
+        // RECLASSED chars reborn (AMA/WITCH)
+        else if (chr.Sex == 128 || chr.Sex == 192) {
+            chr.MonstersKills = 0; // reset monster kills for reborn restriction
+            chr.Money = 0; // wipe gold
+            std::string serializedBag = "[0,0,0,0]";
+            chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
+
+            chr.ExpFireBlade = 1; // wipe ALL exp
+            chr.ExpWaterAxe = 1;
+            chr.ExpAirBludgeon = 1;
+            chr.ExpEarthPike = 1;
+            chr.ExpAstralShooting = 1;
+
+            // Witch
+            if (chr.Sex == 192) {
+                // witch lose equipped items
+                std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                chr.Dress = Login_UnserializeItems(serializedDress);
+
+                // ...and all spellbooks (leave only basic arrow)
+                switch (chr.MainSkill) {
+                    case 1: chr.Spells = 16777218; break; // fire
+                    case 2: chr.Spells = 16777248; break; // water
+                    case 3: chr.Spells = 16778240; break; // air
+                    case 4: chr.Spells = 16842752; break; // earth
+                }
+            }
+        }
+    }
+
+    //////////////////////////////
+    // RECLASS after maxing EXP //
+    //////////////////////////////
+    ascended = 0; // DB-only flag to ladder score
+    unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
+
+    // RECLASS: warrior/mage become ama/witch
+    // (note it can't happen simultaneously with reborn as
+    // at reborn we "half" the exp)
+    if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
+
+        chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
+        chr.Money = 0; // Reset Money
+        chr.Body = 1; // stats
+        chr.Reaction = 1;
+        chr.Mind = 1;
+        chr.Spirit = 1;
+        chr.ExpFireBlade = 1; // exp
+        chr.ExpWaterAxe = 1;
+        chr.ExpAirBludgeon = 1;
+        chr.ExpEarthPike = 1;
+        chr.ExpAstralShooting = 1;
+        // wipe bag
+        std::string serializedBag = "[0,0,0,0]";
+        chr.Bag = Login_UnserializeItems(serializedBag);
+        // wipe equipped
+        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+        chr.Dress = Login_UnserializeItems(serializedDress);
+
+        // reclass: war/mage change class
+        if (chr.Sex == 0) { // warr become ama
+            chr.Sex = 128;
+            chr.Picture = 11; // and become human
+        }
+        else if (chr.Sex == 64) { // mage becomes witch
+            chr.Sex = 192;
+            chr.Picture = 6; // and become human
+        }
+
+    ///////////////////////////////
+    // ASCEND after maxing STATS //
+    ///////////////////////////////
+
+    // ASCEND: ama/witch become again war/mage and receive crown
+    } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
+                stats_sum == 284 && total_exp > 177777777) {
+
+        // increment ascended DB-only field to mark that character was ascended (for ladder score)
+        ascended = 1;
+
+        // Loose some stats as price for ascend,
+        // but still save some be able stay on #7;
+        // otherwise (eg if we reset stats to 1)...
+        // ...reborn will cause mage staff to dissapear
+        chr.Body = 50;
+        chr.Reaction = 50;
+        chr.Mind = 50;
+        chr.Spirit = 50;
+
+        chr.ExpFireBlade = 1; // pay with exp too
+        chr.ExpWaterAxe = 1;
+        chr.ExpAirBludgeon = 1;
+        chr.ExpEarthPike = 1;
+        chr.ExpAstralShooting = 1;
+
+        // (we do not wipe inventory/gold at this point...
+        // ..as players anyway will save items on mule, so why to make hastle.
+        // So we wipe only equipment to be able to award player with crown/staff
+        if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange
+            chr.Sex = 0;
+            chr.Picture = 32;
+            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+            chr.Dress = Login_UnserializeItems(serializedDress);
+        } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
+            chr.Sex = 64;
+            chr.Picture = 15;
+            std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+            chr.Dress = Login_UnserializeItems(serializedDress);
+        }
     }
 }
