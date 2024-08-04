@@ -1090,14 +1090,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                             chr.Dress = Login_UnserializeItems(serializedDress);
 
                             // ...and all spellbooks (leave only basic arrow)
-                            // (if not hardcore)
-                            if (chr.Deaths > 0) {
-                                switch (chr.MainSkill) {
-                                    case 1: chr.Spells = 16777218; break; // fire
-                                    case 2: chr.Spells = 16777248; break; // water
-                                    case 3: chr.Spells = 16778240; break; // air
-                                    case 4: chr.Spells = 16842752; break; // earth
-                                }
+                            switch (chr.MainSkill) {
+                                case 1: chr.Spells = 16777218; break; // fire
+                                case 2: chr.Spells = 16777248; break; // water
+                                case 3: chr.Spells = 16778240; break; // air
+                                case 4: chr.Spells = 16842752; break; // earth
                             }
                         }
                         
