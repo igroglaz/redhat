@@ -1082,18 +1082,9 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
                         if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
                         if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
-                        // ... WARRIOR: astral/shooting in srvID times
-                        // (hardcore character only 2x times)
-                        if (chr.Deaths == 0) {
-                            chr.ExpAstralShooting /= 2;
-                        } else {
-                            chr.ExpAstralShooting /= srvid;
-                        }
 
                         // Mage
                         if (chr.Sex == 64) {
-                            chr.ExpAstralShooting = 1; // MAGE wipe astral skill
-
                             // mages lose equipped items
                             std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
                             chr.Dress = Login_UnserializeItems(serializedDress);
@@ -1108,6 +1099,15 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                     case 4: chr.Spells = 16842752; break; // earth
                                 }
                             }
+                        }
+                        
+                        // astral/shooting skill
+                        if (chr.Deaths == 0) {
+                            chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
+                        } else if (chr.Sex == 0) {
+                            chr.ExpAstralShooting /= srvid; // WARR divide in srvid times
+                        } else if (chr.Sex == 64) {
+                                chr.ExpAstralShooting = 1; // MAGE wipe astral skill
                         }
                     }
                     // RECLASSED chars reborn (AMA/WITCH)
