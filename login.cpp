@@ -2072,5 +2072,23 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
             std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
             chr.Dress = Login_UnserializeItems(serializedDress);
         }
+    } else {
+        // If the player didn't ascend or reclass, the boss key on 7+ increases stats.
+        if (foundBossKey) {
+            switch (srvid) {
+            case 7:
+                chr.Body++;
+                break;
+            case 8:
+                chr.Spirit++;
+                break;
+            case 9:
+                chr.Mind++;
+                break;
+            case 10:
+                chr.Reaction++;
+                break;
+            }
+        }
     }
 }
