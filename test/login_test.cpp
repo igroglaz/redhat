@@ -366,4 +366,78 @@ TEST(UpdateCharacter_Ascend_Success) {
     CHECK_CHARACTER(chr, want);
 }
 
+TEST(UpdateCharacter_NoChanges_7) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200},
+            .stats={.body=51, .reaction=52, .mind=53, .spirit=54},
+            .skills={.fire=1000, .water=2000, .air=3000, .earth=4000, .astral=5000},
+            .items={.money=60000000, .spells=268385790},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 7, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200},
+            .stats={.body=51, .reaction=52, .mind=53, .spirit=54},
+            .skills={.fire=1000, .water=2000, .air=3000, .earth=4000, .astral=5000},
+            .items={.money=60000000, .spells=268385790},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_TreasureOn7) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .skills={.astral=1000},
+            .items={.money=1337, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 7, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=51, .reaction=50, .mind=50, .spirit=50}, // Body is increased as we're on server 7.
+            .skills={.astral=1000},
+            .items={.money=1337, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_TreasureOn8) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=76},
+            .skills={.astral=1000},
+            .items={.bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 8, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=77}, // Spirit is increased even over the limit.
+            .skills={.astral=1000},
+            .items={.bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
 }
