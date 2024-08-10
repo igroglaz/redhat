@@ -1724,6 +1724,60 @@ void WipeSpells(CCharacter& chr) {
     }
 }
 
+// Return a prettied number, like 5000 -> 5k, 123000000 -> 123m.
+std::string PrettyNumber(uint32_t num) {
+    if (num > 1000000000 && (num % 1000000000) == 0) {
+        return std::to_string(num / 1000000000) + "b";
+    } else if (num > 1000000 && (num % 1000000) == 0) {
+        return std::to_string(num / 1000000) + "m";
+    } else if (num > 1000 && (num % 1000) == 0) {
+        return std::to_string(num / 1000) + "k";
+    } else {
+        return std::to_string(num);
+    }
+}
+
+// Check if a girl character (amazon/witch) can do a rebirth.
+// If yes, returns an empty string, otherwise --- the failure reason.
+std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid) {
+    uint32_t need_exp = 0;
+    uint32_t need_kills = 0;
+    uint32_t need_gold = 0;
+
+    if (srvid == 2) {
+        need_exp = 100000;
+        need_kills = 1000;
+        need_gold = 100000;
+    } else if (srvid == 3) {
+        need_exp = 500000;
+        need_kills = 1200;
+        need_gold = 1000000;
+    } else if (srvid == 4) {
+        need_exp = 2000000;
+        need_kills = 1500;
+        need_gold = 5000000;
+    } else if (srvid == 5) {
+        need_exp = 30000000;
+        need_kills = 2000;
+        need_gold = 30000000;
+    } else if (srvid == 6) {
+        need_exp = 100000000;
+        need_kills = 4000;
+        need_gold = 100000000;
+    }
+
+    if (total_exp < need_exp) {
+        return PrettyNumber(need_exp) + "_exp";
+    }
+    if (chr.MonstersKills < need_kills) {
+        return PrettyNumber(need_kills) + "_kills";
+    }
+    if (chr.Money < need_gold) {
+        return PrettyNumber(need_gold) + "_gold";
+    }
+    return "";
+}
+
 /** Update the character in the database, after creation or after leaving a map.
  *
  *  Parameters:
@@ -1807,7 +1861,12 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
     // 2) now check for reborn
 
     bool reborn = false;
-    bool meets_reborn_criteria = foundBossKey;
+    bool meets_reborn_criteria = true;
+    std::string reborn_failure_reason;
+    if (!foundBossKey) {
+        meets_reborn_criteria = false;
+        reborn_failure_reason = "treasure";
+    }
     unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
              chr.ExpEarthPike + chr.ExpAstralShooting;
 
@@ -1835,58 +1894,52 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         // pay for the ticket (for !normal! characters too)
         if (srvid == 2 && chr.Money < 30000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "30k_gold";
         }
         else if (srvid == 3 && chr.Money < 300000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "300k_gold";
         }
         else if (srvid == 4 && chr.Money < 1500000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "1500k_gold";
         }
         else if (srvid == 5 && chr.Money < 10000000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "10m_gold";
         }
         else if (srvid == 6 && chr.Money < 50000000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "50m_gold";
         }
 
         // ..Revert stats for AMA/WITCH if exp is lower than
         if (chr.Sex == 128 || chr.Sex == 192) {
-            if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
-                     chr.Money < 100000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
-                     chr.Money < 1000000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
-                     chr.Money < 5000000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 5 && (total_exp < 30000000 || chr.MonstersKills < 2000 ||
-                     chr.Money < 30000000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 6 && (total_exp < 100000000 || chr.MonstersKills < 4000 ||
-                     chr.Money < 100000000)) {
+            reborn_failure_reason = CheckGirlRebirth(chr, total_exp, srvid);
+            if (!reborn_failure_reason.empty()) {
                 meets_reborn_criteria = false;
             }
         // ..also have min.exp for Hardcore chars (0 or 1 death)
         } else if (chr.Deaths <= 1) {
             if (srvid == 2 && total_exp < 50000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_50k_exp";
             }
             else if (srvid == 3 && total_exp < 100000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_100k_exp";
             }
             else if (srvid == 4 && total_exp < 500000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_500k_exp";
             }
             else if (srvid == 5 && total_exp < 2000000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_2m_exp";
             }
             else if (srvid == 6 && total_exp < 25000000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_25m_exp";
             }
         }
     }
@@ -1923,6 +1976,11 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
             chr.Body = std::min(chr.Body, stat_ceiling);
             chr.Mind = std::min(chr.Mind, stat_ceiling);
             chr.Spirit = std::min(chr.Spirit, stat_ceiling);
+        }
+
+        // Show the reason to the player through the "clan" field.
+        if (!reborn_failure_reason.empty()) {
+            chr.Clan = reborn_failure_reason.substr(0, 11); // The clan can be up to 11 symbols long.
         }
     }
 

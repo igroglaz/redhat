@@ -172,7 +172,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=10},
+            .info{.deaths=10, .clan="30k_gold"},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=1234},
             .items={.money=52, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"}, // Money is untouched, treasure disappears.
@@ -199,7 +199,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=10},
+            .info{.deaths=10, .clan="treasure"},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=1234},
             .items={.money=35000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
@@ -226,7 +226,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=0},
+            .info{.deaths=0, .clan="hc_50k_exp"},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=40000},
             .items={.money=35000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
@@ -314,6 +314,114 @@ TEST(UpdateCharacter_Reborn67_Success) {
     CHECK_CHARACTER(chr, want);
 }
 
+TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.sex=128, .kills=5000},
+            .stats={.body=20, .reaction=20, .mind=20, .spirit=15},
+            .skills={.astral=40000},
+            .items={.money=350000, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 3, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.sex=128, .kills=5000, .clan="500k_exp"},
+            .stats={.body=19, .reaction=19, .mind=19, .spirit=15},
+            .skills={.astral=40000},
+            .items={.money=350000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.sex=128, .kills=1000},
+            .stats={.body=30, .reaction=30, .mind=30, .spirit=25},
+            .skills={.astral=6000000},
+            .items={.money=350000, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 4, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.sex=128, .kills=1000, .clan="1500_kills"},
+            .stats={.body=29, .reaction=29, .mind=29, .spirit=25},
+            .skills={.astral=6000000},
+            .items={.money=350000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.sex=192, .kills=5000},
+            .stats={.body=40, .reaction=40, .mind=40, .spirit=35},
+            .skills={.astral=40000000},
+            .items={.money=350000, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 5, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.sex=192, .kills=5000, .clan="30m_gold"},
+            .stats={.body=39, .reaction=39, .mind=39, .spirit=35},
+            .skills={.astral=40000000},
+            .items={.money=350000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn2_Success_Witch) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=4, .sex=192, .kills=2000},
+            .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
+            .skills={.fire=10000, .water=20000, .air=30000, .earth=40000, .astral=50000},
+            .items={.money=100000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 2, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=4, .sex=192, .kills=0}, // Wipe kills.
+            .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
+            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // Wipe all skills.
+            .items={.money=0, .spells=16842752}, // Wipe money, bag and dress, reset spells.
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
 TEST(UpdateCharacter_Reclass_Success) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
@@ -392,7 +500,7 @@ TEST(UpdateCharacter_NoChanges_7) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_TreasureOn7) {
+TEST(UpdateCharacter_TreasureOn7_NoChanges) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
@@ -408,7 +516,7 @@ TEST(UpdateCharacter_TreasureOn7) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .stats={.body=51, .reaction=50, .mind=50, .spirit=50}, // Body is increased as we're on server 7.
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // Treasure on 7 does nothing.
             .skills={.astral=1000},
             .items={.money=1337, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
