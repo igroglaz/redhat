@@ -11,6 +11,7 @@ namespace
 
 const std::string empty_bag = "[0,0,0,0]";
 const std::string empty_dress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+const std::string dress_with_staff = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
 
 // A couple structs to conveniently construct a character for tests.
 struct Info {
@@ -18,6 +19,8 @@ struct Info {
     uint8_t picture;
     uint8_t sex;
     uint32_t deaths;
+    uint32_t kills;
+    std::string clan;
 };
 
 struct Stats {
@@ -56,6 +59,8 @@ CCharacter FakeCharacter(const CharacterOpts& opts) {
     chr.Picture = opts.info.picture;
     chr.Sex = opts.info.sex;
     chr.Deaths = opts.info.deaths;
+    chr.MonstersKills = opts.info.kills;
+    chr.Clan = opts.info.clan;
 
     chr.Body = opts.stats.body;
     chr.Reaction = opts.stats.reaction;
@@ -102,15 +107,20 @@ std::string CharacterDiff(CCharacter got, CCharacter want) {
     A2_TEST_DIFF_FIELD(Picture);
     A2_TEST_DIFF_FIELD(Sex);
     A2_TEST_DIFF_FIELD(Deaths);
+    A2_TEST_DIFF_FIELD(MonstersKills);
+    A2_TEST_DIFF("Clan", got.Clan, want.Clan);
+
     A2_TEST_DIFF_FIELD(Body);
     A2_TEST_DIFF_FIELD(Reaction);
     A2_TEST_DIFF_FIELD(Mind);
     A2_TEST_DIFF_FIELD(Spirit);
+
     A2_TEST_DIFF_FIELD(ExpFireBlade);
     A2_TEST_DIFF_FIELD(ExpWaterAxe);
     A2_TEST_DIFF_FIELD(ExpAirBludgeon);
     A2_TEST_DIFF_FIELD(ExpEarthPike);
     A2_TEST_DIFF_FIELD(ExpAstralShooting);
+
     A2_TEST_DIFF_FIELD(Money);
     A2_TEST_DIFF_FIELD(Spells);
     A2_TEST_DIFF("Bag", Login_SerializeItems(got.Bag), Login_SerializeItems(want.Bag));
@@ -273,6 +283,84 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
             .stats={.body=29, .reaction=30, .mind=28, .spirit=27},
             .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1250}, // Main skill is set to 1, shooting is divided by server number (4), others halved.
             .items={.dress="[0,0,0,1];[1000,0,0,1]"}, // Money and bag are wiped.
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn67_Success) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=2, .sex=64, .deaths=10},
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .skills={.fire=1000, .water=2000, .air=3000, .earth=4000, .astral=5000},
+            .items={.money=50000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 6, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=2, .sex=64, .deaths=10},
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .skills={.fire=500, .water=1, .air=1500, .earth=2000, .astral=1}, // Main skill and astral are set to 1, others halved.
+            .items={.spells=16777248}, // Money, bag and dress are wiped, spells are reset.
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reclass_Success) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200, .clan="reclass"},
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
+            .items={.money=50000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 7, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=0, .clan="reclass"}, // Sex and picture are changed, kills are reset.
+            .stats={.body=1, .reaction=1, .mind=1, .spirit=1}, // All stats are set to 1.
+            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
+            .items={.spells=16777218}, // Everything is wiped, spells are reset.
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Ascend_Success) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="ascend"},
+            .stats={.body=56, .reaction=76, .mind=76, .spirit=76},
+            .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
+            .items={.money=90000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = -1;
+    UpdateCharacter(chr, 7, ascended);
+
+    CHECK_EQUAL(ascended, (unsigned int)1);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .picture=15, .sex=64, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
+            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
+            .items={.money=90000000, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress=dress_with_staff}, // Dress is reset to get a prize staff.
         }
     );
     CHECK_CHARACTER(chr, want);

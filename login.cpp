@@ -1714,6 +1714,16 @@ bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid
     }
 }
 
+// Wipe mage's spells: remove all spells, leave only healing and the main skill arrow.
+void WipeSpells(CCharacter& chr) {
+    switch (chr.MainSkill) {
+        case 1: chr.Spells = 16777218; break; // fire
+        case 2: chr.Spells = 16777248; break; // water
+        case 3: chr.Spells = 16778240; break; // air
+        case 4: chr.Spells = 16842752; break; // earth
+    }
+}
+
 /** Update the character in the database, after creation or after leaving a map.
  *
  *  Parameters:
@@ -1741,13 +1751,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
 
         if (chr.Sex == 64 || chr.Sex == 192) // mage
         {
-            // give attack spell
-            switch (chr.MainSkill) {
-                case 1: chr.Spells = 16777218; break; // fire
-                case 2: chr.Spells = 16777248; break; // water
-                case 3: chr.Spells = 16778240; break; // air
-                case 4: chr.Spells = 16842752; break; // earth
-            }
+            WipeSpells(chr);
         }
 
         if (chr.Sex == 0) { // warr
@@ -1950,12 +1954,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 chr.Dress = Login_UnserializeItems(serializedDress);
 
                 // ...and all spellbooks (leave only basic arrow)
-                switch (chr.MainSkill) {
-                    case 1: chr.Spells = 16777218; break; // fire
-                    case 2: chr.Spells = 16777248; break; // water
-                    case 3: chr.Spells = 16778240; break; // air
-                    case 4: chr.Spells = 16842752; break; // earth
-                }
+                WipeSpells(chr);
             }
 
             // astral/shooting skill
@@ -1987,12 +1986,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 chr.Dress = Login_UnserializeItems(serializedDress);
 
                 // ...and all spellbooks (leave only basic arrow)
-                switch (chr.MainSkill) {
-                    case 1: chr.Spells = 16777218; break; // fire
-                    case 2: chr.Spells = 16777248; break; // water
-                    case 3: chr.Spells = 16778240; break; // air
-                    case 4: chr.Spells = 16842752; break; // earth
-                }
+                WipeSpells(chr);
             }
         }
     }
@@ -2034,6 +2028,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         else if (chr.Sex == 64) { // mage becomes witch
             chr.Sex = 192;
             chr.Picture = 6; // and become human
+
+            WipeSpells(chr);
         }
 
     ///////////////////////////////
