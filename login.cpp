@@ -2046,6 +2046,15 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 // ...and all spellbooks (leave only basic arrow)
                 WipeSpells(chr);
             }
+
+            // reset BODY for ama/witch upon reborn when moving from 6 to 7
+            if (srvid == 6) {
+                if (chr.Sex == 128) { // ama
+                    chr.Body = 25;
+                } else if (chr.Sex == 192) { // witch
+                    chr.Body = 1;
+                }
+            }
         }
     }
 
