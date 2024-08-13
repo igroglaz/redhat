@@ -516,7 +516,7 @@ TEST(UpdateCharacter_TreasureOn7_NoChanges) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // Treasure on 7 does nothing.
+            .stats={.body=51, .reaction=50, .mind=50, .spirit=50}, // Treasure on 7 does nothing.
             .skills={.astral=1000},
             .items={.money=1337, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }

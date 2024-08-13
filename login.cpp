@@ -2143,6 +2143,9 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         // If the player didn't ascend or reclass, the boss key on 7+ increases stats.
         if (foundBossKey) {
             switch (srvid) {
+            case 7:
+                chr.Body++;
+                break;
             case 8:
                 chr.Spirit++;
                 break;
