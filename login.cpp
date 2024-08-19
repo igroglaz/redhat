@@ -2069,7 +2069,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
     // RECLASS: warrior/mage become ama/witch
     // (note it can't happen simultaneously with reborn as
     // at reborn we "half" the exp)
-    if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
+    if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
+         chr.Money > 500000000) {
 
         chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
         chr.Money = 0; // Reset Money
@@ -2107,7 +2108,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
 
     // ASCEND: ama/witch become again war/mage and receive crown
     } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                stats_sum == 284 && total_exp > 177777777) {
+                stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000) {
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
         ascended = 1;
