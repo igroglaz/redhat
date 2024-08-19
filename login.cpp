@@ -2147,7 +2147,17 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         if (foundBossKey) {
             switch (srvid) {
             case 7:
-                chr.Body++;
+                if (chr.Sex == 192) { // witch increase Body at 7 a bit faster as starts from 1
+                    if (chr.Body < 10) {
+                        chr.Body += 3;
+                    } else if (chr.Body < 25) {
+                        chr.Body += 2;
+                    } else {
+                        chr.Body++;
+                    }
+                } else {
+                    chr.Body++;
+                }
                 break;
             case 8:
                 chr.Spirit++;
@@ -2163,13 +2173,13 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 int randomStat = std::rand() % 3;
                 switch(randomStat) {
                     case 0:
-                        chr.Spirit++;
+                        chr.Spirit += 2;
                         break;
                     case 1:
-                        chr.Mind++;
+                        chr.Mind += 2;
                         break;
                     case 2:
-                        chr.Reaction++;
+                        chr.Reaction += 2;
                         break;
                 }
                 break;
