@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <windows.h>
 
+#include <cstdlib> // For std::rand()
+
 std::string Login_MakePassword(std::string password)
 {
     //Printf("Login_MakePassword()\n");
@@ -2154,6 +2156,21 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 break;
             case 10:
                 chr.Reaction++;
+                break;
+            case 11:
+                // rng between 0 and 2
+                int randomStat = std::rand() % 3;
+                switch(randomStat) {
+                    case 0:
+                        chr.Spirit++;
+                        break;
+                    case 1:
+                        chr.Mind++;
+                        break;
+                    case 2:
+                        chr.Reaction++;
+                        break;
+                }
                 break;
             }
         }
