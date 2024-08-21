@@ -2148,9 +2148,21 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
             switch (srvid) {
             case 7:
                 if (chr.Sex == 192) { // witch increase Body at 7 a bit faster as starts from 1
-                    if (chr.Body < 10) {
-                        chr.Body += 3;
+                    if (chr.Body < 15) {
+                        chr.Body += 5;
                     } else if (chr.Body < 25) {
+                        chr.Body += 4;
+                    } else if (chr.Body < 35) {
+                        chr.Body += 3;
+                    } else if (chr.Body < 45) {
+                        chr.Body += 2;
+                    } else {
+                        chr.Body++;
+                    }
+                } else if (chr.Sex == 128) { // amazon
+                    if (chr.Body < 35) {
+                        chr.Body += 3;
+                    } else if (chr.Body < 45) {
                         chr.Body += 2;
                     } else {
                         chr.Body++;
@@ -2159,10 +2171,10 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                     chr.Body++;
                 }
                 break;
-            case 8:
-                chr.Spirit++;
+            case 8: // each treasure at 8 give 2 spirit
+                chr.Spirit += 3;
                 break;
-            case 9:
+            case 9: // at 9, 10 - we have 3 treasures per map
                 chr.Mind++;
                 break;
             case 10:
