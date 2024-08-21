@@ -2171,15 +2171,15 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                     chr.Body++;
                 }
                 break;
-            case 8: // give more spirit per treasure
+            case 8: // give more mind per treasure
                 if (std::rand() % 2 == 0) {
-                    chr.Spirit += 3;
+                    chr.Mind += 3;
                 } else {
-                    chr.Spirit += 2;
+                    chr.Mind += 2;
                 }
                 break;
             case 9: // at 9, 10 - we have 3 treasures per map
-                chr.Mind++;
+                chr.Spirit++;
                 break;
             case 10:
                 chr.Reaction++;
