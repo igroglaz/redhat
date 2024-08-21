@@ -2171,8 +2171,12 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                     chr.Body++;
                 }
                 break;
-            case 8: // each treasure at 8 give 2 spirit
-                chr.Spirit += 3;
+            case 8: // give more spirit per treasure
+                if (std::rand() % 2 == 0) {
+                    chr.Spirit += 3;
+                } else {
+                    chr.Spirit += 2;
+                }
                 break;
             case 9: // at 9, 10 - we have 3 treasures per map
                 chr.Mind++;
@@ -2181,18 +2185,12 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 chr.Reaction++;
                 break;
             case 11:
-                // rng between 0 and 2
-                int randomStat = std::rand() % 3;
-                switch(randomStat) {
-                    case 0:
-                        chr.Spirit += 2;
-                        break;
-                    case 1:
-                        chr.Mind += 2;
-                        break;
-                    case 2:
-                        chr.Reaction += 2;
-                        break;
+                if (chr.Spirit < 76) {
+                    chr.Spirit += 2;
+                } else if (chr.Mind < 76) {
+                    chr.Mind += 2;
+                } else {
+                    chr.Reaction += 2;
                 }
                 break;
             }
