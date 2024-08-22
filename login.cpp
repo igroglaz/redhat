@@ -2147,28 +2147,32 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         if (foundBossKey) {
             switch (srvid) {
             case 7:
-                if (chr.Sex == 192) { // witch increase Body at 7 a bit faster as starts from 1
-                    if (chr.Body < 15) {
-                        chr.Body += 5;
-                    } else if (chr.Body < 25) {
-                        chr.Body += 4;
-                    } else if (chr.Body < 35) {
-                        chr.Body += 3;
-                    } else if (chr.Body < 45) {
-                        chr.Body += 2;
-                    } else {
-                        chr.Body++;
-                    }
-                } else if (chr.Sex == 128) { // amazon
-                    if (chr.Body < 35) {
-                        chr.Body += 3;
-                    } else if (chr.Body < 45) {
-                        chr.Body += 2;
-                    } else {
-                        chr.Body++;
-                    }
+                if (std::rand() % 10 < 3) {
+                    ; // treasure at 7 server works in 30% cases (we have 2 treasure per map)
                 } else {
-                    chr.Body++;
+                    if (chr.Sex == 192) { // witch increase Body at 7 a bit faster as starts from 1
+                        if (chr.Body < 15) {
+                            chr.Body += 5;
+                        } else if (chr.Body < 25) {
+                            chr.Body += 4;
+                        } else if (chr.Body < 35) {
+                            chr.Body += 3;
+                        } else if (chr.Body < 45) {
+                            chr.Body += 2;
+                        } else {
+                            chr.Body++;
+                        }
+                    } else if (chr.Sex == 128) { // amazon
+                        if (chr.Body < 35) {
+                            chr.Body += 3;
+                        } else if (chr.Body < 45) {
+                            chr.Body += 2;
+                        } else {
+                            chr.Body++;
+                        }
+                    } else { // warrior and mage
+                        chr.Body++;
+                    }
                 }
                 break;
             case 8: // give more mind per treasure
