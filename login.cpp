@@ -2147,8 +2147,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         if (foundBossKey) {
             switch (srvid) {
             case 7:
-                if (std::rand() % 10 < 3) {
-                    ; // treasure at 7 server works in 30% cases (we have 2 treasure per map)
+                if (std::rand() % 2 == 0) {
+                    ; // treasure at 7 server works in 50% cases (we have 2 treasure per map)
                 } else {
                     if (chr.Sex == 192) { // witch increase Body at 7 a bit faster as starts from 1
                         if (chr.Body < 15) {
