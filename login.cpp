@@ -1862,34 +1862,34 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         if (chr.Money < 2136000000) {
             switch (srvid) {
                 case 2:
-                    chr.Money += 20000;
+                    chr.Money += 5000;
                     break;
                 case 3:
-                    chr.Money += 50000;
+                    chr.Money += 30000;
                     break;
                 case 4:
                     chr.Money += 100000;
                     break;
                 case 5:
-                    chr.Money += 300000;
-                    break;
-                case 6:
                     chr.Money += 500000;
                     break;
-                case 7:
+                case 6:
                     chr.Money += 1000000;
                     break;
-                case 8:
+                case 7:
                     chr.Money += 3000000;
                     break;
-                case 9:
+                case 8:
                     chr.Money += 5000000;
                     break;
-                case 10:
+                case 9:
                     chr.Money += 7000000;
                     break;
+                case 10:
+                    chr.Money += 9000000;
+                    break;
                 case 11:
-                    chr.Money += 10000000;
+                    chr.Money += 11483647;
                     break;
             }
         }
