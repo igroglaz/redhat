@@ -2070,7 +2070,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
     // (note it can't happen simultaneously with reborn as
     // at reborn we "half" the exp)
     if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
-         chr.Money > 500000000) {
+         chr.Money > 300000000) {
 
         chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
         chr.Money = 0; // Reset Money
