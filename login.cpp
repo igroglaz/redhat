@@ -1763,11 +1763,11 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
         need_kills = 1500;
         need_gold = 5000000;
     } else if (srvid == 5) {
-        need_exp = 30000000;
+        need_exp = 5000000;
         need_kills = 2000;
         need_gold = 30000000;
     } else if (srvid == 6) {
-        need_exp = 100000000;
+        need_exp = 50000000;
         need_kills = 4000;
         need_gold = 100000000;
     }
