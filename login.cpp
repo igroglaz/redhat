@@ -2183,14 +2183,31 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             chr.Dress = Login_UnserializeItems(serializedDress);
         }
     } else {
-        // If the player didn't ascend or reclass, the boss key on 7+ increases stats.
+        // If the player didn't ascend or reclass,
+        // the boss key on 7+ increases stats
+        // (and increase ladder points on 2+)
         if (foundBossKey) {
             switch (srvid) {
-            case 7:
+            case 2:
+                *points = 1;
+                break;
+            case 3:
+                *points = 2;
+                break;
+            case 4:
+                *points = 3;
+                break;
+            case 5:
+                *points = 15;
+                break;
+            case 6:
+                *points = 15;
+                break;
+            case 7: // 2 treasures per map
                 if (std::rand() % 2 == 0) {
-                    ; // treasure at 7 server works in 50% cases (we have 2 treasure per map)
+                    ; // treasure at 7 server works in 50% cases
                 } else {
-                    if (chr.Sex == 192) { // witch increase Body at 7 a bit faster as starts from 1
+                    if (chr.Sex == 192) { // witch increases Body at 7 a bit faster as starts from 1
                         if (chr.Body < 15) {
                             chr.Body += 5;
                         } else if (chr.Body < 25) {
@@ -2214,27 +2231,25 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                         chr.Body++;
                     }
                 }
+                *points = 15;
                 break;
-            case 8: // give more mind per treasure
+            case 8: // 1 treasure. 2x-3x more mind
                 if (std::rand() % 2 == 0) {
                     chr.Mind += 3;
                 } else {
                     chr.Mind += 2;
                 }
-                // ... and assign ladder points
-                *points = 1;
+                *points = 30;
                 break;
             case 9: // at 9, 10 - we have 3 treasures per map
                 chr.Spirit++;
-                // ... and assign ladder points
-                *points = 2;
+                *points = 100;
                 break;
             case 10:
                 chr.Reaction++;
-                // ... and assign ladder points
-                *points = 2;
+                *points = 100;
                 break;
-            case 11:
+            case 11: // 1 treasure
                 if (chr.Spirit < 76) {
                     chr.Spirit += 2;
                 } else if (chr.Mind < 76) {
@@ -2242,8 +2257,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 } else {
                     chr.Reaction += 2;
                 }
-                // ... and assign ladder points
-                *points = 5;
+                *points = 500;
                 break;
             }
         }
