@@ -863,8 +863,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             // create FLAG is false - update an existing character
             else
             {
-                unsigned int ascended;
-                UpdateCharacter(chr, srvid, ascended);
+                unsigned int ascended = 0; // DB-only flag to ladder score
+                UpdateCharacter(chr, srvid, &ascended); // pass pointer to ascended
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -880,7 +880,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
                                                 `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
-                                                `ascended`='%u'",
+                                                `ascended` = `ascended` + CASE WHEN %u > 0 THEN 1 ELSE 0 END",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -1785,9 +1785,10 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
  *  Parameters:
  *      chr: the character. Will be updated inplace.
  *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, mind <= 15).
- *      ascended: output parameter to signify that the character has ascended.
+ *      ascended: pointer to a variable (to signify that the character has ascended)
  */
-void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Reset character attributes for #1 server (remove 1000 starting gold)
+void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended) {
+    // Reset character attributes for #1 server (remove 1000 starting gold)
     if (srvid == 1)
     {
         chr.Money = 0;
@@ -2099,7 +2100,6 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
     //////////////////////////////
     // RECLASS after maxing EXP //
     //////////////////////////////
-    ascended = 0; // DB-only flag to ladder score
     unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
 
     // RECLASS: warrior/mage become ama/witch
@@ -2147,7 +2147,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000) {
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
-        ascended = 1;
+        *ascended = 1; // We use it as a flag. DB increments if it's 1.
 
         // Loose some stats as price for ascend,
         // but still save some be able stay on #7;

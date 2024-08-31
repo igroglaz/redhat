@@ -141,7 +141,7 @@ TEST(UpdateCharacter_NoChanges) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 2, ascended);
+    UpdateCharacter(chr, 2, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -166,7 +166,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 2, ascended);
+    UpdateCharacter(chr, 2, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -193,7 +193,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 2, ascended);
+    UpdateCharacter(chr, 2, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -220,7 +220,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 2, ascended);
+    UpdateCharacter(chr, 2, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -247,7 +247,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 2, ascended);
+    UpdateCharacter(chr, 2, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -273,7 +273,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 4, ascended);
+    UpdateCharacter(chr, 4, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -299,7 +299,7 @@ TEST(UpdateCharacter_Reborn67_Success) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 6, ascended);
+    UpdateCharacter(chr, 6, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -325,7 +325,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 3, ascended);
+    UpdateCharacter(chr, 3, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -352,7 +352,7 @@ TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 4, ascended);
+    UpdateCharacter(chr, 4, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -379,7 +379,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 5, ascended);
+    UpdateCharacter(chr, 5, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -406,7 +406,7 @@ TEST(UpdateCharacter_Reborn2_Success_Witch) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 2, ascended);
+    UpdateCharacter(chr, 2, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -433,7 +433,7 @@ TEST(UpdateCharacter_Reclass_Success) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 7, ascended);
+    UpdateCharacter(chr, 7, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -459,7 +459,7 @@ TEST(UpdateCharacter_Ascend_Success) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 7, ascended);
+    UpdateCharacter(chr, 7, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)1);
 
@@ -485,7 +485,7 @@ TEST(UpdateCharacter_NoChanges_7) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 7, ascended);
+    UpdateCharacter(chr, 7, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -510,7 +510,7 @@ TEST(UpdateCharacter_TreasureOn7_NoChanges) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 7, ascended);
+    UpdateCharacter(chr, 7, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -534,7 +534,7 @@ TEST(UpdateCharacter_TreasureOn8) {
     );
 
     unsigned int ascended = -1;
-    UpdateCharacter(chr, 8, ascended);
+    UpdateCharacter(chr, 8, &ascended);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
