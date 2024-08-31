@@ -816,7 +816,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_air_bludgeon`, `exp_earth_pike`, \
                                                 `exp_astral_shooting`, `bag`, `dress`, `clantag`, \
                                                 `sec_55555555`, `sec_40A40A40`, `retarded`, `deleted`, \
-                                                `ascended`) VALUES ( \
+                                                `ascended`, \
+                                                `points`) VALUES ( \
                                                     '%u', '%u', '%u', '%u', \
                                                     '%u', '%u', '%u', \
                                                     '%s', '%s', \
@@ -864,7 +865,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             else
             {
                 unsigned int ascended = 0; // DB-only flag to ladder score
-                UpdateCharacter(chr, srvid, &ascended); // pass pointer to ascended
+                unsigned int points = 0;   // DB-only flag to ladder score
+                UpdateCharacter(chr, srvid, &ascended, &points); // pass pointers
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -880,7 +882,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
                                                 `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
-                                                `ascended` = `ascended` + CASE WHEN %u > 0 THEN 1 ELSE 0 END",
+                                                `ascended` = `ascended` + %u, \
+                                                `points` = `points` + %u",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -893,7 +896,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    ascended);
+                                                    ascended,
+                                                    points);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
@@ -1787,7 +1791,7 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
  *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, mind <= 15).
  *      ascended: pointer to a variable (to signify that the character has ascended)
  */
-void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended) {
+void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigned int* points) {
     // Reset character attributes for #1 server (remove 1000 starting gold)
     if (srvid == 1)
     {
@@ -2217,12 +2221,18 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended) {
                 } else {
                     chr.Mind += 2;
                 }
+                // ... and assign ladder points
+                *points = 1;
                 break;
             case 9: // at 9, 10 - we have 3 treasures per map
                 chr.Spirit++;
+                // ... and assign ladder points
+                *points = 2;
                 break;
             case 10:
                 chr.Reaction++;
+                // ... and assign ladder points
+                *points = 2;
                 break;
             case 11:
                 if (chr.Spirit < 76) {
@@ -2232,6 +2242,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended) {
                 } else {
                     chr.Reaction += 2;
                 }
+                // ... and assign ladder points
+                *points = 5;
                 break;
             }
         }
