@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <windows.h>
 
+#include <cstdlib> // For std::rand()
+
 std::string Login_MakePassword(std::string password)
 {
     //Printf("Login_MakePassword()\n");
@@ -814,7 +816,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_air_bludgeon`, `exp_earth_pike`, \
                                                 `exp_astral_shooting`, `bag`, `dress`, `clantag`, \
                                                 `sec_55555555`, `sec_40A40A40`, `retarded`, `deleted`, \
-                                                `ascended`) VALUES ( \
+                                                `ascended`, \
+                                                `points`) VALUES ( \
                                                     '%u', '%u', '%u', '%u', \
                                                     '%u', '%u', '%u', \
                                                     '%s', '%s', \
@@ -861,8 +864,9 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             // create FLAG is false - update an existing character
             else
             {
-                unsigned int ascended;
-                UpdateCharacter(chr, srvid, ascended);
+                unsigned int ascended = 0; // DB-only flag to ladder score
+                unsigned int points = 0;   // DB-only flag to ladder score
+                UpdateCharacter(chr, srvid, &ascended, &points); // pass pointers
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -878,7 +882,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
                                                 `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
-                                                `ascended`='%u'",
+                                                `ascended` = `ascended` + %u, \
+                                                `points` = `points` + %u",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -891,7 +896,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    ascended);
+                                                    ascended,
+                                                    points);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
@@ -1348,7 +1354,7 @@ const char enru_charmap_en[] =
         'E',
         'K',
         'o',
-        'Ž',
+        'ÂŽ',
         'p',
         'P',
         'u',
@@ -1361,23 +1367,23 @@ const char enru_charmap_en[] =
 
 const char enru_charmap_ru[] =
     {
-        ' ',
-        '€',
-        'á',
-        '‘',
-        '¥',
-        '…',
-        'Š',
-        '®',
-        'Ž',
-        'à',
-        '',
-        '¨',
-        'å',
-        '•',
-        'ã',
-        '“',
-        'â',
+        'Â ',
+        'Â€',
+        'Ã¡',
+        'Â‘',
+        'Â¥',
+        'Â…',
+        'ÂŠ',
+        'Â®',
+        'ÂŽ',
+        'Ã ',
+        'Â',
+        'Â¨',
+        'Ã¥',
+        'Â•',
+        'Ã£',
+        'Â“',
+        'Ã¢',
     };
 
 std::string RegexEscape(char what)
@@ -1724,14 +1730,71 @@ void WipeSpells(CCharacter& chr) {
     }
 }
 
+
+// Return a prettied number, like 5000 -> 5k, 123000000 -> 123m.
+std::string PrettyNumber(uint32_t num) {
+    if (num > 1000000000 && (num % 1000000000) == 0) {
+        return std::to_string(num / 1000000000) + "b";
+    } else if (num > 1000000 && (num % 1000000) == 0) {
+        return std::to_string(num / 1000000) + "m";
+    } else if (num > 1000 && (num % 1000) == 0) {
+        return std::to_string(num / 1000) + "k";
+    } else {
+        return std::to_string(num);
+    }
+}
+
+// Check if a girl character (amazon/witch) can do a rebirth.
+// If yes, returns an empty string, otherwise --- the failure reason.
+std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid) {
+    uint32_t need_exp = 0;
+    uint32_t need_kills = 0;
+    uint32_t need_gold = 0;
+
+    if (srvid == 2) {
+        need_exp = 100000;
+        need_kills = 1000;
+        need_gold = 100000;
+    } else if (srvid == 3) {
+        need_exp = 500000;
+        need_kills = 1200;
+        need_gold = 1000000;
+    } else if (srvid == 4) {
+        need_exp = 2000000;
+        need_kills = 1500;
+        need_gold = 5000000;
+    } else if (srvid == 5) {
+        need_exp = 30000000;
+        need_kills = 2000;
+        need_gold = 30000000;
+    } else if (srvid == 6) {
+        need_exp = 100000000;
+        need_kills = 4000;
+        need_gold = 100000000;
+    }
+
+    if (total_exp < need_exp) {
+        return PrettyNumber(need_exp) + "_exp";
+    }
+    if (chr.MonstersKills < need_kills) {
+        return PrettyNumber(need_kills) + "_kills";
+    }
+    if (chr.Money < need_gold) {
+        return PrettyNumber(need_gold) + "_gold";
+    }
+    return "";
+}
+
+
 /** Update the character in the database, after creation or after leaving a map.
  *
  *  Parameters:
  *      chr: the character. Will be updated inplace.
  *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, mind <= 15).
- *      ascended: output parameter to signify that the character has ascended.
+ *      ascended: pointer to a variable (to signify that the character has ascended)
  */
-void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Reset character attributes for #1 server (remove 1000 starting gold)
+void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigned int* points) {
+    // Reset character attributes for #1 server (remove 1000 starting gold)
     if (srvid == 1)
     {
         chr.Money = 0;
@@ -1801,13 +1864,54 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         }
 
         chr.Bag.Items = newItems;
+        
+        // Award player some gold for Treasure
+        if (chr.Money < 2136000000) {
+            switch (srvid) {
+                case 2:
+                    chr.Money += 5000;
+                    break;
+                case 3:
+                    chr.Money += 30000;
+                    break;
+                case 4:
+                    chr.Money += 100000;
+                    break;
+                case 5:
+                    chr.Money += 500000;
+                    break;
+                case 6:
+                    chr.Money += 1000000;
+                    break;
+                case 7:
+                    chr.Money += 3000000;
+                    break;
+                case 8:
+                    chr.Money += 5000000;
+                    break;
+                case 9:
+                    chr.Money += 7000000;
+                    break;
+                case 10:
+                    chr.Money += 9000000;
+                    break;
+                case 11:
+                    chr.Money += 11483647;
+                    break;
+            }
+        }
     }
 
     ////////////////////////////////////////////
     // 2) now check for reborn
 
     bool reborn = false;
-    bool meets_reborn_criteria = foundBossKey;
+    bool meets_reborn_criteria = true;
+    std::string reborn_failure_reason;
+    if (!foundBossKey) {
+        meets_reborn_criteria = false;
+        reborn_failure_reason = "treasure";
+    }
     unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
              chr.ExpEarthPike + chr.ExpAstralShooting;
 
@@ -1835,58 +1939,52 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
         // pay for the ticket (for !normal! characters too)
         if (srvid == 2 && chr.Money < 30000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "30k_gold";
         }
         else if (srvid == 3 && chr.Money < 300000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "300k_gold";
         }
         else if (srvid == 4 && chr.Money < 1500000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "1500k_gold";
         }
         else if (srvid == 5 && chr.Money < 10000000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "10m_gold";
         }
         else if (srvid == 6 && chr.Money < 50000000) {
             meets_reborn_criteria = false;
+            reborn_failure_reason = "50m_gold";
         }
 
         // ..Revert stats for AMA/WITCH if exp is lower than
         if (chr.Sex == 128 || chr.Sex == 192) {
-            if (srvid == 2 && (total_exp < 100000 || chr.MonstersKills < 1000 ||
-                     chr.Money < 100000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 3 && (total_exp < 500000 || chr.MonstersKills < 1200 ||
-                     chr.Money < 1000000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 4 && (total_exp < 2000000 || chr.MonstersKills < 1500 ||
-                     chr.Money < 5000000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 5 && (total_exp < 30000000 || chr.MonstersKills < 2000 ||
-                     chr.Money < 30000000)) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == 6 && (total_exp < 100000000 || chr.MonstersKills < 4000 ||
-                     chr.Money < 100000000)) {
+            reborn_failure_reason = CheckGirlRebirth(chr, total_exp, srvid);
+            if (!reborn_failure_reason.empty()) {
                 meets_reborn_criteria = false;
             }
         // ..also have min.exp for Hardcore chars (0 or 1 death)
         } else if (chr.Deaths <= 1) {
             if (srvid == 2 && total_exp < 50000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_50k_exp";
             }
             else if (srvid == 3 && total_exp < 100000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_100k_exp";
             }
             else if (srvid == 4 && total_exp < 500000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_500k_exp";
             }
             else if (srvid == 5 && total_exp < 2000000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_2m_exp";
             }
             else if (srvid == 6 && total_exp < 25000000) {
                 meets_reborn_criteria = false;
+                reborn_failure_reason = "hc_25m_exp";
             }
         }
     }
@@ -1923,6 +2021,11 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
             chr.Body = std::min(chr.Body, stat_ceiling);
             chr.Mind = std::min(chr.Mind, stat_ceiling);
             chr.Spirit = std::min(chr.Spirit, stat_ceiling);
+        }
+
+        // Show the reason to the player through the "clan" field.
+        if (!reborn_failure_reason.empty()) {
+            chr.Clan = reborn_failure_reason.substr(0, 11); // The clan can be up to 11 symbols long.
         }
     }
 
@@ -1988,19 +2091,28 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
                 // ...and all spellbooks (leave only basic arrow)
                 WipeSpells(chr);
             }
+
+            // reset BODY for ama/witch upon reborn when moving from 6 to 7
+            if (srvid == 6) {
+                if (chr.Sex == 128) { // ama
+                    chr.Body = 25;
+                } else if (chr.Sex == 192) { // witch
+                    chr.Body = 1;
+                }
+            }
         }
     }
 
     //////////////////////////////
     // RECLASS after maxing EXP //
     //////////////////////////////
-    ascended = 0; // DB-only flag to ladder score
     unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
 
     // RECLASS: warrior/mage become ama/witch
     // (note it can't happen simultaneously with reborn as
     // at reborn we "half" the exp)
-    if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777) {
+    if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
+         chr.Money > 300000000) {
 
         chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
         chr.Money = 0; // Reset Money
@@ -2038,10 +2150,10 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
 
     // ASCEND: ama/witch become again war/mage and receive crown
     } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                stats_sum == 284 && total_exp > 177777777) {
+                stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000) {
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
-        ascended = 1;
+        *ascended = 1; // We use it as a flag. DB increments if it's 1.
 
         // Loose some stats as price for ascend,
         // but still save some be able stay on #7;
@@ -2071,6 +2183,85 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int& ascended) {// Res
             chr.Picture = 15;
             std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
             chr.Dress = Login_UnserializeItems(serializedDress);
+        }
+    } else {
+        // If the player didn't ascend or reclass,
+        // the boss key on 7+ increases stats
+        // (and increase ladder points on 2+)
+        if (foundBossKey) {
+            switch (srvid) {
+            case 2:
+                *points = 1;
+                break;
+            case 3:
+                *points = 2;
+                break;
+            case 4:
+                *points = 3;
+                break;
+            case 5:
+                *points = 15;
+                break;
+            case 6:
+                *points = 15;
+                break;
+            case 7: // 2 treasures per map
+                if (std::rand() % 2 == 0) {
+                    ; // treasure at 7 server works in 50% cases
+                } else {
+                    if (chr.Sex == 192) { // witch increases Body at 7 a bit faster as starts from 1
+                        if (chr.Body < 15) {
+                            chr.Body += 5;
+                        } else if (chr.Body < 25) {
+                            chr.Body += 4;
+                        } else if (chr.Body < 35) {
+                            chr.Body += 3;
+                        } else if (chr.Body < 45) {
+                            chr.Body += 2;
+                        } else {
+                            chr.Body++;
+                        }
+                    } else if (chr.Sex == 128) { // amazon
+                        if (chr.Body < 35) {
+                            chr.Body += 3;
+                        } else if (chr.Body < 45) {
+                            chr.Body += 2;
+                        } else {
+                            chr.Body++;
+                        }
+                    } else { // warrior and mage
+                        chr.Body++;
+                    }
+                }
+                *points = 15;
+                break;
+            case 8: // 1 treasure. 2x-3x more mind
+                if (std::rand() % 2 == 0) {
+                    chr.Mind += 3;
+                } else {
+                    chr.Mind += 2;
+                }
+                *points = 30;
+                break;
+            case 9: // at 9, 10 - we have 3 treasures per map
+                chr.Spirit++;
+                *points = 100;
+                break;
+            case 10:
+                chr.Reaction++;
+                *points = 100;
+                break;
+            case 11: // 1 treasure
+                if (chr.Spirit < 76) {
+                    chr.Spirit += 2;
+                } else if (chr.Mind < 76) {
+                    chr.Mind += 2;
+                } else {
+                    chr.Reaction += 2;
+                }
+                *points = 500;
+                break;
+            }
         }
     }
 }

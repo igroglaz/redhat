@@ -200,6 +200,7 @@ void SQL_CreateTables()
         `deleted` INT(1) UNSIGNED NOT NULL, \
         `clantag` VARCHAR(16) CHARACTER SET cp866 COLLATE cp866_bin NOT NULL, \
         `ascended` INT(1) UNSIGNED NOT NULL, \
+        `points` INT(1) UNSIGNED NOT NULL, \
         UNIQUE(`id`))"; // long query to create characters table
 
     std::string query_table_authlog = "CREATE TABLE IF NOT EXISTS `authlog` ( \
