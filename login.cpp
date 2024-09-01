@@ -1789,7 +1789,8 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
  *  Parameters:
  *      chr: the character. Will be updated inplace.
  *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, mind <= 15).
- *      ascended: pointer to a variable (to signify that the character has ascended)
+ *      ascended: output parameter: has the character ascended?
+ *      points: output parameter: points for finding the treasure
  */
 void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigned int* points) {
     // Reset character attributes for #1 server (remove 1000 starting gold)
@@ -1838,19 +1839,19 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
     //////////// before entering next difficulty
 
     ////////////////////////////////////////////
-    // 1) check for "Boss key" - potion
-    bool foundBossKey = false;
+    // 1) check for "Boss key" - treasure
+    uint16_t haveTreasures = 0;
 
     const unsigned long bossKeyItem = 3667;  // "Quest Treasure".
 
     for (const auto &item: chr.Bag.Items) {
         if (item.Id == bossKeyItem) {
-            foundBossKey = true;
+            haveTreasures = item.Count;
             break;
         }
     }
 
-    if (foundBossKey) {
+    if (haveTreasures > 0) {
         // Remove all quest treasures from the player's bag.
         std::vector<CItem> newItems;
         newItems.reserve(chr.Bag.Items.size());
@@ -1862,7 +1863,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         }
 
         chr.Bag.Items = newItems;
-        
+
         // Award player some gold for Treasure
         if (chr.Money < 2136000000) {
             switch (srvid) {
@@ -1906,7 +1907,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
     bool reborn = false;
     bool meets_reborn_criteria = true;
     std::string reborn_failure_reason;
-    if (!foundBossKey) {
+    if (haveTreasures == 0) {
         meets_reborn_criteria = false;
         reborn_failure_reason = "treasure";
     }
@@ -2183,25 +2184,26 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             chr.Dress = Login_UnserializeItems(serializedDress);
         }
     } else {
+        *points = 0;
         // If the player didn't ascend or reclass,
         // the boss key on 7+ increases stats
         // (and increase ladder points on 2+)
-        if (foundBossKey) {
+        for (uint16_t i = 0; i < haveTreasures; ++i) {
             switch (srvid) {
             case 2:
-                *points = 1;
+                *points += 1;
                 break;
             case 3:
-                *points = 2;
+                *points += 2;
                 break;
             case 4:
-                *points = 3;
+                *points += 3;
                 break;
             case 5:
-                *points = 15;
+                *points += 15;
                 break;
             case 6:
-                *points = 15;
+                *points += 15;
                 break;
             case 7: // 2 treasures per map
                 if (std::rand() % 2 == 0) {
@@ -2231,7 +2233,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                         chr.Body++;
                     }
                 }
-                *points = 15;
+                *points += 15;
                 break;
             case 8: // 1 treasure. 2x-3x more mind
                 if (std::rand() % 2 == 0) {
@@ -2239,7 +2241,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 } else {
                     chr.Mind += 2;
                 }
-                *points = 30;
+                *points += 30;
                 break;
             case 9: // at 9, 10 - we have 3 treasures per map
                 chr.Spirit++;
@@ -2247,7 +2249,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 break;
             case 10:
                 chr.Reaction++;
-                *points = 100;
+                *points += 100;
                 break;
             case 11: // 1 treasure
                 if (chr.Spirit < 76) {
@@ -2257,7 +2259,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 } else {
                     chr.Reaction += 2;
                 }
-                *points = 500;
+                *points += 500;
                 break;
             }
         }

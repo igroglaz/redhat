@@ -140,7 +140,7 @@ TEST(UpdateCharacter_NoChanges) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 2, &ascended, &points);
 
@@ -166,7 +166,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 2, &ascended, &points);
 
@@ -177,7 +177,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
             .info{.deaths=10, .clan="30k_gold"},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=1234},
-            .items={.money=52, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"}, // Money is untouched, treasure disappears.
+            .items={.money=5052, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"}, // Money is untouched, treasure disappears.
         }
     );
 
@@ -194,7 +194,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 2, &ascended, &points);
 
@@ -222,7 +222,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 2, &ascended, &points);
 
@@ -250,7 +250,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 2, &ascended, &points);
 
@@ -277,7 +277,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 4, &ascended, &points);
 
@@ -304,7 +304,7 @@ TEST(UpdateCharacter_Reborn67_Success) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 6, &ascended, &points);
 
@@ -331,7 +331,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 3, &ascended, &points);
 
@@ -342,7 +342,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
             .info{.sex=128, .kills=5000, .clan="500k_exp"},
             .stats={.body=19, .reaction=19, .mind=19, .spirit=15},
             .skills={.astral=40000},
-            .items={.money=350000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+            .items={.money=380000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }
     );
 
@@ -359,7 +359,7 @@ TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 4, &ascended, &points);
 
@@ -370,7 +370,7 @@ TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
             .info{.sex=128, .kills=1000, .clan="1500_kills"},
             .stats={.body=29, .reaction=29, .mind=29, .spirit=25},
             .skills={.astral=6000000},
-            .items={.money=350000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+            .items={.money=450000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }
     );
 
@@ -387,7 +387,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 5, &ascended, &points);
 
@@ -398,7 +398,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
             .info{.sex=192, .kills=5000, .clan="30m_gold"},
             .stats={.body=39, .reaction=39, .mind=39, .spirit=35},
             .skills={.astral=40000000},
-            .items={.money=350000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+            .items={.money=850000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }
     );
 
@@ -415,11 +415,12 @@ TEST(UpdateCharacter_Reborn2_Success_Witch) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 2, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -439,15 +440,17 @@ TEST(UpdateCharacter_Reclass_Success) {
             .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200, .clan="reclass"},
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
             .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
-            .items={.money=50000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=500000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
+
     UpdateCharacter(chr, 7, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -466,22 +469,23 @@ TEST(UpdateCharacter_Ascend_Success) {
             .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="ascend"},
             .stats={.body=56, .reaction=76, .mind=76, .spirit=76},
             .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
-            .items={.money=90000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=2147000001, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 7, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)1);
+    CHECK_EQUAL(points, (unsigned int)0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
             .info={.main_skill=1, .picture=15, .sex=64, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
-            .items={.money=90000000, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress=dress_with_staff}, // Dress is reset to get a prize staff.
+            .items={.money=2147000001, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress=dress_with_staff}, // Dress is reset to get a prize staff.
         }
     );
     CHECK_CHARACTER(chr, want);
@@ -497,11 +501,12 @@ TEST(UpdateCharacter_NoChanges_7) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 7, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -514,7 +519,7 @@ TEST(UpdateCharacter_NoChanges_7) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_TreasureOn7_NoChanges) {
+TEST(UpdateCharacter_TreasureOn7) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
@@ -523,9 +528,10 @@ TEST(UpdateCharacter_TreasureOn7_NoChanges) {
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 7, &ascended, &points);
+    CHECK_EQUAL(points, (unsigned int)15);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -533,7 +539,7 @@ TEST(UpdateCharacter_TreasureOn7_NoChanges) {
         CharacterOpts{
             .stats={.body=51, .reaction=50, .mind=50, .spirit=50}, // Treasure on 7 does nothing.
             .skills={.astral=1000},
-            .items={.money=1337, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=3001337, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
     );
     CHECK_CHARACTER(chr, want);
@@ -544,21 +550,22 @@ TEST(UpdateCharacter_TreasureOn8) {
         CharacterOpts{
             .stats={.body=50, .reaction=50, .mind=50, .spirit=76},
             .skills={.astral=1000},
-            .items={.bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]"},
+            .items={.bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,2];[2000,0,0,2]"},
         }
     );
 
-    unsigned int ascended = -1;
+    unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 8, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)60); // Two treasures, 30 each.
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .stats={.body=50, .reaction=50, .mind=50, .spirit=77}, // Spirit is increased even over the limit.
+            .stats={.body=50, .reaction=50, .mind=55, .spirit=76}, // Spirit is increased even over the limit.
             .skills={.astral=1000},
-            .items={.bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+            .items={.money=5000000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }
     );
     CHECK_CHARACTER(chr, want);
