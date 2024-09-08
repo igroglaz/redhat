@@ -1763,7 +1763,7 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
         need_kills = 1500;
         need_gold = 5000000;
     } else if (srvid == 5) {
-        need_exp = 5000000;
+        need_exp = 11000000;
         need_kills = 2000;
         need_gold = 30000000;
     } else if (srvid == 6) {
@@ -1977,11 +1977,11 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_500k_exp";
             }
-            else if (srvid == 5 && total_exp < 2000000) {
+            else if (srvid == 5 && total_exp < 11000000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_2m_exp";
             }
-            else if (srvid == 6 && total_exp < 25000000) {
+            else if (srvid == 6 && total_exp < 50000000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_25m_exp";
             }
