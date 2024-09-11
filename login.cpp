@@ -2029,6 +2029,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
     }
 
     if (reborn) {
+        // 1) perform reborn
         // WARRIOR/MAGE (no reclass OR ascend)
         if (chr.Sex == 0 || chr.Sex == 64) {
             chr.Money = 0; // wipe gold
@@ -2098,6 +2099,45 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 } else if (chr.Sex == 192) { // witch
                     chr.Body = 1;
                 }
+            }
+        }
+
+        // 2) prevent preserving after REBORN too high non-main skill
+        if (srvid < 7) {
+            int limit = 0;
+
+            switch (srvid) {
+                case 2:
+                    limit = 10000;
+                    break;
+                case 3:
+                    limit = 20000;
+                    break;
+                case 4:
+                    limit = 100000;
+                    break;
+                case 5:
+                    limit = 250000;
+                    break;
+                case 6:
+                    limit = 500000;
+                    break;
+            }
+
+            if (chr.ExpFireBlade > limit) {
+                chr.ExpFireBlade = limit;
+            }
+            if (chr.ExpWaterAxe > limit) {
+                chr.ExpWaterAxe = limit;
+            }
+            if (chr.ExpAirBludgeon > limit) {
+                chr.ExpAirBludgeon = limit;
+            }
+            if (chr.ExpEarthPike > limit) {
+                chr.ExpEarthPike = limit;
+            }
+            if (chr.ExpAstralShooting > limit) {
+                chr.ExpAstralShooting = limit;
             }
         }
     }
