@@ -2107,9 +2107,10 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             int limit = 0;
 
             switch (srvid) {
+                // no need to mention 1st srv as there is no treasure, so no reborn
                 case 2:
-                    limit = 10000;
-                    break;
+                    limit = 10000; // Attention! It's for each skill! So total exp...
+                    break; // ...might be 40.000 (10k * 4) (4 cause no main skill)
                 case 3:
                     limit = 20000;
                     break;
@@ -2302,6 +2303,70 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 *points += 500;
                 break;
             }
+        }
+    }
+
+    // 2-6 servers: don't allow too high skill value on low servers
+    if (srvid < 7 && srvid > 1) {
+        int limit = 0;
+
+        switch (srvid) {
+            case 2:
+                limit = 50000;   // 450k (cause counts for each skill..
+                break;           // ..and main/astral limit * 3, so 150+150+150
+            case 3:
+                limit = 100000;   // 900k
+                break;
+            case 4:
+                limit = 1000000;  // 9m
+                break;
+            case 5:
+                limit = 5000000;  // 45m
+                break;
+            case 6:
+                limit = 10000000; // 90m
+                break;
+        }
+
+        // FireBlade
+        if (chr.ExpFireBlade > limit) {
+            if (chr.MainSkill != 1) {
+                chr.ExpFireBlade = limit;
+            } else if (chr.ExpFireBlade > limit * 3) {
+                chr.ExpFireBlade = limit * 3;
+            }
+        }
+
+        // WaterAxe
+        if (chr.ExpWaterAxe > limit) {
+            if (chr.MainSkill != 2) {
+                chr.ExpWaterAxe = limit;
+            } else if (chr.ExpWaterAxe > limit * 3) {
+                chr.ExpWaterAxe = limit * 3;
+            }
+        }
+
+        // AirBludgeon
+        if (chr.ExpAirBludgeon > limit) {
+            if (chr.MainSkill != 3) {
+                chr.ExpAirBludgeon = limit;
+            } else if (chr.ExpAirBludgeon > limit * 3) {
+                chr.ExpAirBludgeon = limit * 3;
+            }
+        }
+
+        // EarthPike
+        if (chr.ExpEarthPike > limit) {
+            if (chr.MainSkill != 4) {
+                chr.ExpEarthPike = limit;
+            } else if (chr.ExpEarthPike > limit * 3) {
+                chr.ExpEarthPike = limit * 3;
+            }
+        }
+
+        // AstralShooting
+        if (chr.ExpAstralShooting > limit * 3) {
+            chr.ExpAstralShooting = limit * 3;
         }
     }
 }
