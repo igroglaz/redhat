@@ -2125,6 +2125,14 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                     break;
             }
 
+            if (chr.Sex == 128 || chr.Sex == 192) { // ama witch: double limit
+                limit *= 2;
+            }
+
+            if (chr.Deaths == 0) { // if HC - triple it
+                limit *= 3;
+            }
+
             if (chr.ExpFireBlade > limit) {
                 chr.ExpFireBlade = limit;
             }
