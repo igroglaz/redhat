@@ -2110,18 +2110,18 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 // no need to mention 1st srv as there is no treasure, so no reborn
                 case 2:
                     limit = 10000; // Attention! It's for each skill! So total exp...
-                    break; // ...might be 40.000 (10k * 4) (4 cause no main skill)
+                    break; // ...might be up to 40.000 (10k * 4) (4 cause no main skill)
                 case 3:
-                    limit = 20000;
+                    limit = 20000; // 80k
                     break;
                 case 4:
-                    limit = 100000;
+                    limit = 100000; // 400k
                     break;
                 case 5:
-                    limit = 250000;
+                    limit = 250000; // 1m
                     break;
                 case 6:
-                    limit = 500000;
+                    limit = 500000; // 2m
                     break;
             }
 
@@ -2307,24 +2307,31 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
     }
 
     // 2-6 servers: don't allow too high skill value on low servers
+    // (also prevent max reward (potion) for mail quest at 6th server)
     if (srvid < 7 && srvid > 1) {
         int limit = 0;
+        int limit_main = 0;
 
         switch (srvid) {
             case 2:
-                limit = 50000;   // 450k (cause counts for each skill..
-                break;           // ..and main/astral limit * 3, so 150+150+150
+                limit = 50000;    // 450k (cause counts for each skill..
+                limit_main = 150000;
+                break;            // ..and main/astral limit * 3, so 150+150+150
             case 3:
-                limit = 100000;   // 900k
+                limit = 100000;   // 1.3m (main/astral * 5)
+                limit_main = 500000;
                 break;
             case 4:
-                limit = 1000000;  // 9m
+                limit = 1000000;  // 11m (main/astral * 4)
+                limit_main = 4000000;
                 break;
             case 5:
-                limit = 5000000;  // 45m
+                limit = 5000000;  // 45m (main/astral * 3)
+                limit_main = 15000000;
                 break;
             case 6:
-                limit = 10000000; // 90m
+                limit = 15000000; // 90m (main/astral * 2)
+                limit_main = 30000000;
                 break;
         }
 
@@ -2332,8 +2339,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         if (chr.ExpFireBlade > limit) {
             if (chr.MainSkill != 1) {
                 chr.ExpFireBlade = limit;
-            } else if (chr.ExpFireBlade > limit * 3) {
-                chr.ExpFireBlade = limit * 3;
+            } else if (chr.ExpFireBlade > limit_main) {
+                chr.ExpFireBlade = limit_main;
             }
         }
 
@@ -2341,8 +2348,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         if (chr.ExpWaterAxe > limit) {
             if (chr.MainSkill != 2) {
                 chr.ExpWaterAxe = limit;
-            } else if (chr.ExpWaterAxe > limit * 3) {
-                chr.ExpWaterAxe = limit * 3;
+            } else if (chr.ExpWaterAxe > limit_main) {
+                chr.ExpWaterAxe = limit_main;
             }
         }
 
@@ -2350,8 +2357,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         if (chr.ExpAirBludgeon > limit) {
             if (chr.MainSkill != 3) {
                 chr.ExpAirBludgeon = limit;
-            } else if (chr.ExpAirBludgeon > limit * 3) {
-                chr.ExpAirBludgeon = limit * 3;
+            } else if (chr.ExpAirBludgeon > limit_main) {
+                chr.ExpAirBludgeon = limit_main;
             }
         }
 
@@ -2359,14 +2366,14 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         if (chr.ExpEarthPike > limit) {
             if (chr.MainSkill != 4) {
                 chr.ExpEarthPike = limit;
-            } else if (chr.ExpEarthPike > limit * 3) {
-                chr.ExpEarthPike = limit * 3;
+            } else if (chr.ExpEarthPike > limit_main) {
+                chr.ExpEarthPike = limit_main;
             }
         }
 
         // AstralShooting
-        if (chr.ExpAstralShooting > limit * 3) {
-            chr.ExpAstralShooting = limit * 3;
+        if (chr.ExpAstralShooting > limit_main) {
+            chr.ExpAstralShooting = limit_main;
         }
     }
 }
