@@ -2104,7 +2104,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
 
         // 2) prevent preserving after REBORN too high non-main skill
         if (srvid < 7) {
-            int limit = 0;
+            uint32_t limit = 0;
 
             switch (srvid) {
                 // no need to mention 1st srv as there is no treasure, so no reborn
@@ -2317,8 +2317,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
     // 2-6 servers: don't allow too high skill value on low servers
     // (also prevent max reward (potion) for mail quest at 6th server)
     if (srvid < 7 && srvid > 1) {
-        int limit = 0;
-        int limit_main = 0;
+        uint32_t limit = 0;
+        uint32_t limit_main = 0;
 
         switch (srvid) {
             case 2:
