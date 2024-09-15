@@ -2316,7 +2316,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
 
     // 2-6 servers: don't allow too high skill value on low servers
     // (also prevent max reward (potion) for mail quest at 6th server)
-    if (srvid < 7 && srvid > 1) {
+    if (srvid < 7 && srvid > 1 && chr.Nick != "AnnataR") {
         uint32_t limit = 0;
         uint32_t limit_main = 0;
 
