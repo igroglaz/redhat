@@ -1765,7 +1765,7 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
     } else if (srvid == 5) {
         need_exp = 11000000;
         need_kills = 2000;
-        need_gold = 30000000;
+        need_gold = 21000000;
     } else if (srvid == 6) {
         need_exp = 50000000;
         need_kills = 4000;
@@ -1948,9 +1948,9 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             meets_reborn_criteria = false;
             reborn_failure_reason = "1500k_gold";
         }
-        else if (srvid == 5 && chr.Money < 10000000) {
+        else if (srvid == 5 && chr.Money < 7000000) {
             meets_reborn_criteria = false;
-            reborn_failure_reason = "10m_gold";
+            reborn_failure_reason = "7m_gold";
         }
         else if (srvid == 6 && chr.Money < 50000000) {
             meets_reborn_criteria = false;
