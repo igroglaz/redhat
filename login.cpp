@@ -1751,8 +1751,8 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
     uint32_t need_gold = 0;
 
     if (srvid == 2) {
-        need_exp = 100000;
-        need_kills = 1000;
+        need_exp = 50000;
+        need_kills = 500;
         need_gold = 100000;
     } else if (srvid == 3) {
         need_exp = 500000;
@@ -1965,9 +1965,9 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             }
         // ..also have min.exp for Hardcore chars (0 or 1 death)
         } else if (chr.Deaths <= 1) {
-            if (srvid == 2 && total_exp < 50000) {
+            if (srvid == 2 && total_exp < 35000) {
                 meets_reborn_criteria = false;
-                reborn_failure_reason = "hc_50k_exp";
+                reborn_failure_reason = "hc_35k_exp";
             }
             else if (srvid == 3 && total_exp < 100000) {
                 meets_reborn_criteria = false;
