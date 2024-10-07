@@ -217,8 +217,8 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
         CharacterOpts{
             .info{.deaths=0},
             .stats={.body=15, .reaction=10, .mind=15, .spirit=15},
-            .skills={.astral=40000},
-            .items={.money=35000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
+            .skills={.astral=30000},
+            .items={.money=35000, .spells=268385790, .bag="[0,0,0,2];[3667,0,0,1];[1000,0,0,1]"},
         }
     );
 
@@ -230,10 +230,10 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=0, .clan="hc_50k_exp"},
+            .info{.deaths=0, .clan="hc_35k_exp"},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
-            .skills={.astral=40000},
-            .items={.money=35000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
+            .skills={.astral=30000},
+            .items={.money=40000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
         }
     );
 
@@ -369,7 +369,7 @@ TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
         CharacterOpts{
             .info{.sex=128, .kills=1000, .clan="1500_kills"},
             .stats={.body=29, .reaction=29, .mind=29, .spirit=25},
-            .skills={.astral=6000000},
+            .skills={.astral=4000000}, // Reduce skills to the ceiling.
             .items={.money=450000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }
     );
@@ -395,9 +395,9 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.sex=192, .kills=5000, .clan="30m_gold"},
+            .info{.sex=192, .kills=5000, .clan="21m_gold"},
             .stats={.body=39, .reaction=39, .mind=39, .spirit=35},
-            .skills={.astral=40000000},
+            .skills={.astral=15000000}, // Reduce skills to the ceiling.
             .items={.money=850000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }
     );
@@ -524,20 +524,20 @@ TEST(UpdateCharacter_TreasureOn7) {
         CharacterOpts{
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
             .skills={.astral=1000},
-            .items={.money=1337, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=1337, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,2];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
     );
 
     unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, 7, &ascended, &points);
-    CHECK_EQUAL(points, (unsigned int)15);
+    CHECK_EQUAL(points, (unsigned int)30); // Two treasures, 15 each.
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .stats={.body=51, .reaction=50, .mind=50, .spirit=50}, // Treasure on 7 does nothing.
+            .stats={.body=51, .reaction=50, .mind=50, .spirit=50}, // Treasure on 7 adds body. Two treasures --- one guaranteed body.
             .skills={.astral=1000},
             .items={.money=3001337, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
@@ -548,7 +548,7 @@ TEST(UpdateCharacter_TreasureOn7) {
 TEST(UpdateCharacter_TreasureOn8) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
-            .stats={.body=50, .reaction=50, .mind=50, .spirit=76},
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
             .skills={.astral=1000},
             .items={.bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,2];[2000,0,0,2]"},
         }
@@ -563,7 +563,7 @@ TEST(UpdateCharacter_TreasureOn8) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .stats={.body=50, .reaction=50, .mind=55, .spirit=76}, // Spirit is increased even over the limit.
+            .stats={.body=50, .reaction=50, .mind=55, .spirit=50}, // Mind is increased, 2+3.
             .skills={.astral=1000},
             .items={.money=5000000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
         }

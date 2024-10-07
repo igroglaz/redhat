@@ -2237,7 +2237,11 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         // If the player didn't ascend or reclass,
         // the boss key on 7+ increases stats
         // (and increase ladder points on 2+)
+        bool coinflip = std::rand() % 2;
+
         for (uint16_t i = 0; i < haveTreasures; ++i) {
+            coinflip = !coinflip; // One treasure is random, two are guaranteed.
+
             switch (srvid) {
             case 2:
                 *points += 1;
@@ -2255,7 +2259,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 *points += 15;
                 break;
             case 7: // 2 treasures per map
-                if (std::rand() % 2 == 0) {
+                if (coinflip) {
                     ; // treasure at 7 server works in 50% cases
                 } else {
                     if (chr.Sex == 192) { // witch increases Body at 7 a bit faster as starts from 1
@@ -2285,7 +2289,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 *points += 15;
                 break;
             case 8: // 1 treasure. 2x-3x more mind
-                if (std::rand() % 2 == 0) {
+                if (coinflip) {
                     chr.Mind += 3;
                 } else {
                     chr.Mind += 2;
