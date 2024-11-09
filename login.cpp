@@ -2221,15 +2221,15 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         // (we do not wipe inventory/gold at this point...
         // ..as players anyway will save items on mule, so why to make hastle.
         // So we wipe only equipment to be able to award player with crown/staff
-        if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange
+        if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange +250 attack
             chr.Sex = 0;
             chr.Picture = 32;
-            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0},{12:250:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
             chr.Dress = Login_UnserializeItems(serializedDress);
-        } else if (chr.Sex == 192) { // witch become mage and get STAFF +3 (Good Bone Staff) body
+        } else if (chr.Sex == 192) { // witch become mage and get physical damage staff
             chr.Sex = 64;
             chr.Picture = 15;
-            std::string serializedDress = "[0,0,40,12];[53709,1,2,1,{2:3:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+            std::string serializedDress = "[0,0,40,12];[53709,0,2,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
             chr.Dress = Login_UnserializeItems(serializedDress);
         }
     } else {
