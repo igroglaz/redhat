@@ -35,25 +35,17 @@ fix would be nice.
 
 #define WM_CRC_THREAD_DONE WM_APP + 0x2DB1
 
+#ifndef _MAX_PATH
+#define _MAX_PATH MAX_PATH
+#endif
+
 class CRC_32
 {
-    typedef struct tag_CRCStruct
-    {
-        CRC_32 *pCRC_32;
-        TCHAR FileName[_MAX_PATH];
-        LPBYTE pByte;
-        UINT size;
-        HWND hWnd;
-        HANDLE Thread;
-    } CRCStruct, *LPCRCStruct;
-
 public:
     CRC_32();
-    DWORD CalcCRC(LPCTSTR FileName, HWND ProgressWnd = NULL);
-    DWORD CalcCRC(LPVOID buffer, UINT size, HWND ProgressWnd = NULL);
+    DWORD CalcCRC(LPVOID buffer, UINT size);
 
 private:
-    static DWORD WINAPI CRC32ThreadProc(LPVOID lpVoid);
     void Calculate (const LPBYTE buffer, UINT size, ULONG &crc);
     ULONG Reflect(ULONG ref, char ch);
     ULONG Table[256];

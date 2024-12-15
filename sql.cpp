@@ -299,7 +299,7 @@ void SQL_UpdateTables()
         return;
     }
 
-    for(uint32_t i = 0; i < SQL_NumRows(result); i++)
+    for(int i = 0; i < SQL_NumRows(result); i++)
     {
         MYSQL_ROW row = SQL_FetchRow(result);
 

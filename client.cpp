@@ -294,7 +294,7 @@ bool CL_ServerProcess(Client* conn)
         l_muted = false;
     }
 
-    if (l_muted && l_muted_unmutedate > time(NULL))
+    if (l_muted && l_muted_unmutedate > static_cast<unsigned long>(time(NULL)))
     {
         Printf(LOG_Info, "[CL] %s (%s) - Character should be muted (reason: %s).\n", conn->HisAddr.c_str(), conn->Login.c_str(), l_reason.c_str());
         SLCMD_MutePlayer(conn->SessionServer, conn->Login, l_muted_unmutedate);
@@ -463,12 +463,10 @@ bool CL_Login(Client* conn, Packet& pack)
     // check version
     if(conn->Version >= 20)
     {
-        uint32_t prc_allods2_exe = *(uint32_t*)(datatmp),
-                 prc_a2mgr_dll = *(uint32_t*)(datatmp + 0x04),
-                 prc_patch_res = *(uint32_t*)(datatmp + 0x08),
-                 prc_world_res = *(uint32_t*)(datatmp + 0x0C),
-                 prc_graphics_res = *(uint32_t*)(datatmp + 0x10),
-                 prc_sessid = *(uint32_t*)(datatmp + 0x14);
+        uint32_t prc_allods2_exe = *(uint32_t*)(datatmp);
+        uint32_t prc_a2mgr_dll = *(uint32_t*)(datatmp + 0x04);
+        // 0x08 --- patch_res, 0x0c --- world_res, 0x10 --- graphics_res.
+        uint32_t prc_sessid = *(uint32_t*)(datatmp + 0x14);
 
         uint32_t lrc_sessid = prc_sessid ^ 0xDEADBEEF;
         uint32_t net_key = 0x6CDB248D;//V_GetSession(lrc_sessid);
@@ -488,11 +486,11 @@ bool CL_Login(Client* conn, Packet& pack)
             return false;
         }
 
-        uint32_t lrc_allods2_exe = prc_allods2_exe ^ net_key,
-                 lrc_a2mgr_dll = (prc_a2mgr_dll - lrc_allods2_exe) ^ net_key,
-                 lrc_patch_res = prc_patch_res ^ lrc_a2mgr_dll,
-                 lrc_world_res = (prc_world_res + lrc_patch_res) ^ net_key,
-                 lrc_graphics_res = (prc_graphics_res ^ net_key) - lrc_allods2_exe;
+        uint32_t lrc_allods2_exe = prc_allods2_exe ^ net_key;
+        uint32_t lrc_a2mgr_dll = (prc_a2mgr_dll - lrc_allods2_exe) ^ net_key;
+        // uint32_t lrc_patch_res = prc_patch_res ^ lrc_a2mgr_dll;
+        // uint32_t lrc_world_res = (prc_world_res + lrc_patch_res) ^ net_key;
+        // uint32_t lrc_graphics_res = (prc_graphics_res ^ net_key) - lrc_allods2_exe;
 
         std::string crcstr = "";
         bool badcrc = false;
@@ -564,7 +562,6 @@ bool CL_Login(Client* conn, Packet& pack)
         }
     }
 
-    uint8_t p_version = (uoth & 0xFF000000) >> 24;
     uint8_t p_gamemode = (uoth & 0x00FF0000) >> 16;
     uint16_t p_loginlen = (uoth & 0x0000FFFF);
 
@@ -1513,7 +1510,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
 
                 if((p_id2 & 0x3F000000) != 0x3F000000)
                 {
-                    int srvHatId;
+                    uint32_t srvHatId;
                     if (srv->Info.GameMode == GAMEMODE_Softcore)
                         srvHatId = Config::HatIDSoftcore;
                     else if (srv->Info.GameMode == GAMEMODE_Sandbox)

@@ -11,7 +11,7 @@ bool Login::LoadFromFile(std::string filename)
     if(this->Signature != 0x12ED34FB) return false;
     this->Password = "";
     f_temp >> this->Password;
-    for(int i = 0; i < this->Password.length(); i++)
+    for (size_t i = 0; i < this->Password.length(); i++)
         if(this->Password[i] == 0)
             this->Password.erase(i);
     f_temp.seekg(0x104);
