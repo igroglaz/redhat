@@ -9,6 +9,10 @@ struct CEffect
 {
     uint8_t Id1, Id2;
     uint8_t Value1, Value2;
+
+    bool operator==(const CEffect &other) const {
+        return Id1 == other.Id1 && Id2 == other.Id2 && Value1 == other.Value1 && Value2 == other.Value2;
+    }
 };
 
 struct CItem
