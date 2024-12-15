@@ -8,12 +8,12 @@
 using namespace std;
 
 /*
-    utils::Format: функция, аналогичная sprintf(), но для STL строк.
+    utils::Format: С„СѓРЅРєС†РёСЏ, Р°РЅР°Р»РѕРіРёС‡РЅР°СЏ sprintf(), РЅРѕ РґР»СЏ STL СЃС‚СЂРѕРє.
 
-    Возвращает отформатированную STL строку.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ РѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРЅСѓСЋ STL СЃС‚СЂРѕРєСѓ.
 
-    format: формат
-    ...: аргументы для формата
+    format: С„РѕСЂРјР°С‚
+    ...: Р°СЂРіСѓРјРµРЅС‚С‹ РґР»СЏ С„РѕСЂРјР°С‚Р°
 */
 std::string Format(const string& format, ...)
 {
@@ -42,12 +42,12 @@ std::string Format(const string& format, ...)
 }
 
 /*
-    utils::Explode: функция для разбиения строки на подстроки.
+    utils::Explode: С„СѓРЅРєС†РёСЏ РґР»СЏ СЂР°Р·Р±РёРµРЅРёСЏ СЃС‚СЂРѕРєРё РЅР° РїРѕРґСЃС‚СЂРѕРєРё.
 
-    Возвращает массив из найденных подстрок.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ РјР°СЃСЃРёРІ РёР· РЅР°Р№РґРµРЅРЅС‹С… РїРѕРґСЃС‚СЂРѕРє.
 
-    what: разбиваемая строка
-    separator: разделитель
+    what: СЂР°Р·Р±РёРІР°РµРјР°СЏ СЃС‚СЂРѕРєР°
+    separator: СЂР°Р·РґРµР»РёС‚РµР»СЊ
 */
 vector<string> Explode(const string& what, const string& separator)
 {
@@ -70,13 +70,13 @@ vector<string> Explode(const string& what, const string& separator)
 }
 
 /*
-    utils::TrimLeft, utils::TrimRight, utils::Trim: обрезать незначимые символы в начале строки (TrimLeft), в конце (TrimRight)
-        или и там, и там (Trim).
+    utils::TrimLeft, utils::TrimRight, utils::Trim: РѕР±СЂРµР·Р°С‚СЊ РЅРµР·РЅР°С‡РёРјС‹Рµ СЃРёРјРІРѕР»С‹ РІ РЅР°С‡Р°Р»Рµ СЃС‚СЂРѕРєРё (TrimLeft), РІ РєРѕРЅС†Рµ (TrimRight)
+        РёР»Рё Рё С‚Р°Рј, Рё С‚Р°Рј (Trim).
 
-    Возвращает обрезанную строку.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ РѕР±СЂРµР·Р°РЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ.
 
-    what: обрезаемая строка
-    callback: функция, определяющая значимость символа. См. IsWhitespace
+    what: РѕР±СЂРµР·Р°РµРјР°СЏ СЃС‚СЂРѕРєР°
+    callback: С„СѓРЅРєС†РёСЏ, РѕРїСЂРµРґРµР»СЏСЋС‰Р°СЏ Р·РЅР°С‡РёРјРѕСЃС‚СЊ СЃРёРјРІРѕР»Р°. РЎРј. IsWhitespace
     (callback - simply term for function which called inside of other function)
 */
 string TrimLeft(const string& what, bool (callback)(char))
@@ -117,11 +117,11 @@ string Trim(const string& what, bool (callback)(char))
 
 
 /*
-    utils::IsWhitespace: вспомогательная функция для Trim*
+    utils::IsWhitespace: РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ РґР»СЏ Trim*
 
-    Возвращает true, если символ является пробелом и его нужно обрезать.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ true, РµСЃР»Рё СЃРёРјРІРѕР» СЏРІР»СЏРµС‚СЃСЏ РїСЂРѕР±РµР»РѕРј Рё РµРіРѕ РЅСѓР¶РЅРѕ РѕР±СЂРµР·Р°С‚СЊ.
 
-    what: проверяемый символ.
+    what: РїСЂРѕРІРµСЂСЏРµРјС‹Р№ СЃРёРјРІРѕР».
 */
 bool IsWhitespace(char what)
 {
@@ -139,11 +139,11 @@ bool IsWhitespace(char what)
 }
 
 /*
-    utils::ToLower, utils::ToUpper: преобразование строки в верхний или нижний регистр.
+    utils::ToLower, utils::ToUpper: РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ СЃС‚СЂРѕРєРё РІ РІРµСЂС…РЅРёР№ РёР»Рё РЅРёР¶РЅРёР№ СЂРµРіРёСЃС‚СЂ.
 
-    Возвращает преобразованную строку.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ.
 
-    what: Преобразовываемая строка.
+    what: РџСЂРµРѕР±СЂР°Р·РѕРІС‹РІР°РµРјР°СЏ СЃС‚СЂРѕРєР°.
 */
 string ToLower(const string& what)
 {
@@ -164,11 +164,11 @@ string ToUpper(const string& what)
 #include <fstream>
 
 /*
-    utils::FileExists: проверка на существование файла.
+    utils::FileExists: РїСЂРѕРІРµСЂРєР° РЅР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ С„Р°Р№Р»Р°.
 
-    Возвращает true, если файл существует.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ true, РµСЃР»Рё С„Р°Р№Р» СЃСѓС‰РµСЃС‚РІСѓРµС‚.
 
-    filename: название проверяемого файла.
+    filename: РЅР°Р·РІР°РЅРёРµ РїСЂРѕРІРµСЂСЏРµРјРѕРіРѕ С„Р°Р№Р»Р°.
 */
 bool FileExists(const string& filename)
 {
@@ -180,11 +180,11 @@ bool FileExists(const string& filename)
 }
 
 /*
-    utils::Basename: срезать путь к файлу, оставив только его название.
+    utils::Basename: СЃСЂРµР·Р°С‚СЊ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ, РѕСЃС‚Р°РІРёРІ С‚РѕР»СЊРєРѕ РµРіРѕ РЅР°Р·РІР°РЅРёРµ.
 
-    Возвращаемое значение: обрезанная строка.
+    Р’РѕР·РІСЂР°С‰Р°РµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ: РѕР±СЂРµР·Р°РЅРЅР°СЏ СЃС‚СЂРѕРєР°.
 
-    filename: старое название файла.
+    filename: СЃС‚Р°СЂРѕРµ РЅР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р°.
 */
 string Basename(const string& filename)
 {
@@ -196,11 +196,11 @@ string Basename(const string& filename)
 }
 
 /*
-    utils::FixSlashes: сделать путь к файлу POSIX-совместимым (т.е. с человеческими слешами вместо backslash, используемого в DOS/Windows)
+    utils::FixSlashes: СЃРґРµР»Р°С‚СЊ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ POSIX-СЃРѕРІРјРµСЃС‚РёРјС‹Рј (С‚.Рµ. СЃ С‡РµР»РѕРІРµС‡РµСЃРєРёРјРё СЃР»РµС€Р°РјРё РІРјРµСЃС‚Рѕ backslash, РёСЃРїРѕР»СЊР·СѓРµРјРѕРіРѕ РІ DOS/Windows)
 
-    Возвращаемое значение: исправленная строка.
+    Р’РѕР·РІСЂР°С‰Р°РµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ: РёСЃРїСЂР°РІР»РµРЅРЅР°СЏ СЃС‚СЂРѕРєР°.
 
-    filename: старое название файла.
+    filename: СЃС‚Р°СЂРѕРµ РЅР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р°.
 */
 string FixSlashes(const string& filename)
 {
@@ -211,11 +211,11 @@ string FixSlashes(const string& filename)
 }
 
 /*
-    utils::TruncateSlashes: удалить повторяющиеся слеши (напр. main//graphics/mainmenu//menu_.bmp).
+    utils::TruncateSlashes: СѓРґР°Р»РёС‚СЊ РїРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ СЃР»РµС€Рё (РЅР°РїСЂ. main//graphics/mainmenu//menu_.bmp).
 
-    Возвращает исправленную строку.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ РёСЃРїСЂР°РІР»РµРЅРЅСѓСЋ СЃС‚СЂРѕРєСѓ.
 
-    filename: старое название файла.
+    filename: СЃС‚Р°СЂРѕРµ РЅР°Р·РІР°РЅРёРµ С„Р°Р№Р»Р°.
 */
 string TruncateSlashes(const string& filename)
 {
@@ -237,11 +237,11 @@ string TruncateSlashes(const string& filename)
 }
 
 /*
-    utils::Directory::Open: назначить папку, в которой будет производиться поиск.
+    utils::Directory::Open: РЅР°Р·РЅР°С‡РёС‚СЊ РїР°РїРєСѓ, РІ РєРѕС‚РѕСЂРѕР№ Р±СѓРґРµС‚ РїСЂРѕРёР·РІРѕРґРёС‚СЊСЃСЏ РїРѕРёСЃРє.
 
-    Возвращает true при успешном открытии папки.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ true РїСЂРё СѓСЃРїРµС€РЅРѕРј РѕС‚РєСЂС‹С‚РёРё РїР°РїРєРё.
 
-    what: название папки.
+    what: РЅР°Р·РІР°РЅРёРµ РїР°РїРєРё.
 */
 bool Directory::Open(const string& what)
 {
@@ -252,11 +252,11 @@ bool Directory::Open(const string& what)
 }
 
 /*
-    utils::Directory::Read: прочитать следующий файл из папки.
+    utils::Directory::Read: РїСЂРѕС‡РёС‚Р°С‚СЊ СЃР»РµРґСѓСЋС‰РёР№ С„Р°Р№Р» РёР· РїР°РїРєРё.
 
-    Возвращаемое значение: true если прочитан, false в противном случае.
+    Р’РѕР·РІСЂР°С‰Р°РµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ: true РµСЃР»Рё РїСЂРѕС‡РёС‚Р°РЅ, false РІ РїСЂРѕС‚РёРІРЅРѕРј СЃР»СѓС‡Р°Рµ.
 
-    where: структура, куда будут помещены данные о файле.
+    where: СЃС‚СЂСѓРєС‚СѓСЂР°, РєСѓРґР° Р±СѓРґСѓС‚ РїРѕРјРµС‰РµРЅС‹ РґР°РЅРЅС‹Рµ Рѕ С„Р°Р№Р»Рµ.
 */
 bool Directory::Read(DirectoryEntry& where)
 {
@@ -269,7 +269,7 @@ bool Directory::Read(DirectoryEntry& where)
 }
 
 /*
-    utils::Directory::Close: закрыть папку.
+    utils::Directory::Close: Р·Р°РєСЂС‹С‚СЊ РїР°РїРєСѓ.
 */
 void Directory::Close()
 {
@@ -277,7 +277,7 @@ void Directory::Close()
     this->directory = NULL;
 }
 
-// На всякий, собственно, пожарный
+// РќР° РІСЃСЏРєРёР№, СЃРѕР±СЃС‚РІРµРЅРЅРѕ, РїРѕР¶Р°СЂРЅС‹Р№
 Directory::~Directory()
 {
     this->Close();
@@ -400,11 +400,6 @@ void PrintfT(unsigned long level, const string& format, ...)
     line[linesize] = 0;
     vsnprintf(line, linesize, format.c_str(), list);
     va_end(list);
-
-    time_t t;
-    struct tm *tm;
-    time(&t);
-    tm = localtime(&t);
 
     printf(line);
 

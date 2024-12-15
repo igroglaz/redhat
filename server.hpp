@@ -92,7 +92,7 @@ struct ServerLayer
         this->Flags.Active = false;
         this->Flags.ShuttingDown = false;
         this->Flags.Closed = true;
-        this->Socket = NULL;
+        this->Socket = (SOCKET)NULL;
     }
 };
 

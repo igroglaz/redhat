@@ -56,11 +56,11 @@ class Character
         bool Bad;
         std::string BadString;
 
-        void DecryptSection(void* buf, unsigned long len, unsigned long key);
+        void DecryptSection(char* buf, unsigned long len, unsigned long key);
         void LoadFromFile(std::string filename);
-        void LoadFromBuffer(void* buf, unsigned long len);
+        void LoadFromBuffer(char* buf, unsigned long len);
         void Error(std::string);
-        // сохранение не используется
+        // СЃРѕС…СЂР°РЅРµРЅРёРµ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
 
         char* Section55555555;
         uint32_t Size55555555;

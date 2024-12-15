@@ -2,6 +2,7 @@
 #define SOCKET_HPP_INCLUDED
 
 #include <string>
+#include <winsock2.h>
 #include "packet.hpp"
 #include "serialize.hpp"
 
@@ -13,7 +14,6 @@ typedef unsigned int	u_int;
 typedef unsigned long	u_long;
 #define _BSDTYPES_DEFINED
 #endif /* ! def _BSDTYPES_DEFINED  */
-typedef u_int	SOCKET;
 
 #define SERR_NOTCREATED 0xFFFFFFFF
 #define SERR_CONNECTION_LOST   100

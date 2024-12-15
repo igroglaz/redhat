@@ -7,8 +7,6 @@ int send_msg(SOCKET sock, int ver, u_char *msg, size_t len, int timeout) {
 	int ret_code = 0, err_code;
 	u_int idx = 0;
 	u_char pack[0x96];
- 	fd_set fd;
-	struct timeval tv;
 	int nBytesSent;
 
 	STp = (u_char *) malloc(len + 5);
@@ -16,9 +14,6 @@ int send_msg(SOCKET sock, int ver, u_char *msg, size_t len, int timeout) {
 	memcpy(STp + len, end, 5);
 
 	memset(pack, 0, 8);
-
-	tv.tv_sec = timeout;
-	tv.tv_usec = 0;
 
 	len += 5;
 

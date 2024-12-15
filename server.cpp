@@ -208,7 +208,7 @@ bool SV_ReturnCharacter(ServerConnection* conn, Packet& pack)
     bool should_save = true;
     if(should_save && ((chr.Id2 & 0x3F000000) != 0x3F000000))
     {
-        int srvHatId;
+        uint32_t srvHatId;
         if (conn->Parent->Info.GameMode == GAMEMODE_Softcore)
             srvHatId = Config::HatIDSoftcore;
         else if (conn->Parent->Info.GameMode == GAMEMODE_Sandbox)
