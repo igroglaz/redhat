@@ -16,7 +16,7 @@
 #define LOG_Trivial         6
 
 // string-related
-std::string Format(const std::string& format, ...);
+std::string Format(std::string format, ...);
 std::vector<std::string> Explode(const std::string& what, const std::string& separator);
 bool IsWhitespace(char what);
 std::string TrimLeft(const std::string& what, bool (callback)(char) = IsWhitespace);
@@ -59,7 +59,7 @@ protected:
     DIR* directory;
 };
 
-void Printf(unsigned long level, const std::string& format, ...);
-void PrintfT(unsigned long level, const std::string& format, ...);
+void Printf(unsigned long level, std::string format, ...);
+void PrintfT(unsigned long level, std::string format, ...);
 
 #endif // UTILS_HPP_INCLUDED

@@ -15,7 +15,7 @@ using namespace std;
     format: формат
     ...: аргументы для формата
 */
-std::string Format(const string& format, ...)
+std::string Format(std::string format, ...)
 {
     char* line = NULL;
     try
@@ -350,7 +350,7 @@ bool StrToBool(const string& what)
 
 HANDLE PrintfMutex = NULL;
 
-void Printf(unsigned long level, const string& format, ...)
+void Printf(unsigned long level, std::string format, ...)
 {
     if(Config::LogLevel < level) return;
     if(!PrintfMutex) PrintfMutex = CreateMutex(NULL, TRUE, NULL);
@@ -385,7 +385,7 @@ void Printf(unsigned long level, const string& format, ...)
     ReleaseMutex(PrintfMutex);
 }
 
-void PrintfT(unsigned long level, const string& format, ...)
+void PrintfT(unsigned long level, std::string format, ...)
 {
     if(Config::LogLevel < level) return;
     if(!PrintfMutex) PrintfMutex = CreateMutex(NULL, TRUE, NULL);
