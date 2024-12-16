@@ -355,7 +355,7 @@ int SQL_Query(std::string query)
 int SQL_NumRows(MYSQL_RES* result)
 {
     //Printf("SQL_NumRows()\n");
-    return mysql_num_rows(result);
+    return static_cast<int>(mysql_num_rows(result));
 }
 
 MYSQL_RES* SQL_StoreResult()
@@ -379,7 +379,7 @@ MYSQL_ROW SQL_FetchRow(MYSQL_RES* result)
 int SQL_AffectedRows()
 {
     //Printf("SQL_AffectedRows()\n");
-    return mysql_affected_rows(&SQL::Connection);
+    return static_cast<int>(mysql_affected_rows(&SQL::Connection));
 }
 
 unsigned long* SQL_FetchLengths(MYSQL_RES* result)

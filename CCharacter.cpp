@@ -271,7 +271,7 @@ bool CCharacter::SaveToFile(std::string filename)
 
 uint16_t CCharacter::GenerateKey(uint16_t prev)
 {
-    if(!prev) srand(time(NULL));
+    if(!prev) srand(static_cast<unsigned int>(time(NULL)));
     else srand(prev);
 
     return rand();
@@ -447,8 +447,8 @@ bool CItemList::SaveToStream(BinaryStream& stream, bool min_format)
     stream.WriteUInt8(0);
     stream.WriteUInt8(0);
     if(!min_format) stream.WriteUInt8(0);
-    else stream.WriteUInt8(Items.size() * 3 + 4);
-    if(!min_format) stream.WriteUInt16(Items.size());
+    else stream.WriteUInt8(static_cast<uint8_t>(Items.size() * 3 + 4));
+    if(!min_format) stream.WriteUInt16(static_cast<uint16_t>(Items.size()));
     else stream.WriteUInt16(0);
     stream.WriteUInt16(0);
     stream.WriteUInt16(siz);

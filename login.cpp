@@ -585,9 +585,9 @@ CItemList Login_UnserializeItems(std::string list)
     std::vector<std::string> f_listdata = Explode(of_listdata, ",");
     if(f_listdata.size() != 4) return items;
 
-    items.UnknownValue0 = StrToInt(Trim(f_listdata[0]));
-    items.UnknownValue1 = StrToInt(Trim(f_listdata[1]));
-    items.UnknownValue2 = StrToInt(Trim(f_listdata[2]));
+    items.UnknownValue0 = static_cast<uint8_t>(StrToInt(Trim(f_listdata[0])));
+    items.UnknownValue1 = static_cast<uint8_t>(StrToInt(Trim(f_listdata[1])));
+    items.UnknownValue2 = static_cast<uint8_t>(StrToInt(Trim(f_listdata[2])));
     items.Items.resize(StrToInt(Trim(f_listdata[3])));
 
     f_str.erase(f_str.begin());
@@ -611,7 +611,7 @@ CItemList Login_UnserializeItems(std::string list)
         item.Id = StrToInt(Trim(f_itemdata[0]));
         item.IsMagic = (StrToInt(Trim(f_itemdata[1])));
         item.Price = StrToInt(Trim(f_itemdata[2]));
-        item.Count = StrToInt(Trim(f_itemdata[3]));
+        item.Count = static_cast<uint16_t>(StrToInt(Trim(f_itemdata[3])));
         if(item.IsMagic)
         {
             for(size_t i = 4; i < f_itemdata.size(); i++)
@@ -623,10 +623,10 @@ CItemList Login_UnserializeItems(std::string list)
                 std::vector<std::string> f_efdata = Explode(of_efdata, ":");
                 if(f_efdata.size() != 4) return items;
                 CEffect effect;
-                effect.Id1 = StrToInt(Trim(f_efdata[0]));
-                effect.Value1 = StrToInt(Trim(f_efdata[1]));
-                effect.Id2 = StrToInt(Trim(f_efdata[2]));
-                effect.Value2 = StrToInt(Trim(f_efdata[3]));
+                effect.Id1 = static_cast<uint8_t>(StrToInt(Trim(f_efdata[0])));
+                effect.Value1 = static_cast<uint8_t>(StrToInt(Trim(f_efdata[1])));
+                effect.Id2 = static_cast<uint8_t>(StrToInt(Trim(f_efdata[2])));
+                effect.Value2 = static_cast<uint8_t>(StrToInt(Trim(f_efdata[3])));
                 item.Effects.push_back(effect);
             }
         }
@@ -1055,21 +1055,21 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
             chr.Id1 = SQL_FetchInt(row, result, "id1");
             chr.Id2 = SQL_FetchInt(row, result, "id2");
             chr.HatId = (genericId ? Config::HatID : SQL_FetchInt(row, result, "hat_id"));
-            chr.UnknownValue1 = SQL_FetchInt(row, result, "unknown_value_1");
-            chr.UnknownValue2 = SQL_FetchInt(row, result, "unknown_value_2");
-            chr.UnknownValue3 = SQL_FetchInt(row, result, "unknown_value_3");
+            chr.UnknownValue1 = static_cast<uint8_t>(SQL_FetchInt(row, result, "unknown_value_1"));
+            chr.UnknownValue2 = static_cast<uint8_t>(SQL_FetchInt(row, result, "unknown_value_2"));
+            chr.UnknownValue3 = static_cast<uint8_t>(SQL_FetchInt(row, result, "unknown_value_3"));
             chr.Nick = SQL_FetchString(row, result, "nick");
             chr.Clan = SQL_FetchString(row, result, "clan");
             chr.ClanTag = SQL_FetchString(row, result, "clantag");
-            chr.Picture = SQL_FetchInt(row, result, "picture");
-            chr.Body = SQL_FetchInt(row, result, "body");
-            chr.Reaction = SQL_FetchInt(row, result, "reaction");
-            chr.Mind = SQL_FetchInt(row, result, "mind");
-            chr.Spirit = SQL_FetchInt(row, result, "spirit");
-            chr.Sex = SQL_FetchInt(row, result, "class");
-            chr.MainSkill = SQL_FetchInt(row, result, "mainskill");
-            chr.Flags = SQL_FetchInt(row, result, "flags");
-            chr.Color = SQL_FetchInt(row, result, "color");
+            chr.Picture = static_cast<uint8_t>(SQL_FetchInt(row, result, "picture"));
+            chr.Body = static_cast<uint8_t>(SQL_FetchInt(row, result, "body"));
+            chr.Reaction = static_cast<uint8_t>(SQL_FetchInt(row, result, "reaction"));
+            chr.Mind = static_cast<uint8_t>(SQL_FetchInt(row, result, "mind"));
+            chr.Spirit = static_cast<uint8_t>(SQL_FetchInt(row, result, "spirit"));
+            chr.Sex = static_cast<uint8_t>(SQL_FetchInt(row, result, "class"));
+            chr.MainSkill = static_cast<uint8_t>(SQL_FetchInt(row, result, "mainskill"));
+            chr.Flags = static_cast<uint8_t>(SQL_FetchInt(row, result, "flags"));
+            chr.Color = static_cast<uint8_t>(SQL_FetchInt(row, result, "color"));
             chr.MonstersKills = SQL_FetchInt(row, result, "monsters_kills");
             chr.PlayersKills = SQL_FetchInt(row, result, "players_kills");
             chr.Frags = SQL_FetchInt(row, result, "frags");
@@ -1211,21 +1211,21 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
         chr.Id1 = SQL_FetchInt(row, result, "id1");
         chr.Id2 = SQL_FetchInt(row, result, "id2");
         chr.HatId = SQL_FetchInt(row, result, "hat_id");
-        chr.UnknownValue1 = SQL_FetchInt(row, result, "unknown_value_1");
-        chr.UnknownValue2 = SQL_FetchInt(row, result, "unknown_value_2");
-        chr.UnknownValue3 = SQL_FetchInt(row, result, "unknown_value_3");
+        chr.UnknownValue1 = static_cast<uint8_t>(SQL_FetchInt(row, result, "unknown_value_1"));
+        chr.UnknownValue2 = static_cast<uint8_t>(SQL_FetchInt(row, result, "unknown_value_2"));
+        chr.UnknownValue3 = static_cast<uint8_t>(SQL_FetchInt(row, result, "unknown_value_3"));
         chr.Nick = SQL_FetchString(row, result, "nick");
         chr.Clan = SQL_FetchString(row, result, "clan");
         chr.ClanTag = SQL_FetchString(row, result, "clantag");
-        chr.Picture = SQL_FetchInt(row, result, "picture");
-        chr.Body = SQL_FetchInt(row, result, "body");
-        chr.Reaction = SQL_FetchInt(row, result, "reaction");
-        chr.Mind = SQL_FetchInt(row, result, "mind");
-        chr.Spirit = SQL_FetchInt(row, result, "spirit");
-        chr.Sex = SQL_FetchInt(row, result, "class");
-        chr.MainSkill = SQL_FetchInt(row, result, "mainskill");
-        chr.Flags = SQL_FetchInt(row, result, "flags");
-        chr.Color = SQL_FetchInt(row, result, "color");
+        chr.Picture = static_cast<uint8_t>(SQL_FetchInt(row, result, "picture"));
+        chr.Body = static_cast<uint8_t>(SQL_FetchInt(row, result, "body"));
+        chr.Reaction = static_cast<uint8_t>(SQL_FetchInt(row, result, "reaction"));
+        chr.Mind = static_cast<uint8_t>(SQL_FetchInt(row, result, "mind"));
+        chr.Spirit = static_cast<uint8_t>(SQL_FetchInt(row, result, "spirit"));
+        chr.Sex = static_cast<uint8_t>(SQL_FetchInt(row, result, "class"));
+        chr.MainSkill = static_cast<uint8_t>(SQL_FetchInt(row, result, "mainskill"));
+        chr.Flags = static_cast<uint8_t>(SQL_FetchInt(row, result, "flags"));
+        chr.Color = static_cast<uint8_t>(SQL_FetchInt(row, result, "color"));
         chr.MonstersKills = SQL_FetchInt(row, result, "monsters_kills");
         chr.PlayersKills = SQL_FetchInt(row, result, "players_kills");
         chr.Frags = SQL_FetchInt(row, result, "frags");
@@ -1354,7 +1354,7 @@ const char enru_charmap_en[] =
         'E',
         'K',
         'o',
-        'é',
+        '\x8E',
         'p',
         'P',
         'u',
@@ -1367,23 +1367,23 @@ const char enru_charmap_en[] =
 
 const char enru_charmap_ru[] =
     {
-        '†',
-        'Ä',
-        '·',
-        'ë',
-        '•',
-        'Ö',
-        'ä',
-        'Æ',
-        'é',
-        '‡',
-        'ê',
-        '®',
-        'Â',
-        'ï',
-        '„',
-        'ì',
-        '‚',
+        '\xA0',
+        '\x80',
+        '\xE1',
+        '\x91',
+        '\xA5',
+        '\x85',
+        '\x8A',
+        '\xAE',
+        '\x8E',
+        '\xE0',
+        '\x90',
+        '\xA8',
+        '\xE5',
+        '\x95',
+        '\xE3',
+        '\x93',
+        '\xE2',
     };
 
 std::string RegexEscape(char what)
