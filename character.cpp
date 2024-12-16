@@ -138,7 +138,7 @@ void Character::LoadFromFile(std::string filename)
     }
 
     f_temp.seekg(0, std::ios::end);
-    filelen = f_temp.tellg();
+    filelen = static_cast<unsigned long>(f_temp.tellg());
     f_temp.seekg(0, std::ios::beg);
     char* buf = (char*)malloc(filelen);
     f_temp.read((char*)buf, filelen);

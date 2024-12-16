@@ -255,14 +255,14 @@ bool ReadConfig(std::string filename)
                     vector<string> ipd = Explode(value, ":");
                     Config::HatAddress = ipd[0];
                     if(ipd.size() == 2)
-                        Config::HatPort = StrToInt(ipd[1]);
+                        Config::HatPort = static_cast<unsigned short>(StrToInt(ipd[1]));
                 }
                 else if(parameter == "inthataddress")
                 {
                     vector<string> ipd = Explode(value, ":");
                     Config::IHatAddress = ipd[0];
                     if(ipd.size() == 2)
-                        Config::IHatPort = StrToInt(ipd[1]);
+                        Config::IHatPort = static_cast<unsigned short>(StrToInt(ipd[1]));
                 }
                 else if(parameter == "protocolversion")
                 {
@@ -309,7 +309,7 @@ bool ReadConfig(std::string filename)
                     vector<string> ipd = Explode(value, ":");
                     Config::SqlAddress = ipd[0];
                     if(ipd.size() == 2)
-                        Config::SqlPort = StrToInt(ipd[1]);
+                        Config::SqlPort = static_cast<unsigned short>(StrToInt(ipd[1]));
                 }
                 else if(parameter == "login")
                     Config::SqlLogin = value;
@@ -395,14 +395,14 @@ bool ReadConfig(std::string filename)
                     vector<string> ipd = Explode(value, ":");
                     srv->Address = ipd[0];
                     if(ipd.size() == 2)
-                        srv->Port = StrToInt(ipd[1]);
+                        srv->Port = static_cast<unsigned short>(StrToInt(ipd[1]));
                 }
                 else if(parameter == "intserveraddr")
                 {
                     vector<string> ipd = Explode(value, ":");
                     srv->IAddress = ipd[0];
                     if(ipd.size() == 2)
-                        srv->IPort = StrToInt(ipd[1]);
+                        srv->IPort = static_cast<unsigned short>(StrToInt(ipd[1]));
                 }
                 else if(parameter == "hatid")
                 {

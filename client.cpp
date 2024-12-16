@@ -201,7 +201,7 @@ bool CL_ServerProcess(Client* conn)
         return false;
     }
 
-    uint32_t dtime = time(NULL);
+    uint32_t dtime = static_cast<uint32_t>(time(NULL));
     if((dtime - conn->SessionTime) > 15)
     {
         SESSION_DelLogin(conn->SessionID1, conn->SessionID2);
@@ -230,7 +230,7 @@ bool CL_ServerProcess(Client* conn)
     }
 
     std::string cas = "unknown";
-    unsigned long retval = 0;
+    uint8_t retval = 0;
     switch(result)
     {
         case 1:
@@ -336,7 +336,7 @@ void Net_ProcessClients()
 void CL_VersionInfo(Client* conn, Packet& pack)
 {
     uint16_t key1, key2;
-    srand(time(NULL));
+    srand(static_cast<unsigned int>(time(NULL)));
     key1 = rand();
     srand(key1);
     key2 = rand();
@@ -603,7 +603,7 @@ bool CL_Login(Client* conn, Packet& pack)
     if(access_level == -1)
     {
         Printf(LOG_Error, "[CL] %s (%s) - IP blocked by global rules.\n", conn->HisAddr.c_str(), s_login.c_str());
-        CLCMD_Kick(conn, P_FHTAGN); // "Ктулху фхтагн!"
+        CLCMD_Kick(conn, P_FHTAGN); // "РљС‚СѓР»С…Сѓ С„С…С‚Р°РіРЅ!"
         return false;
     }
 
@@ -701,7 +701,7 @@ bool CL_Login(Client* conn, Packet& pack)
     unsigned long ban_time, unban_time;
     std::string ban_reason;
     bool ban_active;
-    unsigned long ctime = time(NULL);
+    unsigned long ctime = static_cast<unsigned long>(time(NULL));
     if(!Login_GetBanned(s_login, ban_active, ban_time, unban_time, ban_reason))
     {
         Printf(LOG_Error, "[DB] Error: Login_GetBanned(\"%s\", <banned>, <date_ban>, <date_unban>, <reason>).\n", s_login.c_str());
@@ -782,11 +782,11 @@ bool CL_Login(Client* conn, Packet& pack)
                         Printf(LOG_Info, "[CL] %s (%s) - Login lock dropped (not on server ID %u).\n", conn->HisAddr.c_str(), s_login.c_str(), srv->Number);
                         r_cancel_lock = true;
                     }
-                    /// ДЮП!!!!!
-                    // todo: пофиксить проверку логинов на сервере!
-                    /// сервера сохраняют персонажей напрямую в базу, вернули на место
-                    /// 19.06.2014 - это что я имел в виду? (и главное, когда?)
-                    /// 2022 - привет из нового десятилетия, дюп видимо останется
+                    /// Р”Р®Рџ!!!!!
+                    // todo: РїРѕС„РёРєСЃРёС‚СЊ РїСЂРѕРІРµСЂРєСѓ Р»РѕРіРёРЅРѕРІ РЅР° СЃРµСЂРІРµСЂРµ!
+                    /// СЃРµСЂРІРµСЂР° СЃРѕС…СЂР°РЅСЏСЋС‚ РїРµСЂСЃРѕРЅР°Р¶РµР№ РЅР°РїСЂСЏРјСѓСЋ РІ Р±Р°Р·Сѓ, РІРµСЂРЅСѓР»Рё РЅР° РјРµСЃС‚Рѕ
+                    /// 19.06.2014 - СЌС‚Рѕ С‡С‚Рѕ СЏ РёРјРµР» РІ РІРёРґСѓ? (Рё РіР»Р°РІРЅРѕРµ, РєРѕРіРґР°?)
+                    /// 2022 - РїСЂРёРІРµС‚ РёР· РЅРѕРІРѕРіРѕ РґРµСЃСЏС‚РёР»РµС‚РёСЏ, РґСЋРї РІРёРґРёРјРѕ РѕСЃС‚Р°РЅРµС‚СЃСЏ
                 }
 
                 if(r_cancel_lock)
@@ -883,7 +883,7 @@ bool CL_Login(Client* conn, Packet& pack)
             if(!srv) continue;
 
             if(!srv->Connection || !srv->Connection->Active)
-                continue; // вот тут всё равно есть шанс пролезть сквозь проверку... хотя по идее тогда не пустит
+                continue; // РІРѕС‚ С‚СѓС‚ РІСЃС‘ СЂР°РІРЅРѕ РµСЃС‚СЊ С€Р°РЅСЃ РїСЂРѕР»РµР·С‚СЊ СЃРєРІРѕР·СЊ РїСЂРѕРІРµСЂРєСѓ... С…РѕС‚СЏ РїРѕ РёРґРµРµ С‚РѕРіРґР° РЅРµ РїСѓСЃС‚РёС‚
 
             if(srv->Info.ServerCaps & SERVER_CAP_DETAILED_INFO)
             {
@@ -902,13 +902,13 @@ bool CL_Login(Client* conn, Packet& pack)
                         char_on_server = true;
                 }
 
-                //if(!char_on_server && srv->Info.Time <= 15) char_on_server = true; /// убрано: люди не смогут входить на хэт во время смены любой карты
+                //if(!char_on_server && srv->Info.Time <= 15) char_on_server = true; /// СѓР±СЂР°РЅРѕ: Р»СЋРґРё РЅРµ СЃРјРѕРіСѓС‚ РІС…РѕРґРёС‚СЊ РЅР° С…СЌС‚ РІРѕ РІСЂРµРјСЏ СЃРјРµРЅС‹ Р»СЋР±РѕР№ РєР°СЂС‚С‹
 
                 if(char_on_server)
                 {
                     Printf(LOG_Error, "[CL] %s (%s) - Bug: login unlocked but still ingame (playing on server ID %u)!\n", conn->HisAddr.c_str(), s_login.c_str(), srv->Number);
                     //CLCMD_Kick(conn, P_FHTAGN);
-                    CLCMD_Kick(conn, P_LOGIN_EXISTS); // я не помню, что это... скорее всего "ваш логин уже в игре"
+                    CLCMD_Kick(conn, P_LOGIN_EXISTS); // СЏ РЅРµ РїРѕРјРЅСЋ, С‡С‚Рѕ СЌС‚Рѕ... СЃРєРѕСЂРµРµ РІСЃРµРіРѕ "РІР°С€ Р»РѕРіРёРЅ СѓР¶Рµ РІ РёРіСЂРµ"
                     return false;
                 }
             }
@@ -1203,10 +1203,10 @@ uint32_t CheckNickname(std::string nickname, int hatId, bool secondary)
                             (ch >= 0x61 && ch <= 0x7A) || // a..z
                             (ch == '-') ||
                             (ch == ' ') ||
-                            (ch >= 0x80 && ch <= 0x9F) || // А..Я
-                            (ch >= 0xA0 && ch <= 0xAF) || // а..п
-                            (ch >= 0xE0 && ch <= 0xEF) || // р..я
-                            (ch == 0xF0 || ch == 0xF1) || // Ё ё
+                            (ch >= 0x80 && ch <= 0x9F) || // Рђ..РЇ
+                            (ch >= 0xA0 && ch <= 0xAF) || // Р°..Рї
+                            (ch >= 0xE0 && ch <= 0xEF) || // СЂ..СЏ
+                            (ch == 0xF0 || ch == 0xF1) || // РЃ С‘
                             (ch == '!' || ch == '?') ||
                             (ch == '@') ||
                             (ch == '.') ||
@@ -1216,8 +1216,8 @@ uint32_t CheckNickname(std::string nickname, int hatId, bool secondary)
                             (ch == '$') ||
                             (ch == '(') || (ch == ')') ||
                             (ch == '<') || (ch == '>') ||
-                            (in_clan && ( // ТОЛЬКО В ПРИПИСАХ
-                                (ch == 0x7F) || // 0x7F квадрат
+                            (in_clan && ( // РўРћР›Р¬РљРћ Р’ РџР РРџРРЎРђРҐ
+                                (ch == 0x7F) || // 0x7F РєРІР°РґСЂР°С‚
                                 (ch == '{' || ch == '}'/* || ch == '|'*/) ||
                                 //(ch == '[' || ch == ']') ||
                                 (ch == ':' || ch == ';') ||
@@ -1430,7 +1430,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         char* data = new char[0x30];
         memset(data, 0, 0x30);
         *(unsigned long*)(data) = 0xFFDDAA11;
-        *(unsigned char*)(data + 4) = p_nickname.length();
+        *(unsigned char*)(data + 4) = static_cast<unsigned char>(p_nickname.length());
         *(unsigned char*)(data + 5) = p_body;
         *(unsigned char*)(data + 6) = p_reaction;
         *(unsigned char*)(data + 7) = p_mind;
@@ -1678,7 +1678,7 @@ if (no_enter_server)
 
             conn->SessionID1 = p_id1;
             conn->SessionID2 = p_id2;
-            conn->SessionTime = time(NULL);
+            conn->SessionTime = static_cast<uint32_t>(time(NULL));
             conn->SessionServer = srv;
             conn->SessionNickname = p_nickname;
             conn->Flags |= CLIENT_COMPLETE;

@@ -91,7 +91,7 @@ Archive& Archive::operator << (int64_t data)
 
 Archive& Archive::operator << (const std::string& data)
 {
-    uint16_t strsiz = data.length();
+    uint16_t strsiz = static_cast<uint16_t>(data.length());
     AppendData((uint8_t*)&strsiz, 2);
     AppendData((uint8_t*)data.c_str(), data.length()+1);
     return *this;
@@ -265,7 +265,7 @@ void Archive::LoadFromStream(istream& stream)
 {
     uint8_t* buf = NULL;
     stream.seekg(0, ios::end);
-    uint32_t siz = stream.tellg();
+    uint32_t siz = static_cast<uint32_t>(stream.tellg());
     stream.seekg(0, ios::beg);
     buf = new uint8_t[siz];
     stream.read((char*)buf, siz);
