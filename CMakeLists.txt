@@ -19,6 +19,7 @@ add_library(redhat-lib
     lgn.cpp
     listener.cpp
     login.cpp
+    merge_items.cpp
     packet.cpp
     serialize.cpp
     server.cpp
@@ -42,6 +43,7 @@ target_link_libraries(redhat redhat-lib)
 
 add_executable(redhat-test
     test/login_test.cpp
+    test/merge_items_test.cpp
     test/test.cpp
     test/UnitTest++/AssertException.cpp
     test/UnitTest++/AssertException.h
@@ -118,6 +120,13 @@ target_compile_options(redhat-test PUBLIC /MT)
 target_link_options(redhat-test PUBLIC /NODEFAULTLIB:MSVCRT)
 
 # Run the test.
+add_custom_command(
+    TARGET redhat-test
+    POST_BUILD
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND copy mysql\\lib\\libmysql.dll ${RUNTIME_OUTPUT_DIRECTORY}/libmysql.dll
+)
+
 add_custom_command(
     TARGET redhat-test
     POST_BUILD

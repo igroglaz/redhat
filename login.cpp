@@ -2,6 +2,7 @@
 #include "sql.hpp"
 #include "utils.hpp"
 #include "config.hpp"
+#include "merge_items.hpp"
 
 #include "sha1.h"
 
@@ -1833,6 +1834,8 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             chr.Picture = 64; // zombie
         }
     }
+
+    MergeItems(chr.Bag);
 
     ////////////
     // REBORN //
