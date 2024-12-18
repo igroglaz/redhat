@@ -8,6 +8,14 @@
 namespace
 {
 
+TEST(MergeItems_EmptyBag) {
+    CItemList items = Login_UnserializeItems("[0,0,0,0]");
+    MergeItems(items);
+    std::string got = Login_SerializeItems(items);
+
+    CHECK_EQUAL("[0,0,0,0]", got);
+}
+
 TEST(MergeItems_NoChanges) {
     CItemList items = Login_UnserializeItems("[0,0,0,2];[3667,0,0,1];[1000,0,2,1]");
     MergeItems(items);

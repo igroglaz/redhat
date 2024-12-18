@@ -5,6 +5,10 @@
 void Improve(CItem& item);
 
 void MergeItems(CItemList& bag) {
+    if (bag.Items.size() < MERGE_COUNT) {
+        return;
+    }
+
     for (auto it = bag.Items.begin(); it < bag.Items.end() - (MERGE_COUNT-1); ++it) {
         if (it->Price != 2) {
             continue;
