@@ -1427,19 +1427,22 @@ bool CL_EnterServer(Client* conn, Packet& pack)
             }
         }
 
+        // Replace girls with boys.
+        p_picture &= ~0x80;
+
         char* data = new char[0x30];
         memset(data, 0, 0x30);
-        *(unsigned long*)(data) = 0xFFDDAA11;
-        *(unsigned char*)(data + 4) = static_cast<unsigned char>(p_nickname.length());
-        *(unsigned char*)(data + 5) = p_body;
-        *(unsigned char*)(data + 6) = p_reaction;
-        *(unsigned char*)(data + 7) = p_mind;
-        *(unsigned char*)(data + 8) = p_spirit;
-        *(unsigned char*)(data + 9) = p_base;
-        *(unsigned char*)(data + 10) = p_picture;
-        *(unsigned char*)(data + 11) = p_sex;
-        *(unsigned long*)(data + 12) = p_id1;
-        *(unsigned long*)(data + 16) = p_id2;
+        *(uint32_t*)(data) = 0xFFDDAA11;
+        *(uint8_t*)(data + 4) = static_cast<uint8_t>(p_nickname.length());
+        *(uint8_t*)(data + 5) = 1; // All base stats are set to 1.
+        *(uint8_t*)(data + 6) = 1;
+        *(uint8_t*)(data + 7) = 1;
+        *(uint8_t*)(data + 8) = 1;
+        *(uint8_t*)(data + 9) = p_base;
+        *(uint8_t*)(data + 10) = p_picture;
+        *(uint8_t*)(data + 11) = p_sex;
+        *(uint32_t*)(data + 12) = p_id1;
+        *(uint32_t*)(data + 16) = p_id2;
         memcpy(data + 20, p_nickname.c_str(), p_nickname.length());
 
         if(!Login_SetCharacter(conn->Login, p_id1, p_id2, 0x30, data, p_nickname, l_srvid))

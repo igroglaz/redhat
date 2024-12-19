@@ -1795,8 +1795,9 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
  */
 void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigned int* points) {
     // Reset character attributes for #1 server (remove 1000 starting gold)
-    if (srvid == 1)
-    {
+    if (srvid == 1) {
+        // TODO: don't wipe the character once server 1 is functional.
+
         chr.Money = 0;
         chr.MonstersKills = 0;
         chr.Deaths = 0;
