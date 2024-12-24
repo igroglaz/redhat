@@ -2,9 +2,9 @@
 
 #include "login.hpp"
 
-void Improve(CItem& item);
+void Improve(CItem& item, int server_id);
 
-void MergeItems(CItemList& bag) {
+void MergeItems(CItemList& bag, int server_id) {
     if (bag.Items.size() < MERGE_COUNT) {
         return;
     }
@@ -30,17 +30,31 @@ void MergeItems(CItemList& bag) {
         }
 
         // We have three consecutive items. Merge them.
-        Improve(*it);
+        Improve(*it, server_id);
 
         // Remove the other two items.
         bag.Items.erase(it + 1, it + MERGE_COUNT);
     }
 }
 
-// Improve an item. Right now it just adds +5 max HP.
-void Improve(CItem& item) {
+// Improve an item. The improvement depends on the server.
+void Improve(CItem& item, int server_id) {
     const int max_health = 7;
-    const uint8_t delta = 5;
+    const uint8_t delta_by_server[] = {
+        0, // server 0, unused
+        0, // server 1, doesn't happen
+        1, // server 2
+        2, 2, 2, 2, 2, // servers 3--7
+        4, // server 8
+        3, 3, 3, // servers 9--11
+    };
+
+    if (server_id >= sizeof(delta_by_server) / sizeof(delta_by_server[0])) {
+        // Should not be possible, but let's be safe.
+        return;
+    }
+
+    const uint8_t delta = delta_by_server[server_id];
 
     item.IsMagic = true;
 
@@ -53,5 +67,5 @@ void Improve(CItem& item) {
     }
 
     // Create a new `max_health` effect.
-    item.Effects.push_back(CEffect{.Id1=max_health, .Value1=5});
+    item.Effects.push_back(CEffect{.Id1=max_health, .Value1=delta});
 }
