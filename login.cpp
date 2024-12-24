@@ -1835,7 +1835,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         }
     }
 
-    MergeItems(chr.Bag);
+    MergeItems(chr.Bag, srvid);
 
     ////////////
     // REBORN //
