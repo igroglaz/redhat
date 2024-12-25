@@ -58,6 +58,8 @@
 		<Unit filename="listener.hpp" />
 		<Unit filename="login.cpp" />
 		<Unit filename="login.hpp" />
+		<Unit filename="merge_items.cpp" />
+		<Unit filename="merge_items.hpp" />
 		<Unit filename="packet.cpp" />
 		<Unit filename="packet.hpp" />
 		<Unit filename="redhat.cpp" />
