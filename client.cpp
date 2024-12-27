@@ -1318,6 +1318,37 @@ float CL_NeedPointsFrom(uint8_t what)
     return 0;
 }
 
+bool IsCharacterAllowed(const CCharacter& chr, int srvid) {
+    uint32_t exp_total = 0;
+    exp_total += chr.ExpFireBlade;
+    exp_total += chr.ExpWaterAxe;
+    exp_total += chr.ExpAirBludgeon;
+    exp_total += chr.ExpEarthPike;
+    exp_total += chr.ExpAstralShooting;
+
+    // newborn chars must enter "town" server 1st (#1)
+    if (srvid > 1 && exp_total == 0) {
+        return false;
+    }
+
+    switch (srvid) {
+        case 1:
+            return chr.Body == 1 && chr.Reaction == 1 && chr.Mind == 1 && chr.Spirit == 1 && exp_total == 0;
+        case 2:
+            return chr.Mind < 15;
+        case 3:
+            return chr.Mind >= 15 && chr.Reaction < 20;
+        case 4:
+            return 20 <= chr.Reaction && chr.Reaction < 30;
+        case 5:
+            return 30 <= chr.Reaction && chr.Reaction < 40;
+        case 6:
+            return 40 <= chr.Reaction && chr.Reaction < 50;
+    }
+
+    return true;
+}
+
 bool CL_EnterServer(Client* conn, Packet& pack)
 {
     if(conn->IsBot)
@@ -1547,62 +1578,12 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                         }
                     }
 
-
-///////////////////////////////////////////////////////////////////////
-
-// If character got top stats at certain difficulty - he can not enter this (#1-9) server
-
-uint32_t exp_total = 0;
-exp_total += chrtc.ExpFireBlade;
-exp_total += chrtc.ExpWaterAxe;
-exp_total += chrtc.ExpAirBludgeon;
-exp_total += chrtc.ExpEarthPike;
-exp_total += chrtc.ExpAstralShooting;
-
-// flag to check if char drinked all stat pots at this particular server
-bool no_enter_server = 0;
-
-// newborn chars must enter "town" server 1st (#1)
-if (srv->Number > 1 && exp_total == 0)
-{
-    Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
-    CLCMD_Kick(conn, P_TOO_STRONG);
-    return false;
-}
-
-if      (srv->Number == 1 &&
-        // it takes 'pure' stats, without boni from items
-        (chrtc.Body > 1 || chrtc.Reaction > 1 || chrtc.Mind > 1 || chrtc.Spirit > 1 ||
-         exp_total > 0))
-            no_enter_server = 1;
-else if (srv->Number == 2 && chrtc.Mind > 14)
-            no_enter_server = 1;
-else if (srv->Number == 3 &&
-        (chrtc.Mind < 15 || chrtc.Reaction > 19))
-            no_enter_server = 1;
-else if (srv->Number == 4 &&
-        (chrtc.Reaction < 20 || chrtc.Reaction > 29))
-            no_enter_server = 1;
-else if (srv->Number == 5 &&
-        (chrtc.Reaction < 30 || chrtc.Reaction > 39))
-            no_enter_server = 1;
-else if (srv->Number == 6 &&
-        (chrtc.Reaction < 40 || (chrtc.Reaction > 49)))
-            no_enter_server = 1;
-else if (srv->Number > 6 &&
-        (chrtc.Reaction < 50))
-            no_enter_server = 1;
-
-// character can't enter server if he finished drinking stat potions for this particular server
-if (no_enter_server)
-{
-    Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
-    CLCMD_Kick(conn, P_TOO_STRONG);
-    return false;
-}
-
-///////////////////////////////////////////////////////////////////////
-
+                    // Character can't enter server if he finished drinking stat potions for this particular server.
+                    if (!IsCharacterAllowed(chrtc, srv->Number)) {
+                        Printf(LOG_Error, "[CL] %s (%s) - Character \"%s\" rejected by hat from server ID %u (reason: stats check).\n", conn->HisAddr.c_str(), conn->Login.c_str(), p_nickname.c_str(), srv->Number);
+                        CLCMD_Kick(conn, P_TOO_STRONG);
+                        return false;
+                    }
 
                     /* newbie server flag */
                     if((srv->Info.ServerMode & SVF_NOOBSRV) == SVF_NOOBSRV)
