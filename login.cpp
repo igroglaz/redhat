@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "config.hpp"
 #include "merge_items.hpp"
+#include "server_id.hpp"
 
 #include "sha1.h"
 
@@ -295,7 +296,7 @@ bool Login_SetPassword(std::string login, std::string password)
     return true;
 }
 
-bool Login_SetLocked(std::string login, bool locked_hat, bool locked, unsigned long id1, unsigned long id2, unsigned long srvid)
+bool Login_SetLocked(std::string login, bool locked_hat, bool locked, unsigned long id1, unsigned long id2, ServerIDType srvid)
 {
     //Printf("Login_SetLocked()\n");
     if(!SQL_CheckConnected()) return false;
@@ -332,7 +333,7 @@ bool Login_SetLocked(std::string login, bool locked_hat, bool locked, unsigned l
     return true;
 }
 
-bool Login_GetLocked(std::string login, bool& locked_hat, bool& locked, unsigned long& id1, unsigned long& id2, unsigned long& srvid)
+bool Login_GetLocked(std::string login, bool& locked_hat, bool& locked, unsigned long& id1, unsigned long& id2, ServerIDType& srvid)
 {
     //Printf("Login_GetLocked()\n");
     if(!SQL_CheckConnected()) return false;
@@ -367,7 +368,7 @@ bool Login_GetLocked(std::string login, bool& locked_hat, bool& locked, unsigned
         locked = (SQL_FetchInt(row, result, "locked"));
         id1 = SQL_FetchInt(row, result, "locked_id1");
         id2 = SQL_FetchInt(row, result, "locked_id2");
-        srvid = SQL_FetchInt(row, result, "locked_srvid");
+        srvid = static_cast<ServerIDType>(SQL_FetchInt(row, result, "locked_srvid"));
         SQL_FreeResult(result);
         SQL_Unlock();
 
@@ -636,7 +637,7 @@ CItemList Login_UnserializeItems(std::string list)
     return items;
 }
 
-bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, unsigned long srvid)
+bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, ServerIDType srvid)
 {
     //Printf("Login_SetCharacter()\n");
     if(!SQL_CheckConnected()) return false; // Check if SQL connection is active
@@ -1746,28 +1747,28 @@ std::string PrettyNumber(uint32_t num) {
 
 // Check if a girl character (amazon/witch) can do a rebirth.
 // If yes, returns an empty string, otherwise --- the failure reason.
-std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid) {
+std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDType srvid) {
     uint32_t need_exp = 0;
     uint32_t need_kills = 0;
     uint32_t need_gold = 0;
 
-    if (srvid == 2) {
+    if (srvid == EASY) {
         need_exp = 50000;
         need_kills = 500;
         need_gold = 100000;
-    } else if (srvid == 3) {
+    } else if (srvid == KIDS) {
         need_exp = 500000;
         need_kills = 1200;
         need_gold = 1000000;
-    } else if (srvid == 4) {
+    } else if (srvid == NIVAL) {
         need_exp = 2000000;
         need_kills = 1500;
         need_gold = 5000000;
-    } else if (srvid == 5) {
+    } else if (srvid == MEDIUM) {
         need_exp = 11000000;
         need_kills = 2000;
         need_gold = 21000000;
-    } else if (srvid == 6) {
+    } else if (srvid == HARD) {
         need_exp = 50000000;
         need_kills = 4000;
         need_gold = 100000000;
@@ -1793,9 +1794,9 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, int srvid)
  *      ascended: output parameter: has the character ascended?
  *      points: output parameter: points for finding the treasure
  */
-void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigned int* points) {
+void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended, unsigned int* points) {
     // Reset character attributes for #1 server (remove 1000 starting gold)
-    if (srvid == 1) {
+    if (srvid == START) {
         // TODO: don't wipe the character once server 1 is functional.
 
         chr.Money = 0;
@@ -1871,34 +1872,34 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         // Award player some gold for Treasure
         if (chr.Money < 2136000000) {
             switch (srvid) {
-                case 2:
+                case EASY:
                     chr.Money += 5000;
                     break;
-                case 3:
+                case KIDS:
                     chr.Money += 30000;
                     break;
-                case 4:
+                case NIVAL:
                     chr.Money += 100000;
                     break;
-                case 5:
+                case MEDIUM:
                     chr.Money += 500000;
                     break;
-                case 6:
+                case HARD:
                     chr.Money += 1000000;
                     break;
-                case 7:
+                case NIGHTMARE:
                     chr.Money += 3000000;
                     break;
-                case 8:
+                case QUEST_T1:
                     chr.Money += 5000000;
                     break;
-                case 9:
+                case QUEST_T2:
                     chr.Money += 7000000;
                     break;
-                case 10:
+                case QUEST_T3:
                     chr.Money += 9000000;
                     break;
-                case 11:
+                case QUEST_T4:
                     chr.Money += 11483647;
                     break;
             }
@@ -1927,11 +1928,11 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
     // eg if we received char from srvid 2 and char finished its stay there
     // (by drinking mind to 15) - he will be reborned.. and his next login
     // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
-    if ((srvid == 2 && chr.Mind > 14) ||
-        (srvid == 3 && chr.Reaction > 19) ||
-        (srvid == 4 && chr.Reaction > 29) ||
-        (srvid == 5 && chr.Reaction > 39) ||
-        (srvid == 6 && chr.Reaction > 49))
+    if ((srvid == EASY && chr.Mind > 14) ||
+        (srvid == KIDS && chr.Reaction > 19) ||
+        (srvid == NIVAL && chr.Reaction > 29) ||
+        (srvid == MEDIUM && chr.Reaction > 39) ||
+        (srvid == HARD && chr.Reaction > 49))
     {
         reborn = true;
 
@@ -1940,23 +1941,23 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         // not satisfied. so...
 
         // pay for the ticket (for !normal! characters too)
-        if (srvid == 2 && chr.Money < 30000) {
+        if (srvid == EASY && chr.Money < 30000) {
             meets_reborn_criteria = false;
             reborn_failure_reason = "30k_gold";
         }
-        else if (srvid == 3 && chr.Money < 300000) {
+        else if (srvid == KIDS && chr.Money < 300000) {
             meets_reborn_criteria = false;
             reborn_failure_reason = "300k_gold";
         }
-        else if (srvid == 4 && chr.Money < 1500000) {
+        else if (srvid == NIVAL && chr.Money < 1500000) {
             meets_reborn_criteria = false;
             reborn_failure_reason = "1500k_gold";
         }
-        else if (srvid == 5 && chr.Money < 7000000) {
+        else if (srvid == MEDIUM && chr.Money < 7000000) {
             meets_reborn_criteria = false;
             reborn_failure_reason = "7m_gold";
         }
-        else if (srvid == 6 && chr.Money < 50000000) {
+        else if (srvid == HARD && chr.Money < 50000000) {
             meets_reborn_criteria = false;
             reborn_failure_reason = "50m_gold";
         }
@@ -1969,23 +1970,23 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             }
         // ..also have min.exp for Hardcore chars (0 or 1 death)
         } else if (chr.Deaths <= 1) {
-            if (srvid == 2 && total_exp < 35000) {
+            if (srvid == EASY && total_exp < 35000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_35k_exp";
             }
-            else if (srvid == 3 && total_exp < 100000) {
+            else if (srvid == KIDS && total_exp < 100000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_100k_exp";
             }
-            else if (srvid == 4 && total_exp < 500000) {
+            else if (srvid == NIVAL && total_exp < 500000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_500k_exp";
             }
-            else if (srvid == 5 && total_exp < 11000000) {
+            else if (srvid == MEDIUM && total_exp < 11000000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_2m_exp";
             }
-            else if (srvid == 6 && total_exp < 50000000) {
+            else if (srvid == HARD && total_exp < 50000000) {
                 meets_reborn_criteria = false;
                 reborn_failure_reason = "hc_25m_exp";
             }
@@ -1999,19 +2000,19 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         uint8_t stat_ceiling = 0;
 
         switch (srvid) {
-        case 2:
+        case EASY:
             stat_ceiling = 14;
             break;
-        case 3:
+        case KIDS:
             stat_ceiling = 19;
             break;
-        case 4:
+        case NIVAL:
             stat_ceiling = 29;
             break;
-        case 5:
+        case MEDIUM:
             stat_ceiling = 39;
             break;
-        case 6:
+        case HARD:
             stat_ceiling = 49;
             break;
         }
@@ -2020,7 +2021,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         chr.Reaction = std::min(chr.Reaction, stat_ceiling);
 
         // We don't need to touch other stats on #6 as all stats are acquired independently there.
-        if (srvid != 6) {
+        if (srvid != HARD) {
             chr.Body = std::min(chr.Body, stat_ceiling);
             chr.Mind = std::min(chr.Mind, stat_ceiling);
             chr.Spirit = std::min(chr.Spirit, stat_ceiling);
@@ -2068,9 +2069,9 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             if (chr.Deaths == 0) {
                 chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
             } else if (chr.Sex == 0) {
-                chr.ExpAstralShooting /= srvid; // WARR divide in srvid times
+                chr.ExpAstralShooting /= static_cast<int>(srvid); // WARR divide in srvid times
             } else if (chr.Sex == 64) {
-                    chr.ExpAstralShooting = 1; // MAGE wipe astral skill
+                chr.ExpAstralShooting = 1; // MAGE wipe astral skill
             }
         }
         // RECLASSED chars reborn (AMA/WITCH)
@@ -2097,7 +2098,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             }
 
             // reset BODY for ama/witch upon reborn when moving from 6 to 7
-            if (srvid == 6) {
+            if (srvid == HARD) {
                 if (chr.Sex == 128) { // ama
                     chr.Body = 25;
                 } else if (chr.Sex == 192) { // witch
@@ -2107,24 +2108,24 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
         }
 
         // 2) prevent preserving after REBORN too high non-main skill
-        if (srvid < 7) {
+        if (srvid < NIGHTMARE) {
             uint32_t limit = 0;
 
             switch (srvid) {
                 // no need to mention 1st srv as there is no treasure, so no reborn
-                case 2:
+                case EASY:
                     limit = 10000; // Attention! It's for each skill! So total exp...
                     break; // ...might be up to 40.000 (10k * 4) (4 cause no main skill)
-                case 3:
+                case KIDS:
                     limit = 20000; // 80k
                     break;
-                case 4:
+                case NIVAL:
                     limit = 100000; // 400k
                     break;
-                case 5:
+                case MEDIUM:
                     limit = 250000; // 1m
                     break;
-                case 6:
+                case HARD:
                     limit = 500000; // 2m
                     break;
             }
@@ -2247,22 +2248,22 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
             coinflip = !coinflip; // One treasure is random, two are guaranteed.
 
             switch (srvid) {
-            case 2:
+            case EASY:
                 *points += 1;
                 break;
-            case 3:
+            case KIDS:
                 *points += 2;
                 break;
-            case 4:
+            case NIVAL:
                 *points += 3;
                 break;
-            case 5:
+            case MEDIUM:
                 *points += 15;
                 break;
-            case 6:
+            case HARD:
                 *points += 15;
                 break;
-            case 7: // 2 treasures per map
+            case NIGHTMARE: // 2 treasures per map
                 if (coinflip) {
                     ; // treasure at 7 server works in 50% cases
                 } else {
@@ -2292,7 +2293,7 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 }
                 *points += 15;
                 break;
-            case 8: // 1 treasure. 2x-3x more mind
+            case QUEST_T1: // 1 treasure. 2x-3x more mind
                 if (coinflip) {
                     chr.Mind += 3;
                 } else {
@@ -2300,15 +2301,15 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
                 }
                 *points += 30;
                 break;
-            case 9: // at 9, 10 - we have 3 treasures per map
+            case QUEST_T2: // at 9, 10 - we have 3 treasures per map
                 chr.Spirit++;
                 *points = 100;
                 break;
-            case 10:
+            case QUEST_T3:
                 chr.Reaction++;
                 *points += 100;
                 break;
-            case 11: // 1 treasure
+            case QUEST_T4: // 1 treasure
                 if (chr.Spirit < 76) {
                     chr.Spirit += 2;
                 } else if (chr.Mind < 76) {
@@ -2324,28 +2325,28 @@ void UpdateCharacter(CCharacter& chr, int srvid, unsigned int* ascended, unsigne
 
     // 2-6 servers: don't allow too high skill value on low servers
     // (also prevent max reward (potion) for mail quest at 6th server)
-    if (srvid < 7 && srvid > 1) {
+    if (srvid < NIGHTMARE && srvid > START) {
         uint32_t limit = 0;
         uint32_t limit_main = 0;
 
         switch (srvid) {
-            case 2:
+            case EASY:
                 limit = 50000;    // 450k (cause counts for each skill..
                 limit_main = 150000;
                 break;            // ..and main/astral limit * 3, so 150+150+150
-            case 3:
+            case KIDS:
                 limit = 100000;   // 1.3m (main/astral * 5)
                 limit_main = 500000;
                 break;
-            case 4:
+            case NIVAL:
                 limit = 1000000;  // 11m (main/astral * 4)
                 limit_main = 4000000;
                 break;
-            case 5:
+            case MEDIUM:
                 limit = 5000000;  // 45m (main/astral * 3)
                 limit_main = 15000000;
                 break;
-            case 6:
+            case HARD:
                 limit = 15000000; // 90m (main/astral * 2)
                 limit_main = 30000000;
                 break;

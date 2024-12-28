@@ -253,7 +253,8 @@ bool SV_ReturnCharacter(ServerConnection* conn, Packet& pack)
     p_chrlen = obsb.size();
 
     bool p__locked_hat, p__locked;
-    unsigned long p__id1, p__id2, p__srvid;
+    unsigned long p__id1, p__id2;
+    ServerIDType p__srvid;
 
     if(!Login_GetLocked(p_logname, p__locked_hat, p__locked, p__id1, p__id2, p__srvid))
     {
@@ -295,7 +296,7 @@ bool SV_ReturnCharacter(ServerConnection* conn, Packet& pack)
         should_unlock = true;
     }
 
-    if(should_unlock) Login_SetLocked(p_logname, false, false, 0, 0, 0); // character left the server, so unlock it
+    if(should_unlock) Login_SetLocked(p_logname, false, false, 0, 0, UNDEFINED); // character left the server, so unlock it
     //conn->Parent->Layer->
     if(conn->Parent->Info.ServerCaps & SERVER_CAP_DETAILED_INFO)
     {

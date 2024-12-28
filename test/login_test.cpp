@@ -5,6 +5,7 @@
 #include "UnitTest++.h"
 
 #include "../login.hpp"
+#include "../server_id.hpp"
 
 namespace
 {
@@ -142,7 +143,7 @@ TEST(UpdateCharacter_NoChanges) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 2, &ascended, &points);
+    UpdateCharacter(chr, EASY, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -168,7 +169,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 2, &ascended, &points);
+    UpdateCharacter(chr, EASY, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -196,7 +197,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 2, &ascended, &points);
+    UpdateCharacter(chr, EASY, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -224,7 +225,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 2, &ascended, &points);
+    UpdateCharacter(chr, EASY, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -252,7 +253,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 2, &ascended, &points);
+    UpdateCharacter(chr, EASY, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -279,7 +280,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 4, &ascended, &points);
+    UpdateCharacter(chr, NIVAL, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -306,7 +307,7 @@ TEST(UpdateCharacter_Reborn67_Success) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 6, &ascended, &points);
+    UpdateCharacter(chr, HARD, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -333,7 +334,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 3, &ascended, &points);
+    UpdateCharacter(chr, KIDS, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -361,7 +362,7 @@ TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 4, &ascended, &points);
+    UpdateCharacter(chr, NIVAL, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -389,7 +390,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 5, &ascended, &points);
+    UpdateCharacter(chr, MEDIUM, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -417,7 +418,7 @@ TEST(UpdateCharacter_Reborn2_Success_Witch) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 2, &ascended, &points);
+    UpdateCharacter(chr, EASY, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)1);
@@ -447,7 +448,7 @@ TEST(UpdateCharacter_Reclass_Success) {
     unsigned int ascended = 0;
     unsigned int points = 0;
 
-    UpdateCharacter(chr, 7, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)0);
@@ -475,7 +476,7 @@ TEST(UpdateCharacter_Ascend_Success) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 7, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)1);
     CHECK_EQUAL(points, (unsigned int)0);
@@ -503,7 +504,7 @@ TEST(UpdateCharacter_NoChanges_7) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 7, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)0);
@@ -530,7 +531,7 @@ TEST(UpdateCharacter_TreasureOn7) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 7, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
     CHECK_EQUAL(points, (unsigned int)30); // Two treasures, 15 each.
 
     CHECK_EQUAL(ascended, (unsigned int)0);
@@ -556,7 +557,7 @@ TEST(UpdateCharacter_TreasureOn8) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, 8, &ascended, &points);
+    UpdateCharacter(chr, QUEST_T1, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)60); // Two treasures, 30 each.

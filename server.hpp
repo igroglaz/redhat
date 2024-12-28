@@ -5,6 +5,7 @@
 #include "config.hpp"
 #include "socket.hpp"
 #include <windows.h>
+#include "server_id.hpp"
 
 #define SERVER_CONNECTED 0x00000001
 #define SERVER_LOGGED_IN 0x00000002
@@ -63,7 +64,7 @@ struct ServerConnection
     SOCKET Socket;
     unsigned long Flags;
     unsigned long Version;
-    unsigned long ID;
+    ServerIDType ID;
 
     bool Active;
 
@@ -98,7 +99,7 @@ struct ServerLayer
 
 struct Server
 {
-    unsigned long Number;
+    ServerIDType Number;
     std::string Name;
     std::string Address;
     unsigned short Port;

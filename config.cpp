@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "utils.hpp"
 #include "server.hpp"
+#include "server_id.hpp"
 
 namespace Config
 {
@@ -143,7 +144,7 @@ bool ReadConfig(std::string filename)
                 if(CheckInt(section))
                 {
                     if(!srv) srv = new Server();
-                    srv->Number = StrToInt(section);
+                    srv->Number = static_cast<ServerIDType>(StrToInt(section));
                     srv->Address = "";
                     srv->IAddress = "";
                     srv->Port = 0;
