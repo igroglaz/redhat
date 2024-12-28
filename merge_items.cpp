@@ -1,10 +1,11 @@
 #include "merge_items.hpp"
 
 #include "login.hpp"
+#include "server_id.hpp"
 
-void Improve(CItem& item, int server_id);
+void Improve(CItem& item, ServerIDType server_id);
 
-void MergeItems(CItemList& bag, int server_id) {
+void MergeItems(CItemList& bag, ServerIDType server_id) {
     if (bag.Items.size() < MERGE_COUNT) {
         return;
     }
@@ -38,23 +39,33 @@ void MergeItems(CItemList& bag, int server_id) {
 }
 
 // Improve an item. The improvement depends on the server.
-void Improve(CItem& item, int server_id) {
+void Improve(CItem& item, ServerIDType server_id) {
     const int max_health = 7;
-    const uint8_t delta_by_server[] = {
-        0, // server 0, unused
-        0, // server 1, doesn't happen
-        1, // server 2
-        2, 2, 2, 2, 2, // servers 3--7
-        4, // server 8
-        3, 3, 3, // servers 9--11
-    };
 
-    if (server_id >= sizeof(delta_by_server) / sizeof(delta_by_server[0])) {
-        // Should not be possible, but let's be safe.
-        return;
+    uint8_t delta = 0;
+
+    switch (server_id) {
+        case START: // doesn't happen.
+            break;
+        case EASY:
+            delta = 1;
+            break;
+        case KIDS:
+        case NIVAL:
+        case MEDIUM:
+        case HARD:
+        case NIGHTMARE:
+            delta = 2;
+            break;
+        case QUEST_T1:
+            delta = 4;
+            break;
+        case QUEST_T2:
+        case QUEST_T3:
+        case QUEST_T4:
+            delta = 3;
+            break;
     }
-
-    const uint8_t delta = delta_by_server[server_id];
 
     item.IsMagic = true;
 

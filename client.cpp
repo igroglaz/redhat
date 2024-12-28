@@ -7,6 +7,7 @@
 #include "login.hpp"
 #include "session.hpp"
 #include "version.hpp"
+#include "server_id.hpp"
 #include <algorithm>
 
 #include "server.hpp"
@@ -690,7 +691,8 @@ bool CL_Login(Client* conn, Packet& pack)
     }
 
     bool l_locked_hat, l_locked;
-    unsigned long l_id1, l_id2, l_srvid;
+    unsigned long l_id1, l_id2;
+    ServerIDType l_srvid;
     if(!Login_GetLocked(s_login, l_locked_hat, l_locked, l_id1, l_id2, l_srvid))
     {
         Printf(LOG_Error, "[DB] Error: Login_GetLocked(\"%s\", <locked_hat>, <locked>, <id1>, <id2>, <srvid>).\n", s_login.c_str());
@@ -915,7 +917,7 @@ bool CL_Login(Client* conn, Packet& pack)
         }
     }
 
-    if(!Login_SetLocked(s_login, true, false, 0, 0, 0))
+    if(!Login_SetLocked(s_login, true, false, 0, 0, UNDEFINED))
     {
         Printf(LOG_Error, "[DB] Error: Login_SetLocked(\"%s\", <locked_hat>, <locked>, <id1>, <id2>, <srvid>).\n", s_login.c_str());
         Printf(LOG_Error, "[DB] %s\n", SQL_Error().c_str());
@@ -1318,7 +1320,7 @@ float CL_NeedPointsFrom(uint8_t what)
     return 0;
 }
 
-bool IsCharacterAllowed(const CCharacter& chr, int srvid) {
+bool IsCharacterAllowed(const CCharacter& chr, ServerIDType srvid) {
     uint32_t exp_total = 0;
     exp_total += chr.ExpFireBlade;
     exp_total += chr.ExpWaterAxe;
@@ -1327,23 +1329,25 @@ bool IsCharacterAllowed(const CCharacter& chr, int srvid) {
     exp_total += chr.ExpAstralShooting;
 
     // newborn chars must enter "town" server 1st (#1)
-    if (srvid > 1 && exp_total == 0) {
+    if (srvid != START && exp_total == 0) {
         return false;
     }
 
     switch (srvid) {
-        case 1:
+        case START:
             return chr.Body == 1 && chr.Reaction == 1 && chr.Mind == 1 && chr.Spirit == 1 && exp_total == 0;
-        case 2:
+        case EASY:
             return chr.Mind < 15;
-        case 3:
+        case KIDS:
             return chr.Mind >= 15 && chr.Reaction < 20;
-        case 4:
+        case NIVAL:
             return 20 <= chr.Reaction && chr.Reaction < 30;
-        case 5:
+        case MEDIUM:
             return 30 <= chr.Reaction && chr.Reaction < 40;
-        case 6:
+        case HARD:
             return 40 <= chr.Reaction && chr.Reaction < 50;
+        default:
+            return chr.Reaction >= 50;
     }
 
     return true;
@@ -1383,7 +1387,8 @@ bool CL_EnterServer(Client* conn, Packet& pack)
     delete[] p_srvname_c;
 
     bool l_locked_hat, l_locked;
-    unsigned long l_id1, l_id2, l_srvid;
+    unsigned long l_id1, l_id2;
+    ServerIDType l_srvid;
     if(!Login_GetLocked(conn->Login, l_locked_hat, l_locked, l_id1, l_id2, l_srvid))
     {
         Printf(LOG_Error, "[DB] Error: Login_GetLocked(\"%s\", <locked_hat>, <locked>, <id1>, <id2>, <srvid>).\n", conn->Login.c_str());

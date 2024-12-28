@@ -137,9 +137,9 @@ Login::~Login()
 }
 
 bool Login_Create(std::string login, std::string password);
-bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, unsigned long srvid);
+bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, ServerIDType srvid);
 bool Login_SetIPF(std::string login, std::string ipf);
-bool Login_SetLocked(std::string login, bool locked_hat, bool locked, unsigned long id1, unsigned long id2, unsigned long srvid);
+bool Login_SetLocked(std::string login, bool locked_hat, bool locked, unsigned long id1, unsigned long id2, ServerIDType srvid);
 #include "utils.hpp"
 
 void LGN_DBConvert(std::string directory)
@@ -224,7 +224,7 @@ void LGN_DBConvert(std::string directory)
                         continue;
                     }
 
-                    if(!Login_SetCharacter(login, lgn.Characters[j].Id1, lgn.Characters[j].Id2, size, data, lgn.Characters[j].Nick.c_str(),0)) // we don't have servid there, so we use 0
+                    if(!Login_SetCharacter(login, lgn.Characters[j].Id1, lgn.Characters[j].Id2, size, data, lgn.Characters[j].Nick.c_str(),UNDEFINED)) // we don't have servid there
                     {
                         Printf(LOG_Warning, "[CB] Warning: couldn't convert character %s (login %s), database error!\n", lgn.Characters[j].Nick.c_str(), login.c_str());
                         delete[] data;

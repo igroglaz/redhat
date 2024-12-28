@@ -1,11 +1,11 @@
-#ifndef LOGIN_HPP_INCLUDED
-#define LOGIN_HPP_INCLUDED
+#pragma once
 
 #include <string>
 #include <fstream>
 #include <vector>
 
 #include "character.hpp"
+#include "server_id.hpp"
 
 struct RawCharacter
 {
@@ -33,7 +33,7 @@ class Login
         bool GM;
 
         unsigned long HatID;
-        unsigned long ServerID;
+        ServerIDType ServerID;
         unsigned long LockedID1;
         unsigned long LockedID2;
 
@@ -45,5 +45,3 @@ class Login
         bool LoadFromFile(std::string name);
         void SaveToFile(std::string name);
 };
-
-#endif // LOGIN_HPP_INCLUDED
