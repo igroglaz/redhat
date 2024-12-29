@@ -45,8 +45,6 @@ void Improve(CItem& item, ServerIDType server_id) {
     uint8_t delta = 0;
 
     switch (server_id) {
-        case START: // doesn't happen.
-            break;
         case EASY:
             delta = 1;
             break;
@@ -65,6 +63,8 @@ void Improve(CItem& item, ServerIDType server_id) {
         case QUEST_T4:
             delta = 3;
             break;
+        default:
+            delta = 0;
     }
 
     item.IsMagic = true;
