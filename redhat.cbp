@@ -36,7 +36,7 @@
 			<Add library="winmm" />
 			<Add library="mingw32" />
 			<Add library="ws2_32" />
-			<Add library="mysql\lib\libmysql.lib" />
+			<Add library="mysql/lib/libmysql.lib" />
 		</Linker>
 		<Unit filename="BinaryStream.cpp" />
 		<Unit filename="BinaryStream.hpp" />
@@ -67,10 +67,13 @@
 		<Unit filename="serialize.hpp" />
 		<Unit filename="server.cpp" />
 		<Unit filename="server.hpp" />
+		<Unit filename="server_id.hpp" />
 		<Unit filename="session.cpp" />
 		<Unit filename="session.hpp" />
 		<Unit filename="sha1.cpp" />
 		<Unit filename="sha1.h" />
+		<Unit filename="shelf.cpp" />
+		<Unit filename="shelf.hpp" />
 		<Unit filename="socket.cpp" />
 		<Unit filename="socket.hpp" />
 		<Unit filename="sql.cpp" />
@@ -82,9 +85,6 @@
 		<Unit filename="version.cpp" />
 		<Unit filename="version.hpp" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<lib_finder disable_auto="1" />
 		</Extensions>
 	</Project>
