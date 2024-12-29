@@ -406,10 +406,10 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_Reborn2_Success_Witch) {
+TEST(UpdateCharacter_Reborn23_Success_Witch) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
-            .info{.main_skill=4, .sex=192, .kills=2000},
+            .info{.main_skill=4, .picture=15, .sex=192, .kills=2000},
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
             .skills={.fire=10000, .water=20000, .air=30000, .earth=40000, .astral=50000},
             .items={.money=100000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
@@ -425,10 +425,39 @@ TEST(UpdateCharacter_Reborn2_Success_Witch) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.main_skill=4, .picture=64, .sex=192, .kills=0}, // Wipe kills.
+            .info{.main_skill=4, .picture=15, .sex=192, .kills=0}, // Wipe kills, don't get zombie picture.
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // Wipe all skills.
             .items={.money=0, .spells=16842752}, // Wipe money, bag and dress, reset spells.
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn23_Success_Warrior) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=4, .sex=0, .kills=2000},
+            .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
+            .skills={.fire=10000, .water=20000, .air=30000, .earth=40000, .astral=50000},
+            .items={.money=100000, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, EASY, &ascended, &points);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)1);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=4, .picture=64, .sex=0, .kills=2000}, // Get zombie picture.
+            .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
+            .skills={.fire=5000, .water=10000, .air=15000, .earth=1, .astral=25000}, // Wipe all skills.
+            .items={.money=0, .dress="[0,0,0,1];[1000,0,0,1]"}, // Wipe money and bag.
         }
     );
 

@@ -2018,8 +2018,10 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
 
     if (reborn) {
         if (srvid == EASY) {
-            // Players become zombies on first reborn.
-            chr.Picture = 64;
+            // Male characters become zombies on first reborn.
+            if (chr.Sex == 0 || chr.Sex == 64) {
+                chr.Picture = 64;
+            }
         }
 
         // 1) perform reborn
