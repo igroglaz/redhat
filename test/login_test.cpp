@@ -259,7 +259,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=3, .sex=64, .deaths=10},
+            .info={.main_skill=3, .picture=64, .sex=64, .deaths=10},
             .stats={.body=15, .reaction=11, .mind=15, .spirit=15},
             .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1}, // Main skill and astral are set to 1, others halved.
             .items={.spells=16778240}, // Money, bag and dress are wiped, spells are reset.
@@ -288,7 +288,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
         CharacterOpts{
             .info={.main_skill=3, .sex=0, .deaths=10},
             .stats={.body=29, .reaction=30, .mind=28, .spirit=27},
-            .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1250}, // Main skill is set to 1, shooting is divided by server number (4), others halved.
+            .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1250}, // Main skill is set to 1, shooting is divided by server number (3), others halved.
             .items={.dress="[0,0,0,1];[1000,0,0,1]"}, // Money and bag are wiped.
         }
     );
@@ -425,7 +425,7 @@ TEST(UpdateCharacter_Reborn2_Success_Witch) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.main_skill=4, .sex=192, .kills=0}, // Wipe kills.
+            .info{.main_skill=4, .picture=64, .sex=192, .kills=0}, // Wipe kills.
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // Wipe all skills.
             .items={.money=0, .spells=16842752}, // Wipe money, bag and dress, reset spells.

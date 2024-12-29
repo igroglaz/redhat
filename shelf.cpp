@@ -324,9 +324,7 @@ int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vect
     }
 
     int32_t withdraw = std::min(amount, std::numeric_limits<int32_t>::max() - current_money);
-    Printf(0, "I have %d and want %d. Can get up to %d\n", current_money, amount, withdraw);
     if (static_cast<int64_t>(withdraw) > shelved_money) {
-        Printf(0, "We have %lld shelved. Now I can withdraw up to %d\n", shelved_money, withdraw);
         withdraw = static_cast<int32_t>(shelved_money);
     }
 
@@ -336,8 +334,6 @@ int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vect
 
     int64_t money = shelved_money - static_cast<int64_t>(withdraw);
     
-    Printf(0, "%lld - %d = %lld\n", shelved_money, withdraw, money);
-
     if (!SaveShelf(login_id, server_id, Field::MONEY, mutex, {}, money, shelf_exists, sql_query)) {
         return current_money;
     }

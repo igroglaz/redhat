@@ -1321,21 +1321,8 @@ float CL_NeedPointsFrom(uint8_t what)
 }
 
 bool IsCharacterAllowed(const CCharacter& chr, ServerIDType srvid) {
-    uint32_t exp_total = 0;
-    exp_total += chr.ExpFireBlade;
-    exp_total += chr.ExpWaterAxe;
-    exp_total += chr.ExpAirBludgeon;
-    exp_total += chr.ExpEarthPike;
-    exp_total += chr.ExpAstralShooting;
-
     // newborn chars must enter "town" server 1st (#1)
-    if (srvid != START && exp_total == 0) {
-        return false;
-    }
-
     switch (srvid) {
-        case START:
-            return chr.Body == 1 && chr.Reaction == 1 && chr.Mind == 1 && chr.Spirit == 1 && exp_total == 0;
         case EASY:
             return chr.Mind < 15;
         case KIDS:

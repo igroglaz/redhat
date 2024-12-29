@@ -1798,48 +1798,6 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDTy
  *      points: output parameter: points for finding the treasure
  */
 void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended, unsigned int* points) {
-    // Reset character attributes for #1 server (remove 1000 starting gold)
-    if (srvid == START) {
-        // TODO: don't wipe the character once server 1 is functional.
-
-        chr.Money = 0;
-        chr.MonstersKills = 0;
-        chr.Deaths = 0;
-        chr.ExpFireBlade = 1;
-        chr.ExpWaterAxe = 0;
-        chr.ExpAirBludgeon = 0;
-        chr.ExpEarthPike = 0;
-        chr.ExpAstralShooting = 0;
-        // wipe bag
-        std::string serializedBag = "[0,0,0,0]";
-        chr.Bag = Login_UnserializeItems(serializedBag);
-        // wipe equipped
-        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-        chr.Dress = Login_UnserializeItems(serializedDress);
-
-        if (chr.Sex == 64 || chr.Sex == 192) // mage
-        {
-            WipeSpells(chr);
-        }
-
-        if (chr.Sex == 0) { // warr
-        /////// NOTE: if change avatar number there - don't forget to change
-        /////// at rom2.ru code
-            chr.Picture = 64; // zombie
-        }
-        else if (chr.Sex == 64) { // mage
-            chr.Picture = 64; // zombie
-        }
-        else if (chr.Sex == 128) { // ama become warr
-            chr.Sex = 0;
-            chr.Picture = 64; // zombie
-        }
-        else if (chr.Sex == 192) { // witch become mage
-            chr.Sex = 64;
-            chr.Picture = 64; // zombie
-        }
-    }
-
     MergeItems(chr.Bag, srvid);
 
     ////////////
@@ -2058,6 +2016,11 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
     }
 
     if (reborn) {
+        if (srvid == EASY) {
+            // Players become zombies on first reborn.
+            chr.Picture = 64;
+        }
+
         // 1) perform reborn
         // WARRIOR/MAGE (no reclass OR ascend)
         if (chr.Sex == 0 || chr.Sex == 64) {
@@ -2093,7 +2056,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
             if (chr.Deaths == 0) {
                 chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
             } else if (chr.Sex == 0) {
-                chr.ExpAstralShooting /= static_cast<int>(srvid); // WARR divide in srvid times
+                chr.ExpAstralShooting /= static_cast<int>(srvid + 1); // WARR divide in srvid times
             } else if (chr.Sex == 64) {
                 chr.ExpAstralShooting = 1; // MAGE wipe astral skill
             }
@@ -2349,7 +2312,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
 
     // 2-6 servers: don't allow too high skill value on low servers
     // (also prevent max reward (potion) for mail quest at 6th server)
-    if (srvid < NIGHTMARE && srvid > START) {
+    if (srvid < NIGHTMARE) {
         uint32_t limit = 0;
         uint32_t limit_main = 0;
 

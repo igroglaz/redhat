@@ -163,7 +163,7 @@ TEST(ItemsToSavingsBook_NoBook) {
 
 TEST(ItemsToSavingsBook_Normal) {
     FakeSQLQuery sql_query{.queries={
-        {"INSERT INTO shelf (login_id, server_id, mutex, items) VALUES (42, 7, 0, '[0,0,0,2];[6162,1,0,1,{2:2:0:0}];[3649,0,0,5]')", true},
+        {"INSERT INTO shelf (login_id, server_id, mutex, items) VALUES (42, 6, 0, '[0,0,0,2];[6162,1,0,1,{2:2:0:0}];[3649,0,0,5]')", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -181,7 +181,7 @@ TEST(ItemsToSavingsBook_Normal) {
 
 TEST(ItemsToSavingsBook_WithExistingShelf) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,3];[3649,0,0,10];[53517,1,0,1,{17:50:0:0}];[6162,1,0,1,{2:2:0:0}]' WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,3];[3649,0,0,10];[53517,1,0,1,{17:50:0:0}];[6162,1,0,1,{2:2:0:0}]' WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -216,7 +216,7 @@ TEST(ItemsToSavingsBook_FailedQuerySelect) {
 
 TEST(ItemsToSavingsBook_FailedQuerySave) {
     FakeSQLQuery sql_query{.queries={
-        {"INSERT INTO shelf (login_id, server_id, mutex, items) VALUES (42, 7, 0, '[0,0,0,2];[6162,1,0,1,{2:2:0:0}];[3649,0,0,5]')", false},
+        {"INSERT INTO shelf (login_id, server_id, mutex, items) VALUES (42, 6, 0, '[0,0,0,2];[6162,1,0,1,{2:2:0:0}];[3649,0,0,5]')", false},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -271,7 +271,7 @@ TEST(ItemsFromSavingsBook_EmptyShelf) {
 
 TEST(ItemsFromSavingsBook_Normal) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,0]' WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,0]' WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -323,7 +323,7 @@ TEST(ItemsFromSavingsBook_FailedQuerySelect) {
 
 TEST(ItemsFromSavingsBook_FailedQuerySave) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,0]' WHERE login_id = 42 AND server_id = 7 AND mutex = 0", false},
+        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,0]' WHERE login_id = 42 AND server_id = 6 AND mutex = 0", false},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -342,7 +342,7 @@ TEST(ItemsFromSavingsBook_FailedQuerySave) {
 
 TEST(MoneyToSavingsBook_NewShelf) {
     FakeSQLQuery sql_query{.queries={
-        {"INSERT INTO shelf (login_id, server_id, mutex, money) VALUES (42, 7, 0, 200)", true},
+        {"INSERT INTO shelf (login_id, server_id, mutex, money) VALUES (42, 6, 0, 200)", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -361,7 +361,7 @@ TEST(MoneyToSavingsBook_NewShelf) {
 
 TEST(MoneyToSavingsBook_EmptyShelf) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 200 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 200 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -381,7 +381,7 @@ TEST(MoneyToSavingsBook_EmptyShelf) {
 
 TEST(MoneyToSavingsBook_ExistingShelf) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 250 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 250 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -401,7 +401,7 @@ TEST(MoneyToSavingsBook_ExistingShelf) {
 
 TEST(MoneyToSavingsBook_OverCurrent) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 110 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 110 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -423,7 +423,7 @@ TEST(MoneyToSavingsBook_OverInt32) {
     int32_t billion = 1000000000;
 
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 6000000000 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 6000000000 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -460,7 +460,7 @@ TEST(MoneyToSavingsBook_FailedToQuery) {
 
 TEST(MoneyToSavingsBook_FailedToSave) {
     FakeSQLQuery sql_query{.queries={
-        {"INSERT INTO shelf (login_id, server_id, mutex, money) VALUES (42, 3, 0, 200)", false},
+        {"INSERT INTO shelf (login_id, server_id, mutex, money) VALUES (42, 2, 0, 200)", false},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -516,7 +516,7 @@ TEST(MoneyFromSavingsBook_EmptyShelf) {
 
 TEST(MoneyFromSavingsBook_ExistingShelf) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 100 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 100 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -536,7 +536,7 @@ TEST(MoneyFromSavingsBook_ExistingShelf) {
 
 TEST(MoneyFromSavingsBook_OverShelved) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 0 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 0 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -556,7 +556,7 @@ TEST(MoneyFromSavingsBook_OverShelved) {
 
 TEST(MoneyFromSavingsBook_WithdrawALot) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 4000001000 WHERE login_id = 42 AND server_id = 5 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 4000001000 WHERE login_id = 42 AND server_id = 4 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -578,7 +578,7 @@ TEST(MoneyFromSavingsBook_OverInt32) {
     int32_t billion = 1000000000;
 
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 3000000000 WHERE login_id = 42 AND server_id = 7 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 3000000000 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -615,7 +615,7 @@ TEST(MoneyFromSavingsBook_FailedToQuery) {
 
 TEST(MoneyFromSavingsBook_FailedToSave) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 300 WHERE login_id = 42 AND server_id = 3 AND mutex = 0", false},
+        {"UPDATE shelf SET mutex = 1, money = 300 WHERE login_id = 42 AND server_id = 2 AND mutex = 0", false},
     }};
 
     FakeLoadFromShelf load_from_shelf{
