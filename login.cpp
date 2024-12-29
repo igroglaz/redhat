@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "merge_items.hpp"
 #include "server_id.hpp"
+#include "shelf.hpp"
 
 #include "sha1.h"
 
@@ -780,6 +781,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 SQL_Unlock();
                 return false;
             }
+            chr.LoginID = login_id;
 
             if(chr.Clan.size() > 0) // Process clan data
             {
@@ -1054,6 +1056,7 @@ bool Login_GetCharacter(std::string login, unsigned long id1, unsigned long id2,
         else
         {
             CCharacter chr;
+            chr.LoginID = SQL_FetchInt(row, result, "login_id");
             chr.Id1 = SQL_FetchInt(row, result, "id1");
             chr.Id2 = SQL_FetchInt(row, result, "id2");
             chr.HatId = (genericId ? Config::HatID : SQL_FetchInt(row, result, "hat_id"));
@@ -1904,6 +1907,27 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
                     break;
             }
         }
+    }
+
+    if (chr.Clan == "d" || chr.Clan == "deposit") { // Deposit items.
+        shelf::ItemsToSavingsBook(chr.LoginID, srvid, chr.Bag.Items);
+    } else if (chr.Clan == "w" || chr.Clan == "withdraw") { // Withdraw items.
+        shelf::ItemsFromSavingsBook(chr.LoginID, srvid, chr.Bag.Items);
+    } else if (chr.Clan.starts_with("dg")) { // Deposit gold.
+        if (chr.Clan == "dg") { // Default: 90% of total gold.
+            chr.Money = shelf::MoneyToSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, chr.Money - (chr.Money / 10));
+        } else {
+            std::string percentage_str = chr.Clan.substr(2);
+            if (CheckInt(percentage_str)) { // Deposit given percentage of total gold.
+                int percentage = StrToInt(percentage_str);
+                if (0 < percentage && percentage <= 100) {
+                    double ratio = percentage / 100.0;
+                    chr.Money = shelf::MoneyToSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, static_cast<int32_t>(chr.Money * ratio));
+                }
+            }
+        }
+    } else if (chr.Clan == "wg") { // Withdraw gold.
+        chr.Money = shelf::MoneyFromSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, std::numeric_limits<int32_t>::max());
     }
 
     ////////////////////////////////////////////

@@ -69,6 +69,8 @@ class CCharacter
                  ExpAstralShooting,
                  Id1, Id2, HatId;
 
+        int LoginID;
+
         uint8_t UnknownValue1,
                 UnknownValue2,
                 UnknownValue3,

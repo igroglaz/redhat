@@ -71,9 +71,16 @@ long int SQL_FetchInt(MYSQL_ROW row, MYSQL_RES* result, std::string fieldname)
     return StrToInt(str);
 }
 
-long long int SQL_FetchInt64(MYSQL_ROW row, MYSQL_RES* result, std::string fieldname)
-{
-    return (long long int)SQL_FetchInt(row, result, fieldname);
+int64_t SQL_FetchInt64(MYSQL_ROW row, MYSQL_RES* result, std::string fieldname) {
+    std::string str = SQL_FetchString(row, result, fieldname);
+    if (!str.length() || !CheckInt(str)) {
+        return -1;
+    }
+
+    // StrToInt uses an int for conversion, so we cannot use it.
+	int64_t retval;
+	sscanf(str.c_str(), "%lld", &retval);
+	return retval;
 }
 
 std::string SQL_FetchString(MYSQL_ROW row, MYSQL_RES* result, std::string fieldname)
@@ -110,6 +117,7 @@ void SQL_DropTables()
 {
     std::string query_table_logins = "DROP TABLE `logins`";
     std::string query_table_characters = "DROP TABLE `characters`";
+    std::string query_table_shelf = "DROP TABLE `shelf`";
 
     Printf(LOG_Silent, "[DB] Warning: this action COULD NOT BE UNDONE!\n");
     PrintfT(LOG_Silent, "[DB] Query: \"%s\". Type \"yes\" to continue: ", query_table_logins.c_str());
@@ -132,6 +140,17 @@ void SQL_DropTables()
             Printf(LOG_Silent, "[DB] Warning: table `characters` NOT deleted.\n");
     }
     else Printf(LOG_Silent, "[DB] Table `characters` NOT deleted.\n");
+
+    PrintfT(LOG_Silent, "[DB] Query: \"%s\". Type \"yes\" to continue: ", query_table_shelf.c_str());
+    std::cin >> in;
+    in = ToLower(in);
+    if (in == "y" || in == "yes") {
+        if(mysql_query(&SQL::Connection, query_table_shelf.c_str()) != 0) {
+            Printf(LOG_Silent, "[DB] Warning: failed to delete table `shelf`: %s\n", SQL_Error().c_str());
+        }
+    } else {
+        Printf(LOG_Silent, "[DB] Table `shelf` NOT deleted.\n");
+    }
 }
 
 void SQL_CreateTables()
@@ -217,6 +236,20 @@ void SQL_CreateTables()
         Printf(LOG_Silent, "[DB] Warning: table `characters` not created!\n");
     if(mysql_query(&SQL::Connection, query_table_authlog.c_str()) != 0)
         Printf(LOG_Silent, "[DB] Warning: table `authlog` not created!\n");
+
+    std::string create_table_shelf = R"(
+        CREATE TABLE IF NOT EXISTS shelf (
+            login_id BIGINT(1) NOT NULL COMMENT 'Player login ID, same as in logins',
+            server_id INT(1) NOT NULL COMMENT 'Server ID, 1--7',
+            mutex INT(1) COMMENT 'Used to detect concurrent modification. Always read this field for updates and increment by 1 when updating the row.',
+            items LONGTEXT COMMENT 'Shelved items, in DB format for CItemList',
+            money BIGINT(1) COMMENT 'Shelved money',
+            INDEX shelf_id_index (login_id, server_id)
+        );
+    )";
+    if (mysql_query(&SQL::Connection, create_table_shelf.c_str()) != 0) {
+        Printf(LOG_Silent, "[DB] Warning: table `shelf` not created: %s\n", SQL_Error().c_str());
+    }
 }
 
 #include "CCharacter.hpp"
