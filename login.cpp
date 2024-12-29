@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <windows.h>
+#include <limits>
 
 #include <cstdlib> // For std::rand()
 
@@ -1871,7 +1872,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
         shelf::ItemsToSavingsBook(chr.LoginID, srvid, chr.Bag.Items);
     } else if (chr.Clan == "w" || chr.Clan == "withdraw") { // Withdraw items.
         shelf::ItemsFromSavingsBook(chr.LoginID, srvid, chr.Bag.Items);
-    } else if (chr.Clan.starts_with("dg")) { // Deposit gold.
+    } else if (chr.Clan.find("dg") == 0) { // Deposit gold.
         if (chr.Clan == "dg") { // Default: 90% of total gold.
             chr.Money = shelf::MoneyToSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, chr.Money - (chr.Money / 10));
         } else {
