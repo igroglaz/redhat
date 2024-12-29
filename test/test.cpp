@@ -4,6 +4,11 @@
 
 #include "UnitTest++.h"
 
+#include "../config.hpp"
+#include "../utils.hpp"
+
 int main() {
+    Config::LogLevel = LOG_Silent; // Silence all logs for all tests.
+
     return UnitTest::RunAllTests();
 }

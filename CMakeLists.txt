@@ -24,6 +24,7 @@ add_library(redhat-lib
     serialize.cpp
     server.cpp
     session.cpp
+    shelf.cpp
     sha1.cpp
     socket.cpp
     sql.cpp
@@ -42,6 +43,7 @@ add_executable(redhat
 target_link_libraries(redhat redhat-lib)
 
 add_executable(redhat-test
+    test/shelf_test.cpp
     test/login_test.cpp
     test/merge_items_test.cpp
     test/test.cpp
