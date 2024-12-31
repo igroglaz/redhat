@@ -56,8 +56,6 @@ void Improve(CItem& item, ServerIDType server_id) {
             delta = 2;
             break;
         case QUEST_T1:
-            delta = 4;
-            break;
         case QUEST_T2:
         case QUEST_T3:
         case QUEST_T4:
