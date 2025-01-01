@@ -871,7 +871,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             {
                 unsigned int ascended = 0; // DB-only flag to ladder score
                 unsigned int points = 0;   // DB-only flag to ladder score
-                UpdateCharacter(chr, srvid, &ascended, &points); // pass pointers
+                UpdateCharacter(chr, srvid, shelf::StoreOnShelf, &ascended, &points); // pass pointers
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -1790,6 +1790,25 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDTy
     return "";
 }
 
+void StoreOnShelfUponReborn(ServerIDType server_id, CCharacter& chr, shelf::StoreOnShelfFunction store_on_shelf) {
+    std::vector<CItem> items = std::move(chr.Bag.Items);
+    chr.Bag.Items.clear();
+
+    if (chr.Sex == 64 || chr.Sex == 192) {
+        // Mage and witch lose the dress in addition to the inventory.
+        items.insert(items.end(), chr.Dress.Items.begin(), chr.Dress.Items.end());
+
+        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+        chr.Dress = Login_UnserializeItems(serializedDress);
+    }
+
+    if (!store_on_shelf(chr.LoginID, server_id, std::move(items), chr.Money)) {
+        Printf(LOG_Warning, "Failed to store items on shelf upon reborn for character %s at server %d\n", chr.GetFullName(), server_id);
+    }
+
+    chr.Money = 0;
+}
+
 /** Update the character in the database, after creation or after leaving a map.
  *
  *  Parameters:
@@ -1798,7 +1817,7 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDTy
  *      ascended: output parameter: has the character ascended?
  *      points: output parameter: points for finding the treasure
  */
-void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended, unsigned int* points) {
+void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points) {
     MergeItems(chr.Bag, srvid);
 
     ////////////
@@ -1907,10 +1926,11 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
         chr.ExpFireBlade = 1;
     }
 
+    uint32_t reborn_money_price;
     // note: we check there _!from which server!_ we received character
-    // eg if we received char from srvid 2 and char finished its stay there
-    // (by drinking mind to 15) - he will be reborned.. and his next login
-    // to srvid 3 (as he can't enter 2 anymore) will be ab ovo
+    // eg if we received char from srvid KIDS and char finished its stay there
+    // (by drinking reaction to 20) - he will be reborned.. and his next login
+    // will be to srvid NIVAL (as he can't enter 2 anymore).
     if ((srvid == EASY && chr.Mind > 14) ||
         (srvid == KIDS && chr.Reaction > 19) ||
         (srvid == NIVAL && chr.Reaction > 29) ||
@@ -1923,35 +1943,27 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
         // go to next lvl or not; so we can revert its stats back if reqs
         // not satisfied. so...
 
-        // pay for the ticket (for !normal! characters too)
-        if (srvid == EASY && chr.Money < 30000) {
-            meets_reborn_criteria = false;
-            reborn_failure_reason = "30k_gold";
-        }
-        else if (srvid == KIDS && chr.Money < 300000) {
-            meets_reborn_criteria = false;
-            reborn_failure_reason = "300k_gold";
-        }
-        else if (srvid == NIVAL && chr.Money < 1500000) {
-            meets_reborn_criteria = false;
-            reborn_failure_reason = "1500k_gold";
-        }
-        else if (srvid == MEDIUM && chr.Money < 7000000) {
-            meets_reborn_criteria = false;
-            reborn_failure_reason = "7m_gold";
-        }
-        else if (srvid == HARD && chr.Money < 50000000) {
-            meets_reborn_criteria = false;
-            reborn_failure_reason = "50m_gold";
+        switch (srvid) {
+            case EASY:  reborn_money_price = 30000; break;
+            case KIDS:  reborn_money_price = 300000; break;
+            case NIVAL: reborn_money_price = 1500000; break;
+            case MEDIUM:reborn_money_price = 7000000; break;
+            case HARD:  reborn_money_price = 50000000; break;
+            default:    reborn_money_price = 0; break;
         }
 
-        // ..Revert stats for AMA/WITCH if exp is lower than
+        if (chr.Money < reborn_money_price) {
+            meets_reborn_criteria = false;
+            reborn_failure_reason = PrettyNumber(reborn_money_price) + "_gold";
+        }
+
+        // Amazon and witch have extra requirements.
         if (chr.Sex == 128 || chr.Sex == 192) {
             reborn_failure_reason = CheckGirlRebirth(chr, total_exp, srvid);
             if (!reborn_failure_reason.empty()) {
                 meets_reborn_criteria = false;
             }
-        // ..also have min.exp for Hardcore chars (0 or 1 death)
+        // Hardcore characters do too.
         } else if (chr.Deaths <= 1) {
             if (srvid == EASY && total_exp < 35000) {
                 meets_reborn_criteria = false;
@@ -2024,13 +2036,13 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
             }
         }
 
+        // Save to shelf upon reborn. Note that this function empties the bag and money (and dress for mage/witch).
+        chr.Money -= reborn_money_price;
+        StoreOnShelfUponReborn(srvid, chr, store_on_shelf);
+
         // 1) perform reborn
         // WARRIOR/MAGE (no reclass OR ascend)
         if (chr.Sex == 0 || chr.Sex == 64) {
-            chr.Money = 0; // wipe gold
-            std::string serializedBag = "[0,0,0,0]";
-            chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
-
             // Wipe experience for the main skill
             switch (chr.MainSkill) {
                 case 1: chr.ExpFireBlade = 1; break;
@@ -2045,13 +2057,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
             if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
             if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
 
-            // Mage
+            // Mage loses all spells but the basic arrow.
             if (chr.Sex == 64) {
-                // mages lose equipped items
-                std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                chr.Dress = Login_UnserializeItems(serializedDress);
-
-                // ...and all spellbooks (leave only basic arrow)
                 WipeSpells(chr);
             }
 
@@ -2067,9 +2074,6 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
         // RECLASSED chars reborn (AMA/WITCH)
         else if (chr.Sex == 128 || chr.Sex == 192) {
             chr.MonstersKills = 0; // reset monster kills for reborn restriction
-            chr.Money = 0; // wipe gold
-            std::string serializedBag = "[0,0,0,0]";
-            chr.Bag = Login_UnserializeItems(serializedBag); // wipe bag
 
             chr.ExpFireBlade = 1; // wipe ALL exp
             chr.ExpWaterAxe = 1;
@@ -2079,11 +2083,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended
 
             // Witch
             if (chr.Sex == 192) {
-                // witch lose equipped items
-                std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-                chr.Dress = Login_UnserializeItems(serializedDress);
-
-                // ...and all spellbooks (leave only basic arrow)
+            // Mage loses all spells but the basic arrow.
                 WipeSpells(chr);
             }
 

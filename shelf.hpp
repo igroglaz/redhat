@@ -52,6 +52,11 @@ int32_t MoneyToSavingsBook(int login_id, ServerIDType server_id, std::vector<CIt
 // doesn't remove the book.
 int32_t MoneyFromSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount);
 
+// Store given items and money on the shelf.
+bool StoreOnShelf(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
+
+using StoreOnShelfFunction = bool(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
+
 // Implementation details. Aren't expected to be used outside of `shelf.cpp`.
 namespace impl {
     enum Field {
@@ -75,5 +80,7 @@ namespace impl {
 
     int32_t MoneyToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
     int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
+
+    bool StoreOnShelfImpl(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
 } // namespace impl
 } // namespace shelf

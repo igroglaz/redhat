@@ -22,6 +22,7 @@ struct Info {
     uint32_t deaths;
     uint32_t kills;
     std::string clan;
+    int login_id;
 };
 
 struct Stats {
@@ -53,6 +54,22 @@ struct CharacterOpts {
     Items items;
 };
 
+bool store_on_shelf_called;
+int shelf_login_id;
+ServerIDType shelf_server_id;
+std::string shelf_items;
+int32_t shelf_money;
+
+bool FakeStoreOnShelf(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
+    store_on_shelf_called = true;
+    shelf_login_id = login_id;
+    shelf_server_id = server_id;
+    CItemList item_list{.Items=std::move(inventory)};
+    shelf_items = Login_SerializeItems(item_list);
+    shelf_money = money;
+    return true;
+}
+
 CCharacter FakeCharacter(const CharacterOpts& opts) {
     CCharacter chr;
 
@@ -62,6 +79,7 @@ CCharacter FakeCharacter(const CharacterOpts& opts) {
     chr.Deaths = opts.info.deaths;
     chr.MonstersKills = opts.info.kills;
     chr.Clan = opts.info.clan;
+    chr.LoginID = opts.info.login_id;
 
     chr.Body = opts.stats.body;
     chr.Reaction = opts.stats.reaction;
@@ -110,6 +128,7 @@ std::string CharacterDiff(CCharacter got, CCharacter want) {
     A2_TEST_DIFF_FIELD(Deaths);
     A2_TEST_DIFF_FIELD(MonstersKills);
     A2_TEST_DIFF("Clan", got.Clan, want.Clan);
+    A2_TEST_DIFF_FIELD(LoginID);
 
     A2_TEST_DIFF_FIELD(Body);
     A2_TEST_DIFF_FIELD(Reaction);
@@ -143,7 +162,7 @@ TEST(UpdateCharacter_NoChanges) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -169,7 +188,8 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    store_on_shelf_called = false;
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -183,6 +203,8 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
     );
 
     CHECK_CHARACTER(chr, want);
+
+    CHECK_EQUAL(store_on_shelf_called, false);
 }
 
 TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
@@ -197,7 +219,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -225,7 +247,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -244,55 +266,69 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
 TEST(UpdateCharacter_Reborn23_Success_Mage) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=3, .sex=64, .deaths=10},
+            .info={.main_skill=3, .sex=64, .deaths=10, .login_id=42},
             .stats={.body=15, .reaction=11, .mind=15, .spirit=15},
             .skills={.fire=1000, .water=2000, .air=3000, .earth=4000, .astral=5000},
-            .items={.money=35000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=35000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,2];[1000,0,0,1],[0,0,0,1]"},
         }
     );
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    store_on_shelf_called = false;
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=3, .picture=64, .sex=64, .deaths=10},
+            .info={.main_skill=3, .picture=64, .sex=64, .deaths=10, .login_id=42},
             .stats={.body=15, .reaction=11, .mind=15, .spirit=15},
             .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1}, // Main skill and astral are set to 1, others halved.
             .items={.spells=16778240}, // Money, bag and dress are wiped, spells are reset.
         }
     );
     CHECK_CHARACTER(chr, want);
+
+    CHECK_EQUAL(true, store_on_shelf_called);
+    CHECK_EQUAL(42, shelf_login_id);
+    CHECK_EQUAL(EASY, shelf_server_id);
+    CHECK_EQUAL("[0,0,0,4];[1000,0,0,1];[2000,0,0,2];[1000,0,0,1];[0,0,0,1]", shelf_items);
+    CHECK_EQUAL(10000, shelf_money); // 35000 + 5000 (treasure) - 30000 (reborn price)
 }
 
 TEST(UpdateCharacter_Reborn45_Success_Warrior) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=3, .sex=0, .deaths=10},
+            .info={.main_skill=3, .sex=0, .deaths=10, .login_id=42},
             .stats={.body=29, .reaction=30, .mind=28, .spirit=27},
             .skills={.fire=1000, .water=2000, .air=3000, .earth=4000, .astral=5000},
-            .items={.money=1567890, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=1500003, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
     );
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, NIVAL, &ascended, &points);
+    store_on_shelf_called = false;
+    UpdateCharacter(chr, NIVAL, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=3, .sex=0, .deaths=10},
+            .info={.main_skill=3, .sex=0, .deaths=10, .login_id=42},
             .stats={.body=29, .reaction=30, .mind=28, .spirit=27},
             .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1250}, // Main skill is set to 1, shooting is divided by server number (3), others halved.
             .items={.dress="[0,0,0,1];[1000,0,0,1]"}, // Money and bag are wiped.
         }
     );
     CHECK_CHARACTER(chr, want);
+
+    CHECK_EQUAL(true, store_on_shelf_called);
+    CHECK_EQUAL(42, shelf_login_id);
+    CHECK_EQUAL(NIVAL, shelf_server_id);
+    CHECK_EQUAL("[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", shelf_items);
+    CHECK_EQUAL(100003, shelf_money); // +100000 from treasure
 }
 
 TEST(UpdateCharacter_Reborn67_Success) {
@@ -307,7 +343,7 @@ TEST(UpdateCharacter_Reborn67_Success) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, HARD, &ascended, &points);
+    UpdateCharacter(chr, HARD, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -334,7 +370,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, KIDS, &ascended, &points);
+    UpdateCharacter(chr, KIDS, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -362,7 +398,7 @@ TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, NIVAL, &ascended, &points);
+    UpdateCharacter(chr, NIVAL, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -390,7 +426,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, MEDIUM, &ascended, &points);
+    UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -418,7 +454,7 @@ TEST(UpdateCharacter_Reborn23_Success_Witch) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)1);
@@ -447,7 +483,7 @@ TEST(UpdateCharacter_Reborn23_Success_Warrior) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, EASY, &ascended, &points);
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)1);
@@ -477,7 +513,7 @@ TEST(UpdateCharacter_Reclass_Success) {
     unsigned int ascended = 0;
     unsigned int points = 0;
 
-    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)0);
@@ -505,7 +541,7 @@ TEST(UpdateCharacter_Ascend_Success) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)1);
     CHECK_EQUAL(points, (unsigned int)0);
@@ -533,7 +569,7 @@ TEST(UpdateCharacter_NoChanges_7) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)0);
@@ -560,7 +596,7 @@ TEST(UpdateCharacter_TreasureOn7) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, &ascended, &points);
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
     CHECK_EQUAL(points, (unsigned int)30); // Two treasures, 15 each.
 
     CHECK_EQUAL(ascended, (unsigned int)0);
@@ -586,7 +622,7 @@ TEST(UpdateCharacter_TreasureOn8) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
-    UpdateCharacter(chr, QUEST_T1, &ascended, &points);
+    UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
     CHECK_EQUAL(points, (unsigned int)60); // Two treasures, 30 each.
