@@ -7,6 +7,7 @@
 #include "sql.hpp"
 #include "CCharacter.hpp"
 #include "server_id.hpp"
+#include "shelf.hpp"
 
 struct CharacterInfo
 {
@@ -43,6 +44,6 @@ bool Login_SetIPF(std::string login, std::string ipf);
 std::string Login_SerializeItems(CItemList& list);
 CItemList Login_UnserializeItems(std::string data);
 bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid);
-void UpdateCharacter(CCharacter& chr, ServerIDType srvid, unsigned int* ascended, unsigned int* points);
+void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points);
 
 #endif // LOGIN_HPP_INCLUDED

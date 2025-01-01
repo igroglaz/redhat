@@ -90,6 +90,14 @@ TEST(MergeItemPiles_Merge) {
     CHECK_EQUAL(want, inventory);
 }
 
+TEST(MergeItemPiles_EmptyDressSlots) {
+    std::vector<CItem> inventory{};
+    std::vector<CItem> add{CItem{.Id=0, .Count=1}};
+    shelf::impl::MergeItemPiles(inventory, add);
+    std::vector<CItem> want{};
+    CHECK_EQUAL(want, inventory);
+}
+
 struct FakeSQLQuery {
     std::unordered_map<std::string, bool> queries;
 
@@ -631,6 +639,42 @@ TEST(MoneyFromSavingsBook_FailedToSave) {
     CHECK_EQUAL(1000, got);
     std::vector<CItem> want{book};
     CHECK_EQUAL(want, inventory);
+}
+
+TEST(StoreOnShelf_NoShelf) {
+    FakeSQLQuery sql_query{.queries={
+        {"INSERT INTO shelf (login_id, server_id, mutex, items, money) VALUES (42, 2, 0, '[0,0,0,1];[3587,1,0,1,{42:1:0:0}]', 200)", true},
+    }};
+
+    FakeLoadFromShelf load_from_shelf{
+        .want_login_id=42,
+        .want_server_id=KIDS,
+        .fake_result=true,
+        .fake_shelf_exists=false,
+    };
+
+    std::vector<CItem> inventory{book};
+    auto got = shelf::impl::StoreOnShelfImpl(42, KIDS, inventory, 200, load_from_shelf.Bind(), sql_query.Bind());
+    CHECK_EQUAL(true, got);
+}
+
+TEST(StoreOnShelf_FilledShelf) {
+    FakeSQLQuery sql_query{.queries={
+        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,3];[53517,1,0,1,{17:50:0:0}];[3649,0,0,10];[42503,1,0,1,{3:2:0:0},{10:100:0:0}]', money = 200 WHERE login_id = 42 AND server_id = 6 AND mutex = 0", true},
+    }};
+
+    FakeLoadFromShelf load_from_shelf{
+        .want_login_id=42,
+        .want_server_id=NIGHTMARE,
+        .fake_result=true,
+        .fake_items={staff, potions5},
+        .fake_money=100,
+        .fake_shelf_exists=true,
+    };
+
+    std::vector<CItem> inventory{potions5, helm};
+    auto got = shelf::impl::StoreOnShelfImpl(42, QUEST_T1, inventory, 100, load_from_shelf.Bind(), sql_query.Bind());
+    CHECK_EQUAL(true, got);
 }
 
 }

@@ -45,6 +45,10 @@ int32_t MoneyFromSavingsBook(int login_id, ServerIDType server_id, std::vector<C
     return impl::MoneyFromSavingsBookImpl(login_id, server_id, inventory, current_money, amount, impl::LoadShelf, SQLUpsertOneRow);
 }
 
+bool StoreOnShelf(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
+    return impl::StoreOnShelfImpl(login_id, server_id, std::move(inventory), money, impl::LoadShelf, SQLUpsertOneRow);
+}
+
 namespace impl {
 
 bool IsSavingsBook(const CItem& item) {
@@ -88,6 +92,10 @@ void MergeItemPiles(std::vector<CItem>& items, const std::vector<CItem>& add_ite
     }
 
     for (const auto& item : add_items) {
+        if (item.Id == 0) {
+            continue; // Empty dress slots.
+        }
+
         if (item.IsMagic || piles.count(item.Id) == 0) {
             items.push_back(item);
         } else {
@@ -344,6 +352,25 @@ int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vect
     inventory.erase(savings_book);
 
     return current_money + withdraw;
+}
+
+bool StoreOnShelfImpl(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    server_id = FixServerID(server_id);
+
+    int32_t mutex = 0;
+    std::string shelved_items_repr;
+    int64_t shelved_money = 0;
+    bool shelf_exists;
+    if (!load_shelf(login_id, server_id, Field::BOTH, &mutex, &shelved_items_repr, &shelved_money, shelf_exists)) {
+        return false;
+    }
+
+    std::vector<CItem> shelved_items = Login_UnserializeItems(shelved_items_repr).Items;
+
+    int64_t save_money = shelved_money + money;
+    MergeItemPiles(shelved_items, inventory);
+
+    return SaveShelf(login_id, server_id, Field::BOTH, mutex, shelved_items, save_money, shelf_exists, sql_query);
 }
 
 } // namespace impl

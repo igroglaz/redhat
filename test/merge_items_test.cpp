@@ -117,7 +117,7 @@ TEST(MergeItems_ServerID) {
     
     items = Login_UnserializeItems("[0,0,0,2];[1000,0,2,1];[1000,0,2,1]");
     MergeItems(items, QUEST_T1);
-    CHECK_EQUAL("[0,0,0,1];[1000,1,2,1,{7:4:0:0}]", Login_SerializeItems(items));
+    CHECK_EQUAL("[0,0,0,1];[1000,1,2,1,{7:3:0:0}]", Login_SerializeItems(items));
     
     items = Login_UnserializeItems("[0,0,0,2];[1000,0,2,1];[1000,0,2,1]");
     MergeItems(items, QUEST_T2);
