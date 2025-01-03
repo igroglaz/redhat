@@ -1802,7 +1802,7 @@ void StoreOnShelfUponReborn(ServerIDType server_id, CCharacter& chr, shelf::Stor
         chr.Dress = Login_UnserializeItems(serializedDress);
     }
 
-    if (!store_on_shelf(chr.LoginID, server_id, std::move(items), chr.Money)) {
+    if (!store_on_shelf(chr, server_id, std::move(items), chr.Money)) {
         Printf(LOG_Warning, "Failed to store items on shelf upon reborn for character %s at server %d\n", chr.GetFullName(), server_id);
     }
 
@@ -1888,24 +1888,24 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     }
 
     if (chr.Clan == "d" || chr.Clan == "deposit") { // Deposit items.
-        shelf::ItemsToSavingsBook(chr.LoginID, srvid, chr.Bag.Items);
+        shelf::ItemsToSavingsBook(chr, srvid, chr.Bag.Items);
     } else if (chr.Clan == "w" || chr.Clan == "withdraw") { // Withdraw items.
-        shelf::ItemsFromSavingsBook(chr.LoginID, srvid, chr.Bag.Items);
+        shelf::ItemsFromSavingsBook(chr, srvid, chr.Bag.Items);
     } else if (chr.Clan.find("dg") == 0) { // Deposit gold.
         if (chr.Clan == "dg") { // Default: 90% of total gold.
-            chr.Money = shelf::MoneyToSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, chr.Money - (chr.Money / 10));
+            chr.Money = shelf::MoneyToSavingsBook(chr, srvid, chr.Bag.Items, chr.Money, chr.Money - (chr.Money / 10));
         } else {
             std::string percentage_str = chr.Clan.substr(2);
             if (CheckInt(percentage_str)) { // Deposit given percentage of total gold.
                 int percentage = StrToInt(percentage_str);
                 if (0 < percentage && percentage <= 100) {
                     double ratio = percentage / 100.0;
-                    chr.Money = shelf::MoneyToSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, static_cast<int32_t>(chr.Money * ratio));
+                    chr.Money = shelf::MoneyToSavingsBook(chr, srvid, chr.Bag.Items, chr.Money, static_cast<int32_t>(chr.Money * ratio));
                 }
             }
         }
     } else if (chr.Clan == "wg") { // Withdraw gold.
-        chr.Money = shelf::MoneyFromSavingsBook(chr.LoginID, srvid, chr.Bag.Items, chr.Money, std::numeric_limits<int32_t>::max());
+        chr.Money = shelf::MoneyFromSavingsBook(chr, srvid, chr.Bag.Items, chr.Money, std::numeric_limits<int32_t>::max());
     }
 
     ////////////////////////////////////////////

@@ -1139,8 +1139,9 @@ uint32_t CheckNickname_creation(std::string nickname, int hatId, bool secondary)
                 return P_WRONG_NAME;
 
             // characters which are allowed in nickname
-            bool allowed = ((ch >= 0x41 && ch <= 0x5A) ||   // A..Z
-                            (ch >= 0x61 && ch <= 0x7A));    // a..z
+            bool allowed = (ch >= 'A' && ch <= 'Z') ||
+                           (ch >= 'a' && ch <= 'z') ||
+                           (ch == '@' && i == 0); // Only first character can be a `@`.
 
             if (!allowed) return P_WRONG_NAME;
         }
