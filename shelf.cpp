@@ -29,24 +29,24 @@ bool SQLUpsertOneRow(std::string query) {
     return true;
 }
 
-bool ItemsToSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory) {
-    return impl::ItemsToSavingsBookImpl(login_id, server_id, inventory, impl::LoadShelf, SQLUpsertOneRow);
+bool ItemsToSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory) {
+    return impl::ItemsToSavingsBookImpl(chr, server_id, inventory, impl::LoadShelf, SQLUpsertOneRow);
 }
 
-bool ItemsFromSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory) {
-    return impl::ItemsFromSavingsBookImpl(login_id, server_id, inventory, impl::LoadShelf, SQLUpsertOneRow);
+bool ItemsFromSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory) {
+    return impl::ItemsFromSavingsBookImpl(chr, server_id, inventory, impl::LoadShelf, SQLUpsertOneRow);
 }
 
-int32_t MoneyToSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount) {
-    return impl::MoneyToSavingsBookImpl(login_id, server_id, inventory, current_money, amount, impl::LoadShelf, SQLUpsertOneRow);
+int32_t MoneyToSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount) {
+    return impl::MoneyToSavingsBookImpl(chr, server_id, inventory, current_money, amount, impl::LoadShelf, SQLUpsertOneRow);
 }
 
-int32_t MoneyFromSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount) {
-    return impl::MoneyFromSavingsBookImpl(login_id, server_id, inventory, current_money, amount, impl::LoadShelf, SQLUpsertOneRow);
+int32_t MoneyFromSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount) {
+    return impl::MoneyFromSavingsBookImpl(chr, server_id, inventory, current_money, amount, impl::LoadShelf, SQLUpsertOneRow);
 }
 
-bool StoreOnShelf(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
-    return impl::StoreOnShelfImpl(login_id, server_id, std::move(inventory), money, impl::LoadShelf, SQLUpsertOneRow);
+bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
+    return impl::StoreOnShelfImpl(chr, server_id, std::move(inventory), money, impl::LoadShelf, SQLUpsertOneRow);
 }
 
 namespace impl {
@@ -66,10 +66,14 @@ std::vector<CItem>::const_iterator FindSavingsBook(const std::vector<CItem>& inv
     return inventory.end();
 }
 
-ServerIDType FixServerID(ServerIDType server_id) {
+int FixServerID(const CCharacter& chr, ServerIDType server_id) {
     // Nightmare+ servers use the same shelf.
     if (server_id >= NIGHTMARE) {
-        return NIGHTMARE;
+        server_id = NIGHTMARE;
+    }
+
+    if (chr.Nick.size() && chr.Nick[0] == '@') {
+        return -server_id;
     }
     return server_id;
 }
@@ -105,7 +109,7 @@ void MergeItemPiles(std::vector<CItem>& items, const std::vector<CItem>& add_ite
     }
 }
 
-bool LoadShelf(int login_id, ServerIDType server_id, Field field, int32_t* mutex, std::string* items, int64_t* money, bool& shelf_exists) {
+bool LoadShelf(const CCharacter& chr, int shelf_number, Field field, int32_t* mutex, std::string* items, int64_t* money, bool& shelf_exists) {
     const char* field_names = "";
     switch (field) {
     case ITEMS:
@@ -119,15 +123,15 @@ bool LoadShelf(int login_id, ServerIDType server_id, Field field, int32_t* mutex
         break;
     }
 
-    std::string query = Format("SELECT mutex, %s FROM shelf WHERE login_id = %d AND server_id = %d", field_names, login_id, server_id);
+    std::string query = Format("SELECT mutex, %s FROM shelf WHERE login_id = %d AND server_id = %d", field_names, chr.LoginID, shelf_number);
     if (SQL_Query(query) != 0) {
-        Printf(LOG_Error, "Failed to query shelf content for player %d and server %d: %s\n", login_id, server_id, SQL_Error().c_str());
+        Printf(LOG_Error, "Failed to query shelf content for player %d and shelf %d: %s\n", chr.LoginID, shelf_number, SQL_Error().c_str());
         return false;
     }
 
     auto result = SQL_StoreResult();
     if (!result) {
-        Printf(LOG_Error, "Failed to get query result for shelf content for player %d and server %d: %s\n", login_id, server_id, SQL_Error().c_str());
+        Printf(LOG_Error, "Failed to get query result for shelf content for player %d and shelf %d: %s\n", chr.LoginID, shelf_number, SQL_Error().c_str());
         return false;
     }
 
@@ -154,7 +158,7 @@ bool LoadShelf(int login_id, ServerIDType server_id, Field field, int32_t* mutex
     return true;
 }
 
-bool SaveShelf(int login_id, ServerIDType server_id, Field field, int32_t mutex, std::vector<CItem> new_items, int64_t money, bool shelf_exists, SQLQueryFunction sql_query) {
+bool SaveShelf(const CCharacter& chr, int shelf_number, Field field, int32_t mutex, std::vector<CItem> new_items, int64_t money, bool shelf_exists, SQLQueryFunction sql_query) {
     std::string items;
     if (field & Field::ITEMS) {
         CItemList item_list{.Items = std::move(new_items)};
@@ -177,7 +181,7 @@ bool SaveShelf(int login_id, ServerIDType server_id, Field field, int32_t mutex,
             break;
         }
 
-        query = Format("UPDATE shelf SET mutex = %d, %s WHERE login_id = %d AND server_id = %d AND mutex = %d", mutex + 1, field_values.c_str(), login_id, server_id, mutex);
+        query = Format("UPDATE shelf SET mutex = %d, %s WHERE login_id = %d AND server_id = %d AND mutex = %d", mutex + 1, field_values.c_str(), chr.LoginID, shelf_number, mutex);
     } else {
         std::string field_names;
         
@@ -196,20 +200,20 @@ bool SaveShelf(int login_id, ServerIDType server_id, Field field, int32_t mutex,
             break;
         }
         
-        query = Format("INSERT INTO shelf (login_id, server_id, mutex, %s) VALUES (%d, %d, %d, %s)", field_names.c_str(), login_id, server_id, mutex, field_values.c_str());
+        query = Format("INSERT INTO shelf (login_id, server_id, mutex, %s) VALUES (%d, %d, %d, %s)", field_names.c_str(), chr.LoginID, shelf_number, mutex, field_values.c_str());
     }
 
     if (!sql_query(query)) {
-        Printf(LOG_Error, "[shelf] Failed to save new shelf content for player %d and server %d: '%s' (shelf existed: %d, new fields: %s)\n", login_id, server_id, SQL_Error().c_str(), shelf_exists, field_values.c_str());
+        Printf(LOG_Error, "[shelf] Failed to save new shelf content for player %d and server %d: '%s' (shelf existed: %d, new fields: %s)\n", chr.LoginID, shelf_number, SQL_Error().c_str(), shelf_exists, field_values.c_str());
         return false;
     }
 
-    Printf(LOG_Info, "[shelf] Saved new shelf content for login %d on server %d: %s\n", login_id, server_id, field_values.c_str());
+    Printf(LOG_Info, "[shelf] Saved new shelf content for login %d on server %d: %s\n", chr.LoginID, shelf_number, field_values.c_str());
     return true;
 }
 
-bool ItemsToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    server_id = FixServerID(server_id);
+bool ItemsToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    int shelf_number = FixServerID(chr, server_id);
 
     auto savings_book = FindSavingsBook(inventory);
     if (savings_book == inventory.end()) {
@@ -221,7 +225,7 @@ bool ItemsToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CI
     int32_t mutex = 0;
     std::string shelf_content;
     bool shelf_exists = false;
-    if (!load_shelf(login_id, server_id, Field::ITEMS, &mutex, &shelf_content, nullptr, shelf_exists)) {
+    if (!load_shelf(chr, shelf_number, Field::ITEMS, &mutex, &shelf_content, nullptr, shelf_exists)) {
         return false;
     }
 
@@ -229,7 +233,7 @@ bool ItemsToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CI
 
     MergeItemPiles(current_items, to_shelf);
 
-    if (!SaveShelf(login_id, server_id, Field::ITEMS, mutex, std::move(current_items), 0, shelf_exists, sql_query)) {
+    if (!SaveShelf(chr, shelf_number, Field::ITEMS, mutex, std::move(current_items), 0, shelf_exists, sql_query)) {
         return false;
     }
 
@@ -238,8 +242,8 @@ bool ItemsToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CI
     return true;
 }
 
-bool ItemsFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    server_id = FixServerID(server_id);
+bool ItemsFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    int shelf_number = FixServerID(chr, server_id);
 
     auto savings_book = FindSavingsBook(inventory);
     if (savings_book == inventory.end()) {
@@ -249,7 +253,7 @@ bool ItemsFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<
     int32_t mutex = 0;
     std::string shelf_content;
     bool shelf_exists;
-    if (!load_shelf(login_id, server_id, Field::ITEMS, &mutex, &shelf_content, nullptr, shelf_exists)) {
+    if (!load_shelf(chr, shelf_number, Field::ITEMS, &mutex, &shelf_content, nullptr, shelf_exists)) {
         return false;
     }
 
@@ -259,11 +263,11 @@ bool ItemsFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<
         return true;
     }
 
-    if (!SaveShelf(login_id, server_id, Field::ITEMS, mutex, {}, 0, shelf_exists, sql_query)) {
+    if (!SaveShelf(chr, shelf_number, Field::ITEMS, mutex, {}, 0, shelf_exists, sql_query)) {
         return false;
     }
 
-    Printf(LOG_Info, "[shelf] Loaded items for login %d on server %d: '%s'\n", login_id, server_id, SQL_Escape(shelf_content).c_str());
+    Printf(LOG_Info, "[shelf] Loaded items for login %d on server %d: '%s'\n", chr.LoginID, shelf_number, SQL_Escape(shelf_content).c_str());
 
     // Remove the book.
     inventory.erase(savings_book);
@@ -274,8 +278,8 @@ bool ItemsFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<
     return true;
 }
 
-int32_t MoneyToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    server_id = FixServerID(server_id);
+int32_t MoneyToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    int shelf_number = FixServerID(chr, server_id);
 
     if (amount == 0) {
         return current_money;
@@ -294,17 +298,17 @@ int32_t MoneyToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector
     int32_t mutex = 0;
     int64_t shelved_money = 0;
     bool shelf_exists;
-    if (!load_shelf(login_id, server_id, Field::MONEY, &mutex, nullptr, &shelved_money, shelf_exists)) {
+    if (!load_shelf(chr, shelf_number, Field::MONEY, &mutex, nullptr, &shelved_money, shelf_exists)) {
         return current_money;
     }
 
     int64_t money = shelved_money + deposit;
 
-    if (!SaveShelf(login_id, server_id, Field::MONEY, mutex, {}, money, shelf_exists, sql_query)) {
+    if (!SaveShelf(chr, shelf_number, Field::MONEY, mutex, {}, money, shelf_exists, sql_query)) {
         return current_money;
     }
 
-    Printf(LOG_Info, "[shelf] Stored money for login %d on server %d: %d stashed (tried %d), total %" PRId64 "\n", login_id, server_id, deposit, amount, money);
+    Printf(LOG_Info, "[shelf] Stored money for login %d on server %d: %d stashed (tried %d), total %" PRId64 "\n", chr.LoginID, shelf_number, deposit, amount, money);
 
     // Remove the book.
     inventory.erase(savings_book);
@@ -312,8 +316,8 @@ int32_t MoneyToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector
     return current_money - deposit;
 }
 
-int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    server_id = FixServerID(server_id);
+int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    int shelf_number = FixServerID(chr, server_id);
 
     if (amount == 0) {
         return current_money;
@@ -327,7 +331,7 @@ int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vect
     int32_t mutex = 0;
     int64_t shelved_money = 0;
     bool shelf_exists;
-    if (!load_shelf(login_id, server_id, Field::MONEY, &mutex, nullptr, &shelved_money, shelf_exists)) {
+    if (!load_shelf(chr, shelf_number, Field::MONEY, &mutex, nullptr, &shelved_money, shelf_exists)) {
         return current_money;
     }
 
@@ -342,11 +346,11 @@ int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vect
 
     int64_t money = shelved_money - static_cast<int64_t>(withdraw);
     
-    if (!SaveShelf(login_id, server_id, Field::MONEY, mutex, {}, money, shelf_exists, sql_query)) {
+    if (!SaveShelf(chr, shelf_number, Field::MONEY, mutex, {}, money, shelf_exists, sql_query)) {
         return current_money;
     }
 
-    Printf(LOG_Info, "[shelf] Loaded money for login %d on server %d: %d withdrawn (tried %d), left %" PRId64 " stashed\n", login_id, server_id, withdraw, amount, money);
+    Printf(LOG_Info, "[shelf] Loaded money for login %d on server %d: %d withdrawn (tried %d), left %" PRId64 " stashed\n", chr.LoginID, shelf_number, withdraw, amount, money);
 
     // Remove the book.
     inventory.erase(savings_book);
@@ -354,14 +358,14 @@ int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vect
     return current_money + withdraw;
 }
 
-bool StoreOnShelfImpl(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    server_id = FixServerID(server_id);
+bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    int shelf_number = FixServerID(chr, server_id);
 
     int32_t mutex = 0;
     std::string shelved_items_repr;
     int64_t shelved_money = 0;
     bool shelf_exists;
-    if (!load_shelf(login_id, server_id, Field::BOTH, &mutex, &shelved_items_repr, &shelved_money, shelf_exists)) {
+    if (!load_shelf(chr, shelf_number, Field::BOTH, &mutex, &shelved_items_repr, &shelved_money, shelf_exists)) {
         return false;
     }
 
@@ -370,7 +374,7 @@ bool StoreOnShelfImpl(int login_id, ServerIDType server_id, std::vector<CItem> i
     int64_t save_money = shelved_money + money;
     MergeItemPiles(shelved_items, inventory);
 
-    return SaveShelf(login_id, server_id, Field::BOTH, mutex, shelved_items, save_money, shelf_exists, sql_query);
+    return SaveShelf(chr, shelf_number, Field::BOTH, mutex, shelved_items, save_money, shelf_exists, sql_query);
 }
 
 } // namespace impl

@@ -60,9 +60,9 @@ ServerIDType shelf_server_id;
 std::string shelf_items;
 int32_t shelf_money;
 
-bool FakeStoreOnShelf(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
+bool FakeStoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
     store_on_shelf_called = true;
-    shelf_login_id = login_id;
+    shelf_login_id = chr.LoginID;
     shelf_server_id = server_id;
     CItemList item_list{.Items=std::move(inventory)};
     shelf_items = Login_SerializeItems(item_list);
