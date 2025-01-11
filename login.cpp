@@ -2030,8 +2030,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
     if (reborn) {
         if (srvid == EASY) {
-            // Male characters become zombies on first reborn.
-            if (chr.Sex == 0 || chr.Sex == 64) {
+            // Male characters become zombies on first reborn (except Ironman)
+            if ((chr.Sex == 0 || chr.Sex == 64) && chr.Nick[0] != '@') {
                 chr.Picture = 64;
             }
         }
