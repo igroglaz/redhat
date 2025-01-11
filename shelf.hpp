@@ -15,7 +15,7 @@ namespace shelf {
 // 
 // If DB operation fails, returns `false` and doesn't modify the inventory.
 // If there's no book, returns `true` and doesn't modify the inventory.
-bool ItemsToSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory);
+bool ItemsToSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory);
 
 // Take the items from the shelf to the player's inventory.
 //
@@ -26,7 +26,7 @@ bool ItemsToSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>
 //
 // If DB operation fails, returns `false` and doesn't modify the inventory.
 // If there's no book, returns `true` and doesn't modify the inventory.
-bool ItemsFromSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory);
+bool ItemsFromSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory);
 
 // Store `amount` of gold on the shelf.
 //
@@ -38,7 +38,7 @@ bool ItemsFromSavingsBook(int login_id, ServerIDType server_id, std::vector<CIte
 //
 // If DB operation fails or the player has no book, returns `current_money` and
 // doesn't remove the book.
-int32_t MoneyToSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount);
+int32_t MoneyToSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount);
 
 // Take up to `amount` of gold on the shelf and give to the player.
 //
@@ -50,12 +50,12 @@ int32_t MoneyToSavingsBook(int login_id, ServerIDType server_id, std::vector<CIt
 //
 // If DB operation fails or the player has no book, returns `current_money` and
 // doesn't remove the book.
-int32_t MoneyFromSavingsBook(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount);
+int32_t MoneyFromSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount);
 
 // Store given items and money on the shelf.
-bool StoreOnShelf(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
+bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
 
-using StoreOnShelfFunction = bool(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
+using StoreOnShelfFunction = bool(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
 
 // Implementation details. Aren't expected to be used outside of `shelf.cpp`.
 namespace impl {
@@ -67,20 +67,20 @@ namespace impl {
 
     using SQLQueryFunction = std::function<bool(std::string)>;
     // Mocking SQL calls in `LoadShelf` is annoying, so let's stub out the whole function.
-    using LoadShelfFunction = std::function<bool(int, ServerIDType, Field, int32_t*, std::string*, int64_t*, bool&)>;
+    using LoadShelfFunction = std::function<bool(const CCharacter&, int, Field, int32_t*, std::string*, int64_t*, bool&)>;
 
     bool IsSavingsBook(const CItem& item);
     std::vector<CItem>::const_iterator FindSavingsBook(const std::vector<CItem>& inventory);
     void MergeItemPiles(std::vector<CItem>& items, const std::vector<CItem>& add_items);
-    bool LoadShelf(int login_id, ServerIDType server_id, Field field, int32_t* mutex, std::string* items_repr, int64_t* money, bool& shelf_exists);
-    bool SaveShelf(int login_id, ServerIDType server_id, Field field, int32_t mutex, std::vector<CItem> items, int64_t money, bool shelf_exists, SQLQueryFunction sql_query);
+    bool LoadShelf(const CCharacter& chr, int shelf_number, Field field, int32_t* mutex, std::string* items_repr, int64_t* money, bool& shelf_exists);
+    bool SaveShelf(const CCharacter& chr, int shelf_number, Field field, int32_t mutex, std::vector<CItem> items, int64_t money, bool shelf_exists, SQLQueryFunction sql_query);
 
-    bool ItemsToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_from_shelf, SQLQueryFunction sql_query);
-    bool ItemsFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_from_shelf, SQLQueryFunction sql_query);
+    bool ItemsToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_from_shelf, SQLQueryFunction sql_query);
+    bool ItemsFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_from_shelf, SQLQueryFunction sql_query);
 
-    int32_t MoneyToSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
-    int32_t MoneyFromSavingsBookImpl(int login_id, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
+    int32_t MoneyToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
+    int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
 
-    bool StoreOnShelfImpl(int login_id, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
+    bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
 } // namespace impl
 } // namespace shelf
