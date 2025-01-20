@@ -30,6 +30,8 @@ void SQL_CreateTables();
 
 void SQL_UpdateTables();
 
+void SQL_UpdateVersion1();
+
 int SQL_Query(std::string query);
 int SQL_NumRows(MYSQL_RES* result);
 MYSQL_RES* SQL_StoreResult();
