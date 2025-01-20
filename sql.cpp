@@ -241,14 +241,68 @@ void SQL_CreateTables()
         CREATE TABLE IF NOT EXISTS shelf (
             login_id BIGINT(1) NOT NULL COMMENT 'Player login ID, same as in logins',
             server_id INT(1) NOT NULL COMMENT 'Server ID, 1--7',
+            cabinet INT(1) NOT NULL COMMENT 'Cabinet, 0 for regular characters, 1 for solo, 2 for solo-hardcore',
             mutex INT(1) COMMENT 'Used to detect concurrent modification. Always read this field for updates and increment by 1 when updating the row.',
             items LONGTEXT COMMENT 'Shelved items, in DB format for CItemList',
             money BIGINT(1) COMMENT 'Shelved money',
-            INDEX shelf_id_index (login_id, server_id)
+            INDEX shelf_id_index (login_id, server_id, cabinet)
         );
     )";
     if (mysql_query(&SQL::Connection, create_table_shelf.c_str()) != 0) {
         Printf(LOG_Silent, "[DB] Warning: table `shelf` not created: %s\n", SQL_Error().c_str());
+    }
+}
+
+void SQL_UpdateVersion1() {
+    std::string query_check = R"(
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = 'a2hat'
+            AND TABLE_NAME = 'shelf'
+            AND COLUMN_NAME = 'cabinet';
+    )";
+
+    if (SQL_Query(query_check) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to check if shelf table needs to be updated to v1: %s\n", SQL_Error().c_str());
+        return;
+    }
+
+    MYSQL_RES* result = SQL_StoreResult();
+    if (!result) {
+        Printf(LOG_Warning, "[DB] Warning: failed to check if shelf table needs to be updated to v1 (no result): %s\n", SQL_Error().c_str());
+        return;
+    }
+
+    bool need_update = SQL_NumRows(result) == 0;
+
+    SQL_FreeResult(result);
+
+    if (!need_update) {
+        return;
+    }
+
+    Printf(LOG_Info, "[DB]: updating shelf table to v1\n");
+
+    const char* query;
+
+    query = "ALTER TABLE shelf ADD COLUMN cabinet INT(1) NOT NULL COMMENT 'Cabinet, 0 for regular characters, 1 for solo, 2 for solo-hardcore'";
+    if (mysql_query(&SQL::Connection, query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to update shelf table to v1: add column: %s\n", SQL_Error().c_str());
+    }
+    
+    query = "UPDATE shelf SET cabinet = IF(server_id < 0, 1, 0), server_id = ABS(server_id)";
+    if (mysql_query(&SQL::Connection, query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to update shelf table to v1: update: %s\n", SQL_Error().c_str());
+    }
+    
+    query = "ALTER TABLE shelf DROP INDEX shelf_id_index";
+    if (mysql_query(&SQL::Connection, query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to update shelf table to v1: drop index: %s\n", SQL_Error().c_str());
+    }
+
+    query = "ALTER TABLE shelf ADD INDEX shelf_id_index (login_id, server_id, cabinet)";
+    if (mysql_query(&SQL::Connection, query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to update shelf table to v1: add index: %s\n", SQL_Error().c_str());
     }
 }
 

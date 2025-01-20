@@ -63,6 +63,8 @@ bool H_Init(int argc, char* argv[])
     }
     if(exit_) return false;
 
+    SQL_UpdateVersion1();
+
     Printf(LOG_Info, "[HC] Red Hat (v1.3) started.\n");
 
     Net_Init();
