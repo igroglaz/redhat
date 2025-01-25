@@ -257,7 +257,7 @@ void SQL_UpdateVersion1() {
     std::string query_check = R"(
         SELECT COLUMN_NAME
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = 'a2hat'
+        WHERE TABLE_SCHEMA = ')" + Config::SqlDatabase + R"('
             AND TABLE_NAME = 'shelf'
             AND COLUMN_NAME = 'cabinet';
     )";
