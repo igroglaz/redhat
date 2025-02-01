@@ -1141,7 +1141,7 @@ uint32_t CheckNickname_creation(std::string nickname, int hatId, bool secondary)
             // characters which are allowed in nickname
             bool allowed = (ch >= 'A' && ch <= 'Z') ||
                            (ch >= 'a' && ch <= 'z') ||
-                           (ch == '@' && i == 0); // Only first character can be a `@`.
+                           (i == 0 && (ch == '@' || ch == '_')); // Only first character can be a `@` or `_`.
 
             if (!allowed) return P_WRONG_NAME;
         }
@@ -1453,6 +1453,17 @@ bool CL_EnterServer(Client* conn, Packet& pack)
 
         // Replace girls with boys.
         p_picture &= ~0x80;
+
+        // Check for solo mage.
+        const char c = p_nickname[0];
+        int solo_mage_need = c == '@' ? 1 : c == '_' ? 2 : 0;
+        if (solo_mage_need > 0 && (p_picture & 0x40)) {
+            int allow_mage = AllowMage(conn->Login.c_str());
+            if (allow_mage < solo_mage_need) {
+                Printf(LOG_Info, "[CL] solo-mage %s is not allowed for login %s, allow_mage=%d, want=%d. Converted to warrior\n", p_nickname.c_str(), conn->Login.c_str(), allow_mage, solo_mage_need);
+                p_picture &= ~0x40;
+            }
+        }
 
         char* data = new char[0x30];
         memset(data, 0, 0x30);
