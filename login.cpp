@@ -784,6 +784,48 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             }
             chr.LoginID = login_id;
 
+
+            // Check allow_mage DB field for hero creation for @ (solo) and _ (hc) modes
+            if (chr.Nick[0] == '@' || chr.Nick[0] == '_')
+            {
+                std::string query_get_allow = Format("SELECT `allow_mage` FROM `logins` WHERE LOWER(`name`)=LOWER('%s')", login.c_str());
+                if (SQL_Query(query_get_allow.c_str()) != 0)
+                {
+                    SQL_Unlock();
+                    return false;
+                }
+                MYSQL_RES* res_allow = SQL_StoreResult();
+                if (!res_allow || SQL_NumRows(res_allow) == 0)
+                {
+                    if (res_allow)
+                        SQL_FreeResult(res_allow);
+                    SQL_Unlock();
+                    return false;
+                }
+                MYSQL_ROW row_allow = SQL_FetchRow(res_allow);
+                int allow_mage = SQL_FetchInt(row_allow, res_allow, "allow_mage");
+                SQL_FreeResult(res_allow);
+                if (chr.Nick[0] == '@')
+                {
+                    if (allow_mage != 1)
+                    {
+                        Printf(LOG_Error, "[DB] @-mage creation is not allowed for login %s\n", login.c_str());
+                        SQL_Unlock();
+                        return false;
+                    }
+                }
+                else if (chr.Nick[0] == '_')
+                {
+                    if (allow_mage != 2)
+                    {
+                        Printf(LOG_Error, "[DB] _-mage creation is not allowed for login %s\n", login.c_str());
+                        SQL_Unlock();
+                        return false;
+                    }
+                }
+            }
+
+
             if(chr.Clan.size() > 0) // Process clan data
             {
                 int cpos = chr.Clan.find("[");
