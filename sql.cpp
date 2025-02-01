@@ -177,7 +177,9 @@ void SQL_CreateTables()
         `discordUserId` VARCHAR(255) DEFAULT NULL, \
         `discordRole` VARCHAR(1020) DEFAULT NULL, \
         `changes` TINYINT(4) NOT NULL DEFAULT '0', \
-        UNIQUE(`id`))"; // long query to create logins table
+        `allow_mage` TINYINT(1) NOT NULL DEFAULT '0', \
+        UNIQUE(`id`))";
+
 
     std::string query_table_characters = "CREATE TABLE IF NOT EXISTS `characters` ( \
         `id` BIGINT(1) NOT NULL AUTO_INCREMENT, \

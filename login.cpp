@@ -2046,6 +2046,28 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 std::string serializedDress = "[0,0,40,12];[4367,0,0,1];[45606,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[46631,0,0,1];[46895,0,0,1];[6162,0,0,1];[47413,0,0,1];[47672,0,0,1];[0,0,0,1];[48220,0,0,1]";
                 chr.Dress = Login_UnserializeItems(serializedDress);
             }
+        // to allow create mages only if managed to get to finish the regular game
+        // we fill allow_mage DB field on rebirth
+        } else if (srvid == NIGHTMARE) { 
+            if (chr.Nick[0] == '@') { // for @ chars: make it 1 if it's 0
+                std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 1 WHERE `id` = '%u' AND `allow_mage` = 0", chr.LoginID);
+
+                SQL_Lock();
+                if (SQL_Query(query_update_allow.c_str()) != 0)
+                {
+                     Printf(LOG_Error, "[DB] Failed to update allow_mage: %s\n", SQL_Error().c_str());
+                }
+                SQL_Unlock();
+            } else if (chr.Nick[0] == '_') { // for _ chars: make it 2
+                std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 2 WHERE `id` = '%u'", chr.LoginID);
+
+                SQL_Lock();
+                if (SQL_Query(query_update_allow.c_str()) != 0)
+                {
+                     Printf(LOG_Error, "[DB] Failed to update allow_mage: %s\n", SQL_Error().c_str());
+                }
+                SQL_Unlock();
+            }
         }
 
         // Save to shelf upon reborn. Note that this function empties the bag and money (and dress for mage/witch).
