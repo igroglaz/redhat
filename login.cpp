@@ -2076,18 +2076,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             if ((chr.Sex == 0 || chr.Sex == 64) && chr.Nick[0] != '@') {
                 chr.Picture = 64;
             }
-            
-            // Allow @ characters reborning TO #2 server become only warriors
-            if (chr.Nick[0] == '@') {
-                if (chr.Sex == 64) { // mage
-                    chr.Sex = 0; // become warr
-                    chr.Picture = 64; // become zomb (cause was silly mage)
-                }
-                
-                // replace equipped items on leather warrior's set + spear (BOTH for warr and pseudo-mage)
-                std::string serializedDress = "[0,0,40,12];[4367,0,0,1];[45606,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[46631,0,0,1];[46895,0,0,1];[6162,0,0,1];[47413,0,0,1];[47672,0,0,1];[0,0,0,1];[48220,0,0,1]";
-                chr.Dress = Login_UnserializeItems(serializedDress);
-            }
+
         // to allow create mages only if managed to get to finish the regular game
         // we fill allow_mage DB field on rebirth
         } else if (srvid == NIGHTMARE) { 
