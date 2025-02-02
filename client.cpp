@@ -1454,14 +1454,24 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         // Replace girls with boys.
         p_picture &= ~0x80;
 
-        // Check for solo mage.
-        const char c = p_nickname[0];
-        int solo_mage_need = c == '@' ? 1 : c == '_' ? 2 : 0;
-        if (solo_mage_need > 0 && (p_picture & 0x40)) {
-            int allow_mage = AllowMage(conn->Login.c_str());
-            if (allow_mage < solo_mage_need) {
-                Printf(LOG_Info, "[CL] solo-mage %s is not allowed for login %s, allow_mage=%d, want=%d. Converted to warrior\n", p_nickname.c_str(), conn->Login.c_str(), allow_mage, solo_mage_need);
-                p_picture &= ~0x40;
+        // Check for solo mage for @ (solo) and _ (hc) modes at hero creation 
+        // (DB: 'allow_mage' field at table 'logins')
+        if (p_picture & 0x40) { // mage class flag
+            if (p_nickname[0] == '@')
+            {
+                if (AllowMage(conn->Login.c_str()) <= 0) // check DB. @ must have 1+
+                {
+                    Printf(LOG_Info, "[CL] @-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
+                    p_picture &= ~0x40; // change hero class to warrior
+                }
+            }
+            else if (p_nickname[0] == '_')
+            {
+                if (AllowMage(conn->Login.c_str()) != 2) // check DB. _ must have 2
+                {
+                    Printf(LOG_Info, "[CL] _-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
+                    p_picture &= ~0x40; // change hero class to warrior
+                }
             }
         }
 
