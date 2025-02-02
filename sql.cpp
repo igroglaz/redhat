@@ -178,6 +178,7 @@ void SQL_CreateTables()
         `discordRole` VARCHAR(1020) DEFAULT NULL, \
         `changes` TINYINT(4) NOT NULL DEFAULT '0', \
         `allow_mage` TINYINT(1) NOT NULL DEFAULT '0', \
+        `alias_nickname` VARCHAR(50) DEFAULT NULL, \
         UNIQUE(`id`))";
 
 
