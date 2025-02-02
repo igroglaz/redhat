@@ -2055,9 +2055,9 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 chr.Picture = 64;
             }
 
-        // to allow create mages only if managed to get to finish the regular game
-        // we fill allow_mage DB field on rebirth
-        } else if (srvid == NIGHTMARE) { 
+        // allow to create mages only if managed to finish HARD
+        // (fill allow_mage DB field on rebirth)
+        } else if (srvid == HARD) { 
             if (chr.Nick[0] == '@') { // for @ chars: make it 1 if it's 0
                 std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 1 WHERE `id` = '%u' AND `allow_mage` = 0", chr.LoginID);
 
