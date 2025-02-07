@@ -1,6 +1,7 @@
 #ifndef SQL_HPP_INCLUDED
 #define SQL_HPP_INCLUDED
 
+#include <memory>
 #include <winsock2.h>
 #include <mysql.h>
 #include <string>
@@ -27,6 +28,7 @@ std::string SQL_Error();
 
 void SQL_DropTables();
 void SQL_CreateTables();
+void SQL_CreateTableCheckpoint();
 
 void SQL_UpdateTables();
 
@@ -41,5 +43,19 @@ int SQL_AffectedRows();
 unsigned long* SQL_FetchLengths(MYSQL_RES* result);
 unsigned long SQL_NumFields(MYSQL_RES* result);
 MYSQL_FIELD* SQL_FetchFields(MYSQL_RES* result);
+
+struct SimpleSQL {
+    std::string query;
+    bool success;
+    MYSQL_RES* result;
+
+    // Execute a query. If it's a SELECT query, stores the result.
+    SimpleSQL(std::string query);
+    ~SimpleSQL();
+
+    operator bool() const {
+        return success;
+    }
+};
 
 #endif // SQL_HPP_INCLUDED

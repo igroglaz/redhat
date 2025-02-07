@@ -13,6 +13,7 @@ add_library(redhat-lib
     CCharacter.cpp
     CRC_32.cpp
     character.cpp
+    checkpoint.cpp
     client.cpp
     config.cpp
     hat2.cpp

@@ -1,3 +1,4 @@
+#include "checkpoint.h"
 #include "login.hpp"
 #include "sql.hpp"
 #include "utils.hpp"
@@ -710,7 +711,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
         }
 
         // Query to check if character exists
-        std::string query_checkchr = Format("SELECT `login_id` FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
+        std::string query_checkchr = Format("SELECT `id` FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
+        int character_id = -1;
         if(SQL_Query(query_checkchr.c_str()) != 0) // Execute query
         {
             SQL_Unlock();
@@ -724,7 +726,12 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
         if(result)
         {
             // If character exists, set create FLAG to false
-            if(SQL_NumRows(result) == 1) create = false;
+            if (SQL_NumRows(result) == 1) {
+                MYSQL_ROW row = SQL_FetchRow(result);
+                character_id = SQL_FetchInt(row, result, "id");
+                create = false;
+            }
+
             SQL_FreeResult(result); // Free result memory
         }
 
@@ -803,6 +810,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 return false;
             }
             chr.LoginID = login_id;
+            chr.ID = character_id;
 
             if(chr.Clan.size() > 0) // Process clan data
             {
@@ -813,6 +821,56 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         cpos--;
                     chr.Clan = std::string(chr.Clan);
                     chr.Clan.erase(cpos);
+                }
+            }
+
+            // Giga-characters are restored from a checkpoint if they've died.
+            if (chr.Nick[0] == '_') {
+                checkpoint::Checkpoint saved(character_id);
+
+                if (!saved.loaded_from_db) {
+                    // Character died before saving for the first time. Create a fake checkpoint from scratch.
+                    if (srvid != EASY) {
+                        Printf(LOG_Error, "[checkpoint] no checkpoint for %d at server %d!\n", character_id, srvid);
+                    }
+                    saved.body = chr.Body;
+                    saved.reaction = chr.Reaction;
+                    saved.mind = chr.Mind;
+                    saved.spirit = chr.Spirit;
+                    saved.monsters_kills = 0;
+                    saved.players_kills = 0;
+                    saved.frags = 0;
+                    saved.deaths = 0; // Set deaths to 0, so `chr.Deaths > saved.deaths` below will trigger.
+                    saved.exp_fire_blade = 0;
+                    saved.exp_water_axe = 0;
+                    saved.exp_air_bludgeon = 0;
+                    saved.exp_earth_pike = 0;
+                    saved.exp_astral_shooting = 0;
+                    saved.dress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                }
+
+                if (chr.Deaths > saved.deaths) {
+                    Printf(LOG_Info, "[checkpoint] restoring character %d from checkpoint\n", character_id);
+                    if (srvid != EASY) { // On EASY server the base stats are preserved.
+                        chr.Body = saved.body;
+                        chr.Reaction = saved.reaction;
+                        chr.Mind = saved.mind;
+                        chr.Spirit = saved.spirit;
+                    }
+                    chr.MonstersKills = saved.monsters_kills;
+                    chr.PlayersKills = saved.players_kills;
+                    chr.Frags = saved.frags;
+                    // Deaths are not loaded to preserve ladder statistics.
+                    chr.ExpFireBlade = saved.exp_fire_blade;
+                    chr.ExpWaterAxe = saved.exp_water_axe;
+                    chr.ExpAirBludgeon = saved.exp_air_bludgeon;
+                    chr.ExpEarthPike = saved.exp_earth_pike;
+                    chr.ExpAstralShooting = saved.exp_astral_shooting;
+                    chr.Dress = Login_UnserializeItems(saved.dress);
+
+                    if (saved.loaded_from_db) { // If the character is new, we'll create a new checkpoint in `UpdateCharacter` anyway.
+                        checkpoint::UpdateDeaths(character_id, chr.Deaths);
+                    }
                 }
             }
 
@@ -2187,6 +2245,18 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 chr.ExpAstralShooting = limit;
             }
         }
+
+        // Create a checkpoint for giga-characters on reborn.
+        if (chr.Nick[0] == '_') {
+            Printf(LOG_Info, "[checkpoint] saving %d on reborn from server %d\n", chr.ID, srvid);
+            checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
+        }
+    }
+
+    // Create a checkpoint for giga-characters on EASY server always but only with stats.
+    if (chr.Nick[0] == '_' && !reborn && srvid == EASY) {
+        Printf(LOG_Info, "[checkpoint] saving stats for %d\n", chr.ID);
+        checkpoint::Checkpoint(chr, true).SaveToDB(chr.ID);
     }
 
     //////////////////////////////
@@ -2230,6 +2300,12 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             WipeSpells(chr);
         }
 
+        // Create a checkpoint for giga-characters on reclass.
+        if (chr.Nick[0] == '_') {
+            Printf(LOG_Info, "[checkpoint] saving %d on reclass\n", chr.ID);
+            checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
+        }
+
     ///////////////////////////////
     // ASCEND after maxing STATS //
     ///////////////////////////////
@@ -2269,6 +2345,12 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             chr.Picture = 15;
             std::string serializedDress = "[0,0,40,12];[53709,0,2,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
             chr.Dress = Login_UnserializeItems(serializedDress);
+        }
+
+        // Create a checkpoint for giga-characters on ascend.
+        if (chr.Nick[0] == '_') {
+            Printf(LOG_Info, "[checkpoint] saving %d on ascend\n", chr.ID);
+            checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else {
         *points = 0;

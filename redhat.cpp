@@ -59,6 +59,9 @@ bool H_Init(int argc, char* argv[])
         {
             SQL_UpdateTables();
             exit_ = true;
+        } else if (arg == "-create-table-checkpoint") {
+            SQL_CreateTableCheckpoint();
+            exit_ = true;
         }
     }
     if(exit_) return false;
