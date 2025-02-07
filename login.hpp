@@ -46,5 +46,6 @@ CItemList Login_UnserializeItems(std::string data);
 bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid);
 void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points);
 int AllowMage(const char* login);
+void WipeSpells(CCharacter& chr);
 
 #endif // LOGIN_HPP_INCLUDED

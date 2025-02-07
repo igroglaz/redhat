@@ -70,6 +70,7 @@ class CCharacter
                  Id1, Id2, HatId;
 
         int LoginID;
+        int ID; // Unknown by the server. Populated within `Login_UpdateCharacter()`.
 
         uint8_t UnknownValue1,
                 UnknownValue2,

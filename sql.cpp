@@ -153,6 +153,32 @@ void SQL_DropTables()
     }
 }
 
+void SQL_CreateTableCheckpoint() {
+    std::string create_table_checkpoint = R"(
+        CREATE TABLE IF NOT EXISTS `checkpoint` (
+            `id` BIGINT(1) NOT NULL AUTO_INCREMENT,
+            `body` TINYINT(1) UNSIGNED NOT NULL,
+            `reaction` TINYINT(1) UNSIGNED NOT NULL,
+            `mind` TINYINT(1) UNSIGNED NOT NULL,
+            `spirit` TINYINT(1) UNSIGNED NOT NULL,
+            `monsters_kills` INT(1) UNSIGNED NOT NULL,
+            `players_kills` INT(1) UNSIGNED NOT NULL,
+            `frags` INT(1) UNSIGNED NOT NULL,
+            `deaths` INT(1) UNSIGNED NOT NULL,
+            `exp_fire_blade` INT(1) UNSIGNED NOT NULL,
+            `exp_water_axe` INT(1) UNSIGNED NOT NULL,
+            `exp_air_bludgeon` INT(1) UNSIGNED NOT NULL,
+            `exp_earth_pike` INT(1) UNSIGNED NOT NULL,
+            `exp_astral_shooting` INT(1) UNSIGNED NOT NULL,
+            `dress` LONGTEXT CHARACTER SET cp866 COLLATE cp866_bin NOT NULL,
+            UNIQUE(`id`)
+        );
+    )";
+    if (mysql_query(&SQL::Connection, create_table_checkpoint.c_str()) != 0) {
+        Printf(LOG_Silent, "[DB] Warning: table `checkpoint` not created: %s\n", SQL_Error().c_str());
+    }
+}
+
 void SQL_CreateTables()
 {
     std::string query_table_logins = "CREATE TABLE IF NOT EXISTS `logins` ( \
@@ -254,6 +280,8 @@ void SQL_CreateTables()
     if (mysql_query(&SQL::Connection, create_table_shelf.c_str()) != 0) {
         Printf(LOG_Silent, "[DB] Warning: table `shelf` not created: %s\n", SQL_Error().c_str());
     }
+
+    SQL_CreateTableCheckpoint();
 }
 
 void SQL_UpdateVersion1() {
@@ -488,4 +516,34 @@ MYSQL_FIELD* SQL_FetchFields(MYSQL_RES* result)
 {
     //Printf("SQL_FetchFields()\n");
     return mysql_fetch_fields(result);
+}
+
+SimpleSQL::SimpleSQL(std::string query) {
+    this->query = query;
+    this->result = nullptr;
+    this->success = true;
+
+    if (SQL_Query(query) != 0) {
+        Printf(LOG_Error, "[DB] Query failed: %s --- %s\n", query.c_str(), SQL_Error().c_str());
+        this->success = false;
+        return;
+    }
+
+    // Auto-detect SELECT statements. Non-select statements fail the `SQL_StoreResult` call.
+    if (query.find("SELECT") != query.find_first_not_of(' ')) {
+        return;
+    }
+
+    this->result = SQL_StoreResult();
+    if (!this->result) {
+        Printf(LOG_Error, "[DB] Query failed to store result: %s --- %s\n", query.c_str(), SQL_Error().c_str());
+        this->success = false;
+        return;
+    }
+}
+
+SimpleSQL::~SimpleSQL() {
+    if (this->result) {
+        SQL_FreeResult(this->result);
+    }
 }
