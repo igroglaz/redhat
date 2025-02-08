@@ -151,11 +151,10 @@ struct FakeLoadFromShelf {
     }
 };
 
-CCharacter FakeChar(int login_id, std::string nick="", int deaths=0) {
+CCharacter FakeChar(int login_id, std::string nick="") {
     CCharacter chr;
     chr.LoginID = login_id;
     chr.Nick = nick;
-    chr.Deaths = deaths;
     return chr;
 }
 
@@ -261,15 +260,13 @@ TEST(ItemsToSavingsBook_Solo) {
     };
 
     std::vector<CItem> inventory{cuirass, potions5, book, helm};
-    shelf::impl::ItemsToSavingsBookImpl(FakeChar(42, "@solo", 3), QUEST_T4, inventory, load_from_shelf.Bind(), sql_query.Bind());
+    shelf::impl::ItemsToSavingsBookImpl(FakeChar(42, "@solo"), QUEST_T4, inventory, load_from_shelf.Bind(), sql_query.Bind());
     std::vector<CItem> want{helm};
     CHECK_EQUAL(want, inventory);
 }
 
-TEST(ItemsToSavingsBook_SoloHardCore) {
-    FakeSQLQuery sql_query{.queries={
-        {"INSERT INTO shelf (login_id, server_id, cabinet, mutex, items) VALUES (42, 6, 2, 0, '[0,0,0,2];[6162,1,0,1,{2:2:0:0}];[3649,0,0,5]')", true},
-    }};
+TEST(ItemsToSavingsBook_Giga) {
+    FakeSQLQuery sql_query{.queries={}};
 
     FakeLoadFromShelf load_from_shelf{
         .want_login_id=42,
@@ -279,8 +276,8 @@ TEST(ItemsToSavingsBook_SoloHardCore) {
     };
 
     std::vector<CItem> inventory{cuirass, potions5, book, helm};
-    shelf::impl::ItemsToSavingsBookImpl(FakeChar(42, "@solo"), QUEST_T4, inventory, load_from_shelf.Bind(), sql_query.Bind());
-    std::vector<CItem> want{helm};
+    shelf::impl::ItemsToSavingsBookImpl(FakeChar(42, "_giga"), QUEST_T4, inventory, load_from_shelf.Bind(), sql_query.Bind());
+    std::vector<CItem> want{cuirass, potions5, book, helm};
     CHECK_EQUAL(want, inventory);
 }
 
@@ -406,15 +403,13 @@ TEST(ItemsFromSavingsBook_Solo) {
     };
 
     std::vector<CItem> inventory{cuirass, potions5, book, helm};
-    shelf::impl::ItemsFromSavingsBookImpl(FakeChar(42, "@solo", 3), QUEST_T1, inventory, load_from_shelf.Bind(), sql_query.Bind());
+    shelf::impl::ItemsFromSavingsBookImpl(FakeChar(42, "@solo"), QUEST_T1, inventory, load_from_shelf.Bind(), sql_query.Bind());
     std::vector<CItem> want{cuirass, potions10, helm, staff};
     CHECK_EQUAL(want, inventory);
 }
 
-TEST(ItemsFromSavingsBook_SoloHardCore) {
-    FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,0]' WHERE login_id = 42 AND server_id = 6 AND cabinet = 2 AND mutex = 0", true},
-    }};
+TEST(ItemsFromSavingsBook_Giga) {
+    FakeSQLQuery sql_query{.queries={}};
 
     FakeLoadFromShelf load_from_shelf{
         .want_login_id=42,
@@ -425,8 +420,8 @@ TEST(ItemsFromSavingsBook_SoloHardCore) {
     };
 
     std::vector<CItem> inventory{cuirass, potions5, book, helm};
-    shelf::impl::ItemsFromSavingsBookImpl(FakeChar(42, "@solo"), QUEST_T4, inventory, load_from_shelf.Bind(), sql_query.Bind());
-    std::vector<CItem> want{cuirass, potions10, helm, staff};
+    shelf::impl::ItemsFromSavingsBookImpl(FakeChar(42, "_giga"), QUEST_T4, inventory, load_from_shelf.Bind(), sql_query.Bind());
+    std::vector<CItem> want{cuirass, potions5, book, helm};
     CHECK_EQUAL(want, inventory);
 }
 
@@ -569,7 +564,7 @@ TEST(MoneyToSavingsBook_FailedToSave) {
 
 TEST(MoneyToSavingsBook_Solo) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 250 WHERE login_id = 42 AND server_id = 6 AND cabinet = 2 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 250 WHERE login_id = 42 AND server_id = 6 AND cabinet = 1 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -745,7 +740,7 @@ TEST(MoneyFromSavingsBook_FailedToSave) {
 
 TEST(MoneyFromSavingsBook_Solo) {
     FakeSQLQuery sql_query{.queries={
-        {"UPDATE shelf SET mutex = 1, money = 100 WHERE login_id = 42 AND server_id = 6 AND cabinet = 2 AND mutex = 0", true},
+        {"UPDATE shelf SET mutex = 1, money = 100 WHERE login_id = 42 AND server_id = 6 AND cabinet = 1 AND mutex = 0", true},
     }};
 
     FakeLoadFromShelf load_from_shelf{
@@ -760,6 +755,24 @@ TEST(MoneyFromSavingsBook_Solo) {
     auto got = shelf::impl::MoneyFromSavingsBookImpl(FakeChar(42, "@solo"), QUEST_T4, inventory, 1000, 200, load_from_shelf.Bind(), sql_query.Bind());
     CHECK_EQUAL(1200, got);
     std::vector<CItem> want{};
+    CHECK_EQUAL(want, inventory);
+}
+
+TEST(MoneyFromSavingsBook_Giga) {
+    FakeSQLQuery sql_query{.queries={}};
+
+    FakeLoadFromShelf load_from_shelf{
+        .want_login_id=42,
+        .want_shelf_number=NIGHTMARE,
+        .fake_result=true,
+        .fake_money=300,
+        .fake_shelf_exists=true,
+    };
+
+    std::vector<CItem> inventory{book};
+    auto got = shelf::impl::MoneyFromSavingsBookImpl(FakeChar(42, "_giga"), QUEST_T4, inventory, 1000, 200, load_from_shelf.Bind(), sql_query.Bind());
+    CHECK_EQUAL(1000, got);
+    std::vector<CItem> want{book};
     CHECK_EQUAL(want, inventory);
 }
 
@@ -796,6 +809,23 @@ TEST(StoreOnShelf_FilledShelf) {
 
     std::vector<CItem> inventory{potions5, helm};
     auto got = shelf::impl::StoreOnShelfImpl(FakeChar(42), QUEST_T1, inventory, 100, load_from_shelf.Bind(), sql_query.Bind());
+    CHECK_EQUAL(true, got);
+}
+
+TEST(StoreOnShelf_Giga) {
+    FakeSQLQuery sql_query{.queries={}}; // No queries --- nothing is saved on shelf.
+
+    FakeLoadFromShelf load_from_shelf{
+        .want_login_id=42,
+        .want_shelf_number=NIGHTMARE,
+        .fake_result=true,
+        .fake_items={staff, potions5},
+        .fake_money=100,
+        .fake_shelf_exists=true,
+    };
+
+    std::vector<CItem> inventory{potions5, helm};
+    auto got = shelf::impl::StoreOnShelfImpl(FakeChar(42, "_giga"), QUEST_T1, inventory, 100, load_from_shelf.Bind(), sql_query.Bind());
     CHECK_EQUAL(true, got);
 }
 

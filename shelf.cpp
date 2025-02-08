@@ -14,6 +14,14 @@
 #endif // PRId64
 
 namespace shelf {
+    
+bool CanDeposit(const CCharacter& chr) {
+    return !chr.Nick.length() || chr.Nick[0] != '_';
+}
+
+bool CanWithdraw(const CCharacter& chr) {
+    return !chr.Nick.length() || chr.Nick[0] != '_';
+}
 
 bool SQLUpsertOneRow(std::string query) {
     if (SQL_Query(query) != 0) {
@@ -74,12 +82,9 @@ int FixServerID(ServerIDType server_id) {
     return server_id;
 }
 
-// 0 --- default, 1 --- solo-characters, 2 --- solo-hardcore characters.
+// 0 --- default, 1 --- solo-characters.
 int Cabinet(const CCharacter& chr) {
-    if (chr.Nick.size() && chr.Nick[0] == '@') {
-        if (chr.Deaths <= 1) {
-            return 2;
-        }
+    if (chr.Nick[0] == '@') {
         return 1;
     }
     return 0;
@@ -224,6 +229,10 @@ bool SaveShelf(const CCharacter& chr, int shelf_number, Field field, int32_t mut
 }
 
 bool ItemsToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    if (!CanDeposit(chr)) {
+        return true;
+    }
+
     int shelf_number = FixServerID(server_id);
 
     auto savings_book = FindSavingsBook(inventory);
@@ -254,6 +263,10 @@ bool ItemsToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::
 }
 
 bool ItemsFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    if (!CanWithdraw(chr)) {
+        return true;
+    }
+
     int shelf_number = FixServerID(server_id);
 
     auto savings_book = FindSavingsBook(inventory);
@@ -290,6 +303,10 @@ bool ItemsFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std
 }
 
 int32_t MoneyToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    if (!CanDeposit(chr)) {
+        return current_money;
+    }
+
     int shelf_number = FixServerID(server_id);
 
     if (amount == 0) {
@@ -328,6 +345,10 @@ int32_t MoneyToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, st
 }
 
 int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    if (!CanWithdraw(chr)) {
+        return current_money;
+    }    
+
     int shelf_number = FixServerID(server_id);
 
     if (amount == 0) {
@@ -370,6 +391,10 @@ int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, 
 }
 
 bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    if (!CanDeposit(chr)) {
+        return true;
+    }
+
     int shelf_number = FixServerID(server_id);
 
     int32_t mutex = 0;

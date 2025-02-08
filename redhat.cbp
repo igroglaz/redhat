@@ -46,6 +46,8 @@
 		<Unit filename="CRC_32.h" />
 		<Unit filename="character.cpp" />
 		<Unit filename="character.hpp" />
+		<Unit filename="checkpoint.cpp" />
+		<Unit filename="checkpoint.h" />
 		<Unit filename="client.cpp" />
 		<Unit filename="client.hpp" />
 		<Unit filename="config.cpp" />
