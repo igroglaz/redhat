@@ -52,6 +52,14 @@ int32_t MoneyToSavingsBook(const CCharacter& chr, ServerIDType server_id, std::v
 // doesn't remove the book.
 int32_t MoneyFromSavingsBook(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount);
 
+// Checks if given character can deposit items on the shelf.
+// Giga-characters are not allowed to deposit.
+bool CanDeposit(const CCharacter& chr);
+
+// Checks if given character can deposit items on the shelf.
+// Giga-characters are not allowed to withdraw.
+bool CanWithdraw(const CCharacter& chr);
+
 // Store given items and money on the shelf.
 bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
 
