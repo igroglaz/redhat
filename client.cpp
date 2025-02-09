@@ -1037,6 +1037,22 @@ bool CL_ServerList(Client* conn, Packet& pack)
     return CLCMD_SendServerList(conn);
 }
 
+uint32_t ServerDifficultyLevel(ServerIDType server_id) {
+    switch (server_id) {
+        case EASY:
+        case KIDS:
+            return 1;
+        case NIVAL:
+        case MEDIUM:
+            return 2;
+        case HARD:
+        case NIGHTMARE:
+            return 3;
+        default:
+            return 4;
+    }
+}
+
 bool CLCMD_SendServerList(Client* conn)
 {
     Packet pack;
@@ -1076,7 +1092,7 @@ bool CLCMD_SendServerList(Client* conn)
                                                           map_name.c_str(),
                                                           srv->Info.MapWidth,
                                                           srv->Info.MapHeight,
-                                                          srv->Info.MapLevel,
+                                                          ServerDifficultyLevel(srv->Number),
                                                           srv->Info.PlayerCount,
                                                           srv->Address.c_str(),
                                                           srv->Port);
