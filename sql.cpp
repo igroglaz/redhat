@@ -2,10 +2,16 @@
 #include "sql.hpp"
 #include "utils.hpp"
 
+#include <inttypes.h>
 #include <iostream>
 #include <mysql.h>
 
 #include <windows.h>
+
+// This should be defined in inttypes.h, but some old compilers don't have that.
+#ifndef PRId64
+#define PRId64 "lld"
+#endif // PRId64
 
 namespace SQL
 {
@@ -79,7 +85,7 @@ int64_t SQL_FetchInt64(MYSQL_ROW row, MYSQL_RES* result, std::string fieldname) 
 
     // StrToInt uses an int for conversion, so we cannot use it.
 	int64_t retval;
-	sscanf(str.c_str(), "%lld", &retval);
+	sscanf(str.c_str(), "%" PRId64, &retval);
 	return retval;
 }
 
