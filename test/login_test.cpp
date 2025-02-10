@@ -21,6 +21,7 @@ struct Info {
     uint8_t sex;
     uint32_t deaths;
     uint32_t kills;
+    std::string nick;
     std::string clan;
     int login_id;
 };
@@ -78,6 +79,7 @@ CCharacter FakeCharacter(const CharacterOpts& opts) {
     chr.Sex = opts.info.sex;
     chr.Deaths = opts.info.deaths;
     chr.MonstersKills = opts.info.kills;
+    chr.Nick = opts.info.nick;
     chr.Clan = opts.info.clan;
     chr.LoginID = opts.info.login_id;
 
@@ -127,6 +129,7 @@ std::string CharacterDiff(CCharacter got, CCharacter want) {
     A2_TEST_DIFF_FIELD(Sex);
     A2_TEST_DIFF_FIELD(Deaths);
     A2_TEST_DIFF_FIELD(MonstersKills);
+    A2_TEST_DIFF("Nick", got.Nick, want.Nick);
     A2_TEST_DIFF("Clan", got.Clan, want.Clan);
     A2_TEST_DIFF_FIELD(LoginID);
 
@@ -494,6 +497,35 @@ TEST(UpdateCharacter_Reborn23_Success_Warrior) {
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
             .skills={.fire=5000, .water=10000, .air=15000, .earth=1, .astral=25000}, // Wipe all skills.
             .items={.money=0, .dress="[0,0,0,1];[1000,0,0,1]"}, // Wipe money and bag.
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn23_Failure_Solo_Treasures) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=4, .kills=2000, .nick="@ironman"},
+            .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
+            .skills={.fire=10000, .water=20000, .air=30000, .earth=40000, .astral=50000},
+            .items={.money=100000, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)1);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=4, .kills=2000, .nick="@ironman", .clan="2_treasures"},
+            .stats={.body=14, .reaction=12, .mind=14, .spirit=14}, // Reduce mind.
+            .skills={.fire=10000, .water=20000, .air=30000, .earth=40000, .astral=50000},
+            .items={.money=105000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Remove treasure.
         }
     );
 

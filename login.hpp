@@ -48,4 +48,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 int AllowMage(const char* login);
 void WipeSpells(CCharacter& chr);
 
+bool IsSolo(const CCharacter& chr);
+bool IsIronMan(const CCharacter& chr);
+bool IsLegend(const CCharacter& chr);
+
 #endif // LOGIN_HPP_INCLUDED

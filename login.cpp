@@ -1996,6 +1996,12 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         meets_reborn_criteria = false;
         reborn_failure_reason = "treasure";
     }
+
+    if (srvid <= MEDIUM && IsSolo(chr) && haveTreasures < 2) {
+        meets_reborn_criteria = false;
+        reborn_failure_reason = "2_treasures";
+    }
+
     unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
              chr.ExpEarthPike + chr.ExpAstralShooting;
 
@@ -2508,4 +2514,16 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             chr.ExpAstralShooting = limit_main;
         }
     }
+}
+
+bool IsSolo(const CCharacter& chr) {
+    return IsIronMan(chr) || IsLegend(chr);
+}
+
+bool IsIronMan(const CCharacter& chr) {
+    return chr.Nick.length() && chr.Nick[0] == '@';
+}
+
+bool IsLegend(const CCharacter& chr) {
+    return chr.Nick.length() && chr.Nick[0] == '_';
 }
