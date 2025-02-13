@@ -17,6 +17,7 @@ add_library(redhat-lib
     client.cpp
     config.cpp
     hat2.cpp
+    kill_stats.cpp
     lgn.cpp
     listener.cpp
     login.cpp
@@ -44,7 +45,8 @@ add_executable(redhat
 target_link_libraries(redhat redhat-lib)
 
 add_executable(redhat-test
-    test/shelf_test.cpp
+    test/shelf_test.cpp 
+    test/kill_stats_test.cpp
     test/login_test.cpp
     test/merge_items_test.cpp
     test/test.cpp

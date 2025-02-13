@@ -93,7 +93,7 @@ void Character::LoadFromBuffer(char* buf, unsigned long len)
                 // end.
                 break;
             }
-            case 0x55555555: // unknown; client info?
+            case 0x55555555: // Per-monster kill stats.
             {
                 p += ssiz;
                 break;
