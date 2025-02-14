@@ -2277,7 +2277,11 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
          chr.Money > 300000000) {
 
         chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
-        chr.Money = 0; // Reset Money
+        if (chr.Deaths == 0) {
+            chr.Money = 133; // HC: leave 133 gold to buy a bow
+        } else {
+            chr.Money = 0; // regular hero: reset money
+        }
         chr.Body = 1; // stats
         chr.Reaction = 1;
         chr.Mind = 1;
