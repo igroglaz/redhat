@@ -31,6 +31,7 @@ add_library(redhat-lib
     socket.cpp
     sql.cpp
     status.cpp
+    update_character.cpp
     utils.cpp
     version.cpp
 )

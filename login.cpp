@@ -6,6 +6,7 @@
 #include "merge_items.hpp"
 #include "server_id.hpp"
 #include "shelf.hpp"
+#include "update_character.h"
 
 #include "sha1.h"
 
@@ -1854,6 +1855,10 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDTy
         need_exp = 50000000;
         need_kills = 4000;
         need_gold = 100000000;
+    }
+
+    if (!update_character::HasKillsForReborn(chr, srvid)) {
+        return "mob_kills";
     }
 
     if (total_exp < need_exp) {
