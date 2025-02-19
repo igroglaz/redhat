@@ -1429,141 +1429,24 @@ bool Login_GetCharacterList(std::string login, std::vector<CharacterInfo>& info,
     }
 }
 
-const char enru_charmap_en[] =
-    {
-        'a',
-        'A',
-        'c',
-        'C',
-        'e',
-        'E',
-        'K',
-        'o',
-        '\x8E',
-        'p',
-        'P',
-        'u',
-        'x',
-        'X',
-        'y',
-        'Y',
-        'm',
-    };
-
-const char enru_charmap_ru[] =
-    {
-        '\xA0',
-        '\x80',
-        '\xE1',
-        '\x91',
-        '\xA5',
-        '\x85',
-        '\x8A',
-        '\xAE',
-        '\x8E',
-        '\xE0',
-        '\x90',
-        '\xA8',
-        '\xE5',
-        '\x95',
-        '\xE3',
-        '\x93',
-        '\xE2',
-    };
-
-std::string RegexEscape(char what)
-{
-    std::string retval = "";
-    switch(what)
-    {
-        case '*':
-        case '.':
-        case '?':
-        case '\\':
-        case '|':
-        case '(':
-        case ')':
-        case '[':
-        case ']':
-        case '+':
-        case '-':
-        case '{':
-        case '}':
-        case '"':
-        case '\'':
-        case '^':
-        case '$':
-            retval += "\\";
-        default:
-            retval += what;
-            break;
-    }
-
-    return retval;
-}
-
-bool Login_NickExists(std::string nickname, int hatId)
-{
-    //Printf("Login_NickExists()\n");
+bool Login_NickExists(std::string nickname, int hatId) {
     if(!SQL_CheckConnected()) return false;
 
-    try
-    {
-        std::string nickname2 = nickname;
-        nickname = "";
-        for(size_t i = 0; i < nickname2.length(); i++)
-        {
-            bool char_dest = false;
-            for(size_t j = 0; j < sizeof(enru_charmap_en); j++)
-            {
-                if(nickname2[i] == enru_charmap_en[j] ||
-                   nickname2[i] == enru_charmap_ru[j])
-                {
-                    if(!char_dest) nickname += "[";
-                    char_dest = true;
-                    nickname += RegexEscape((enru_charmap_en[j] == nickname2[i]) ? enru_charmap_ru[j] : enru_charmap_en[j]);
-                }
-            }
-
-            nickname += RegexEscape(nickname2[i]);
-            if(char_dest)
-                nickname += "]";
-        }
-
-        nickname = SQL_Escape(nickname);
-        //Printf(LOG_Info, "Resulting nickname: %s\n", nickname.c_str());
-
-        SQL_Lock();
-        std::string query_nickheck = Format("SELECT `nick` FROM `characters` WHERE `nick` REGEXP '^%s$' AND `deleted`='0'", nickname.c_str());
-        if (hatId > 0) query_nickheck += Format(" AND `hat_id`='%d'", hatId);
-        if(SQL_Query(query_nickheck.c_str()) != 0)
-        {
-            SQL_Unlock();
-            return false;
-        }
-        MYSQL_RES* result = SQL_StoreResult();
-        if(!result)
-        {
-            SQL_Unlock();
-            return false;
-        }
-
-        if(!SQL_NumRows(result))
-        {
-            SQL_FreeResult(result);
-            SQL_Unlock();
-            return false; // nick does not exist
-        }
-
-        SQL_FreeResult(result);
-        SQL_Unlock();
-        return true; // nick exists
+    std::string query_nickheck = Format("SELECT `nick` FROM `characters` WHERE LOWER(`nick`) = LOWER('%s') AND `deleted`='0'", SQL_Escape(nickname).c_str());
+    if (hatId > 0) {
+        query_nickheck += Format(" AND `hat_id`='%d'", hatId);
     }
-    catch(...)
-    {
-        SQL_Unlock();
-        return true;
+
+    SimpleSQL result(query_nickheck);
+    if (!result) {
+        return false;
     }
+
+    if (!SQL_NumRows(result.result)) {
+        return false; // nick does not exist
+    }
+
+    return true; // nick exists
 }
 
 bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
