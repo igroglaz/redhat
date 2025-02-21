@@ -868,6 +868,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpEarthPike = saved.exp_earth_pike;
                     chr.ExpAstralShooting = saved.exp_astral_shooting;
                     chr.Dress = Login_UnserializeItems(saved.dress);
+                    chr.Bag.Items.clear();
+
+                    if (chr.Sex == 64 || chr.Sex == 192) {
+                        WipeSpells(chr);
+                    }
 
                     if (saved.loaded_from_db) { // If the character is new, we'll create a new checkpoint in `UpdateCharacter` anyway.
                         checkpoint::UpdateDeaths(character_id, chr.Deaths);
