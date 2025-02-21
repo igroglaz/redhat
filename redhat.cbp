@@ -54,6 +54,8 @@
 		<Unit filename="config.hpp" />
 		<Unit filename="hat2.cpp" />
 		<Unit filename="hat2.hpp" />
+		<Unit filename="kill_stats.cpp" />
+		<Unit filename="kill_stats.h" />
 		<Unit filename="lgn.cpp" />
 		<Unit filename="lgn.hpp" />
 		<Unit filename="listener.cpp" />
@@ -82,6 +84,8 @@
 		<Unit filename="sql.hpp" />
 		<Unit filename="status.cpp" />
 		<Unit filename="status.hpp" />
+		<Unit filename="update_character.cpp" />
+		<Unit filename="update_character.h" />
 		<Unit filename="utils.cpp" />
 		<Unit filename="utils.hpp" />
 		<Unit filename="version.cpp" />
