@@ -3,6 +3,7 @@
 #include "sql.hpp"
 #include "utils.hpp"
 #include "config.hpp"
+#include "kill_stats.h"
 #include "merge_items.hpp"
 #include "server_id.hpp"
 #include "shelf.hpp"
@@ -1752,9 +1753,6 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDTy
     if (total_exp < need_exp) {
         return PrettyNumber(need_exp) + "_exp";
     }
-    if (chr.MonstersKills < need_kills) {
-        return PrettyNumber(need_kills) + "_kills";
-    }
     if (chr.Money < need_gold) {
         return PrettyNumber(need_gold) + "_gold";
     }
@@ -2073,7 +2071,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         }
         // RECLASSED chars reborn (AMA/WITCH)
         else if (chr.Sex == 128 || chr.Sex == 192) {
-            chr.MonstersKills = 0; // reset monster kills for reborn restriction
+            update_character::ClearMonsterKills(chr);
 
             chr.ExpFireBlade = 1; // wipe ALL exp
             chr.ExpWaterAxe = 1;
@@ -2169,7 +2167,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
          chr.Money > 300000000) {
 
-        chr.MonstersKills = 0; // reset monster kills (we need it for reborn restrictions)
+        update_character::ClearMonsterKills(chr);
+
         if (chr.Deaths == 0) {
             chr.Money = 133; // HC: leave 133 gold to buy a bow
         } else {
