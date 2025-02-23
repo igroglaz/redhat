@@ -8,55 +8,63 @@ namespace update_character {
 std::unordered_map<ServerIDType, std::unordered_map<uint16_t, uint8_t>> girl_needs_monster_kills{
 
     {EASY, {
+        ////////////////////// 1
+        {692, 1},  // Necro_Female1
+        {616, 1},  // Ogre
+        {620, 1},  // Troll
+        ////////////////////// 14
         {657, 14}, // F_Zombie.1
-        {661, 14}, // A_Zombie.2
         {664, 14}, // F_Skeleton.1
         {668, 14}, // A_Skeleton.1
-        {628, 14}, // Ghost
         {629, 14}, // Ghost.2
+        {715, 14}, // Dino
         {632, 14}, // Bee
         {707, 14}, // Spider
     }},
     {KIDS, {
-        ////////////////////// 2
-        {617, 2}, // Ogre.2
-        {621, 2}, // Troll.2
-        {2374, 2}, // Demon
-        {711, 2}, // Succubus
+        ////////////////////// 1
+        {617, 1},  // Ogre.2
+        {621, 1},  // Troll.2
+        {2374, 1}, // Demon
+        {711, 1},  // Succubus
         ////////////////////// 14
+        {630, 14}, // Ghost.3
         {609, 14}, // Orc_Sword.2
-        {625, 14}, // Bat_Sonic.2
         {633, 14}, // Bee.2
         {707, 14}, // Spider
     }},
     {NIVAL, {
-        ////////////////////// 4
-        {711, 4}, // Necro_Leader2
+        ////////////////////// 1
+        {696, 1},  // Necro_Leader2
+        {695, 1},  // Necro_Female2
+        {694, 1},  // Necro_Male2
+        {712, 1},  // Succubus.2
         ////////////////////// 14
-        {711, 14}, // Necro_Female2
         {669, 14}, // A_Skeleton.2
         {661, 14}, // A_Zombie.2
-        {625, 14}, // Bat_Sonic.2
-        {633, 14}, // Bee.2
-        {708, 14}, // Spider.2
         {617, 14}, // Ogre.2
         {621, 14}, // Troll.2
+        {625, 14}, // Bat_Sonic.2
+        {708, 14}, // Spider.2
     }},
     {MEDIUM, {
+        ////////////////////// 1
+        {701, 1},  // Necro_Female4
+        {671, 1},  // A_Skeleton.4
+        {667, 1},  // F_Skeleton.4
         ////////////////////// 14
+        {666, 14}, // F_Skeleton.3
+        {659, 14}, // F_Zombie.3
+        {618, 14}, // Ogre.3
+        {622, 14}, // Troll.3
+        {610, 14}, // Orc_Sword.3
+        {614, 14}, // Orc_Bow.3
+        {631, 14}, // Ghost.4
+        {603, 14}, // Goblin_Pike.4
+        {717, 14}, // Dino.3
         {626, 14}, // Bat_Sonic.3
         {634, 14}, // Bee.3
         {709, 14}, // Spider.3
-        {717, 14}, // Dino.3
-        {666, 14}, // F_Skeleton.3
-        {659, 14}, // F_Zombie.3
-        {630, 14}, // Ghost.3
-        {618, 14}, // Ogre.3
-        {622, 14}, // Troll.3
-        {713, 14}, // Succubus.3
-        {655, 14}, // Orc_Shaman.3
-        {610, 14}, // Orc_Sword.3
-        {614, 14}, // Orc_Bow.3
     }},
     {HARD, {
         {2132, 14}, // 2F_KnightLeader4
@@ -78,9 +86,9 @@ std::unordered_map<ServerIDType, std::unordered_map<uint16_t, uint8_t>> girl_nee
         {627, 14}, // Bat_Sonic.4
         {635, 14}, // Bee.4
         {710, 14}, // Spider.4
+        {714, 14}, // Succubus.4
         {812, 14}, // Turtle.5
         {808, 14}, // Ghost.5
-        {714, 14}, // Succubus.4
     }},
 };
 
