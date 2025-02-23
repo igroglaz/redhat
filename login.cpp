@@ -1759,11 +1759,11 @@ std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDTy
     return "";
 }
 
-void StoreOnShelfUponReborn(ServerIDType server_id, CCharacter& chr, shelf::StoreOnShelfFunction store_on_shelf) {
+void StoreOnShelf(ServerIDType server_id, CCharacter& chr, bool store_dress, shelf::StoreOnShelfFunction store_on_shelf) {
     std::vector<CItem> items = std::move(chr.Bag.Items);
     chr.Bag.Items.clear();
 
-    if (chr.Sex == 64 || chr.Sex == 192) {
+    if (store_dress) {
         // Mage and witch lose the dress in addition to the inventory.
         items.insert(items.end(), chr.Dress.Items.begin(), chr.Dress.Items.end());
 
@@ -2036,7 +2036,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         // Save to shelf upon reborn. Note that this function empties the bag and money (and dress for mage/witch).
         chr.Money -= reborn_money_price;
-        StoreOnShelfUponReborn(srvid, chr, store_on_shelf);
+        StoreOnShelf(srvid, chr, chr.Sex == 64 || chr.Sex == 192, store_on_shelf);
 
         // 1) perform reborn
         // WARRIOR/MAGE (no reclass OR ascend)
@@ -2166,13 +2166,14 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     // at reborn we "half" the exp)
     if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
          chr.Money > 300000000) {
-
         update_character::ClearMonsterKills(chr);
+
+        // Save to shelf upon reclass. Note that this function removes money, empties the bag and dress.
+        chr.Money -= 300000000;
+        StoreOnShelf(srvid, chr, true, store_on_shelf);
 
         if (chr.Deaths == 0) {
             chr.Money = 133; // HC: leave 133 gold to buy a bow
-        } else {
-            chr.Money = 0; // regular hero: reset money
         }
         chr.Body = 1; // stats
         chr.Reaction = 1;
@@ -2183,12 +2184,6 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.ExpAirBludgeon = 1;
         chr.ExpEarthPike = 1;
         chr.ExpAstralShooting = 1;
-        // wipe bag
-        std::string serializedBag = "[0,0,0,0]";
-        chr.Bag = Login_UnserializeItems(serializedBag);
-        // wipe equipped
-        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-        chr.Dress = Login_UnserializeItems(serializedDress);
 
         // reclass: war/mage change class
         if (chr.Sex == 0) { // warr become ama

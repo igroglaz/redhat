@@ -507,7 +507,7 @@ TEST(UpdateCharacter_Reborn23_Failure_Solo_Treasures) {
 TEST(UpdateCharacter_Reclass_Success) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200, .clan="reclass"},
+            .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200, .clan="reclass", .login_id=42},
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
             .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
             .items={.money=500000000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
@@ -516,6 +516,7 @@ TEST(UpdateCharacter_Reclass_Success) {
 
     unsigned int ascended = 0;
     unsigned int points = 0;
+    store_on_shelf_called = false;
 
     UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
@@ -524,13 +525,19 @@ TEST(UpdateCharacter_Reclass_Success) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="reclass"}, // Sex and picture are changed.
+            .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="reclass", .login_id=42}, // Sex and picture are changed.
             .stats={.body=1, .reaction=1, .mind=1, .spirit=1}, // All stats are set to 1.
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
             .items={.spells=16777218}, // Everything is wiped, spells are reset.
         }
     );
     CHECK_CHARACTER(chr, want);
+
+    CHECK_EQUAL(true, store_on_shelf_called);
+    CHECK_EQUAL(42, shelf_login_id);
+    CHECK_EQUAL(NIGHTMARE, shelf_server_id);
+    CHECK_EQUAL("[0,0,0,3];[1000,0,0,1];[2000,0,0,2];[1000,0,0,1]", shelf_items);
+    CHECK_EQUAL(203000000, shelf_money); // Had 500 mil, paid 300 mil for reclass, got 3 mil for treasures.
 }
 
 TEST(UpdateCharacter_Ascend_Success) {
