@@ -12,7 +12,6 @@ namespace
 
 const std::string empty_bag = "[0,0,0,0]";
 const std::string empty_dress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-const std::string dress_with_staff = "[0,0,40,12];[53709,0,2,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
 
 // A couple structs to conveniently construct a character for tests.
 struct Info {
@@ -533,7 +532,7 @@ TEST(UpdateCharacter_Reclass_Success) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_Ascend_Success) {
+TEST(UpdateCharacter_Ascend_Witch_Success) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
             .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="ascend"},
@@ -555,7 +554,35 @@ TEST(UpdateCharacter_Ascend_Success) {
             .info={.main_skill=1, .picture=15, .sex=64, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
-            .items={.money=2147000001, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress=dress_with_staff}, // Dress is reset to get a prize staff.
+            .items={.money=1, .spells=268385790, .bag="[0,0,0,3];[53709,0,2,1];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Ascend_Amazon_Success) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .picture=6, .sex=128, .deaths=10, .kills=4200, .clan="ascend"},
+            .stats={.body=56, .reaction=76, .mind=76, .spirit=76},
+            .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
+            .items={.money=2147000001, .spells=0, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+
+    CHECK_EQUAL(ascended, (unsigned int)1);
+    CHECK_EQUAL(points, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info={.main_skill=1, .picture=32, .sex=0, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
+            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
+            .items={.money=1, .spells=0, .bag="[0,0,0,3];[18118,1,2,1,{2:3:0:0},{19:2:0:0},{12:250:0:0}];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
         }
     );
     CHECK_CHARACTER(chr, want);
