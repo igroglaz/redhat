@@ -2215,6 +2215,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     // ASCEND: ama/witch become again war/mage and receive crown
     } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
                 stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000) {
+        chr.Money -= 2147000000;
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
         *ascended = 1; // We use it as a flag. DB increments if it's 1.
@@ -2234,19 +2235,24 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.ExpEarthPike = 1;
         chr.ExpAstralShooting = 1;
 
-        // (we do not wipe inventory/gold at this point...
-        // ..as players anyway will save items on mule, so why to make hastle.
-        // So we wipe only equipment to be able to award player with crown/staff
+        // We do not wipe inventory/gold for ascension.
+        // The prize item is inserted into the beginning of the inventory.
         if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange +250 attack
             chr.Sex = 0;
             chr.Picture = 32;
-            std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[18118,1,2,1,{2:3:0:0},{19:2:0:0},{12:250:0:0}];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-            chr.Dress = Login_UnserializeItems(serializedDress);
+
+            CItem crown{.Id=18118, .IsMagic=1, .Price=2, .Count=1, .Effects={
+                { .Id1=2, .Id2=0, .Value1=3, .Value2=0, }, // body = 3
+                { .Id1=19, .Id2=0, .Value1=2, .Value2=0, }, // scanrange = 2
+                { .Id1=12, .Id2=0, .Value1=250, .Value2=0, }, // attack = 250
+            }};
+            chr.Bag.Items.insert(chr.Bag.Items.begin(), crown);
         } else if (chr.Sex == 192) { // witch become mage and get physical damage staff
             chr.Sex = 64;
             chr.Picture = 15;
-            std::string serializedDress = "[0,0,40,12];[53709,0,2,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-            chr.Dress = Login_UnserializeItems(serializedDress);
+
+            CItem staff{.Id=53709, .IsMagic=0, .Price=2, .Count=1};
+            chr.Bag.Items.insert(chr.Bag.Items.begin(), staff);
         }
 
         // Create a checkpoint for giga-characters on ascend.
