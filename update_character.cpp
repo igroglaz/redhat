@@ -118,4 +118,14 @@ bool HasKillsForReborn(CCharacter& chr, ServerIDType server_id) {
     return true;
 }
 
+void ClearMonsterKills(CCharacter& chr) {
+    KillStats kill_stats;
+    kill_stats.by_server_id.fill(0);
+
+    chr.Section55555555.Reset();
+    if (!kill_stats.Marshal(chr.Section55555555)) {
+        Printf(LOG_Error, "[reborn-kills] failed to marshal zero kill stats\n");
+    }
+}
+
 } // namespace update_character

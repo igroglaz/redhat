@@ -389,34 +389,6 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_Reborn4_Failed_Amazon_NoKills) {
-    CCharacter chr = FakeCharacter(
-        CharacterOpts{
-            .info{.sex=128, .kills=1000},
-            .stats={.body=30, .reaction=30, .mind=30, .spirit=25},
-            .skills={.astral=6000000},
-            .items={.money=350000, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]"},
-        }
-    );
-
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIVAL, FakeStoreOnShelf, &ascended, &points);
-
-    CHECK_EQUAL(ascended, (unsigned int)0);
-
-    CCharacter want = FakeCharacter(
-        CharacterOpts{
-            .info{.sex=128, .kills=1000, .clan="1500_kills"},
-            .stats={.body=29, .reaction=29, .mind=29, .spirit=25},
-            .skills={.astral=4000000}, // Reduce skills to the ceiling.
-            .items={.money=450000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
-        }
-    );
-
-    CHECK_CHARACTER(chr, want);
-}
-
 TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
@@ -464,7 +436,7 @@ TEST(UpdateCharacter_Reborn23_Success_Witch) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.main_skill=4, .picture=15, .sex=192, .kills=0}, // Wipe kills, don't get zombie picture.
+            .info{.main_skill=4, .picture=15, .sex=192, .kills=2000}, // Doesn't get zombie picture.
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // Wipe all skills.
             .items={.money=0, .spells=16842752}, // Wipe money, bag and dress, reset spells.
@@ -552,7 +524,7 @@ TEST(UpdateCharacter_Reclass_Success) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=0, .clan="reclass"}, // Sex and picture are changed, kills are reset.
+            .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="reclass"}, // Sex and picture are changed.
             .stats={.body=1, .reaction=1, .mind=1, .spirit=1}, // All stats are set to 1.
             .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
             .items={.spells=16777218}, // Everything is wiped, spells are reset.
