@@ -27,9 +27,9 @@ std::unordered_map<ServerIDType, std::unordered_map<uint16_t, uint8_t>> girl_nee
         {621, 1},  // Troll.2
         {2374, 1}, // Demon
         {711, 1},  // Succubus
+        {609, 3}, // Orc_Sword.2
         ////////////////////// 14
         {630, 14}, // Ghost.3
-        {609, 14}, // Orc_Sword.2
         {633, 14}, // Bee.2
         {707, 14}, // Spider
     }},
