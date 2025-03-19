@@ -1351,7 +1351,7 @@ bool IsCharacterAllowed(const CCharacter& chr, ServerIDType srvid) {
         case HARD:
             return 40 <= chr.Reaction && chr.Reaction < 50;
         default:
-            return chr.Reaction >= 50;
+            return chr.Reaction >= 50 && chr.Mind >= 50 && chr.Spirit >= 50;
     }
 
     return true;

@@ -1910,7 +1910,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         (srvid == KIDS && chr.Reaction > 19) ||
         (srvid == NIVAL && chr.Reaction > 29) ||
         (srvid == MEDIUM && chr.Reaction > 39) ||
-        (srvid == HARD && chr.Reaction > 49))
+        (srvid == HARD && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
     {
         reborn = true;
 
@@ -1988,14 +1988,10 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         }
 
         // Make stats at most "max-1".
+        chr.Body = std::min(chr.Body, stat_ceiling);
         chr.Reaction = std::min(chr.Reaction, stat_ceiling);
-
-        // We don't need to touch other stats on #6 as all stats are acquired independently there.
-        if (srvid != HARD) {
-            chr.Body = std::min(chr.Body, stat_ceiling);
-            chr.Mind = std::min(chr.Mind, stat_ceiling);
-            chr.Spirit = std::min(chr.Spirit, stat_ceiling);
-        }
+        chr.Mind = std::min(chr.Mind, stat_ceiling);
+        chr.Spirit = std::min(chr.Spirit, stat_ceiling);
 
         // Show the reason to the player through the "clan" field.
         if (!reborn_failure_reason.empty()) {
