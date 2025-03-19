@@ -2282,58 +2282,37 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 *points += 15;
                 break;
             case NIGHTMARE: // 2 treasures per map
-                if (coinflip) {
-                    ; // treasure at 7 server works in 50% cases
-                } else {
-                    if (chr.Sex == 192) { // witch increases Body at 7 a bit faster as starts from 1
-                        if (chr.Body < 15) {
-                            chr.Body += 5;
-                        } else if (chr.Body < 25) {
-                            chr.Body += 4;
-                        } else if (chr.Body < 35) {
-                            chr.Body += 3;
-                        } else if (chr.Body < 45) {
-                            chr.Body += 2;
-                        } else {
-                            chr.Body++;
-                        }
-                    } else if (chr.Sex == 128) { // amazon
-                        if (chr.Body < 35) {
-                            chr.Body += 3;
-                        } else if (chr.Body < 45) {
-                            chr.Body += 2;
-                        } else {
-                            chr.Body++;
-                        }
-                    } else { // warrior and mage
-                        chr.Body++;
-                    }
-                }
+                // treasure at 7 server works in 50% cases
+                update_character::TreasureOnNightmare(chr, coinflip);
                 *points += 15;
                 break;
             case QUEST_T1: // 1 treasure. 2x-3x more mind
                 if (coinflip) {
-                    chr.Mind += 3;
+                    update_character::IncreaseUpTo(&chr.Mind, 3, 70);
                 } else {
-                    chr.Mind += 2;
+                    update_character::IncreaseUpTo(&chr.Mind, 2, 70);
                 }
                 *points += 30;
                 break;
             case QUEST_T2: // at 9, 10 - we have 3 treasures per map
-                chr.Spirit++;
+                update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
+                if (i == 0 && haveTreasures == 3) { // A bonus for getting all three treasures.
+                    update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
+                }
                 *points = 100;
                 break;
             case QUEST_T3:
-                chr.Reaction++;
+                update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
+                if (i == 0 && haveTreasures == 3) { // A bonus for getting all three treasures.
+                    update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
+                }
                 *points += 100;
                 break;
             case QUEST_T4: // 1 treasure
-                if (chr.Spirit < 76) {
-                    chr.Spirit += 2;
-                } else if (chr.Mind < 76) {
-                    chr.Mind += 2;
-                } else {
-                    chr.Reaction += 2;
+                for (int j = 0; j < 2; ++j) {
+                    update_character::IncreaseUpTo(&chr.Mind, 1, 76)
+                        || update_character::IncreaseUpTo(&chr.Spirit, 1, 76) 
+                        || update_character::IncreaseUpTo(&chr.Reaction, 1, 76);
                 }
                 *points += 500;
                 break;

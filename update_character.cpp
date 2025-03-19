@@ -128,4 +128,43 @@ void ClearMonsterKills(CCharacter& chr) {
     }
 }
 
+void TreasureOnNightmare(CCharacter& chr, bool coinflip) {
+    uint8_t add_body_min = 0;
+    uint8_t add_body_max = 1;
+
+    // Witch and amazon increase Body a bit faster as they start from 1 and 25.
+    if (chr.Sex == 192 || chr.Sex == 128) {
+        if (chr.Body < 15) {
+            add_body_min = 1; // At low body levels, at least +1 is guaranteed.
+            add_body_max = 4;
+        } else if (chr.Body < 25) {
+            add_body_min = 1;
+            add_body_max = 3;
+        } else if (chr.Body < 35) {
+            add_body_min = 1;
+            add_body_max = 2;
+        } else if (chr.Body < 45) {
+            add_body_max = 2;
+        }
+    }
+
+    chr.Body += coinflip ? add_body_min : add_body_max;
+}
+
+bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit) {
+    if (*value >= limit) {
+        // Already over the limit, leave as is.
+        return false;
+    }
+
+    *value += increment;
+
+    if (*value >= limit) {
+        // Can get only up to the limit, not more.
+        *value = limit;
+    }
+
+    return true;
+}
+
 } // namespace update_character

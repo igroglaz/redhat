@@ -15,4 +15,9 @@ bool HasKillsForReborn(CCharacter& chr, ServerIDType server_id);
 // Reset monster kills for reborn restriction
 void ClearMonsterKills(CCharacter& chr);
 
+void TreasureOnNightmare(CCharacter& chr, bool coinflip);
+
+// At QUEST_T1--QUEST_T3 a character can increase stats up to 70.
+bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit);
+
 } // namespace update_character

@@ -595,7 +595,7 @@ TEST(UpdateCharacter_Ascend_Amazon_Success) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_NoChanges_7) {
+TEST(UpdateCharacter_NoChanges_Nightmare) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
             .info={.main_skill=1, .sex=64, .deaths=10, .kills=4200},
@@ -623,7 +623,7 @@ TEST(UpdateCharacter_NoChanges_7) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_TreasureOn7) {
+TEST(UpdateCharacter_TreasureOnNightmare) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
@@ -649,7 +649,7 @@ TEST(UpdateCharacter_TreasureOn7) {
     CHECK_CHARACTER(chr, want);
 }
 
-TEST(UpdateCharacter_TreasureOn8) {
+TEST(UpdateCharacter_TreasureOnQuestT1) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
@@ -670,6 +670,116 @@ TEST(UpdateCharacter_TreasureOn8) {
             .stats={.body=50, .reaction=50, .mind=55, .spirit=50}, // Mind is increased, 2+3.
             .skills={.astral=1000},
             .items={.money=5000000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_TreasureLimitOnQuestT1) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=69, .spirit=50},
+            .skills={.astral=1000},
+            .items={.bag="[0,0,0,1];[3667,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, &ascended, &points);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=70, .spirit=50}, // Mind is increased up to 70.
+            .skills={.astral=1000},
+            .items={.money=5000000, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_TreasureBonusOnQuestT2) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .skills={.astral=1000},
+            .items={.bag="[0,0,0,1];[3667,0,0,3]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, QUEST_T2, FakeStoreOnShelf, &ascended, &points);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=54}, // Spirit += 3 + 1
+            .skills={.astral=1000},
+            .items={.money=7000000, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_TreasureOnQuestT4) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=72, .mind=73, .spirit=74},
+            .skills={.astral=1000},
+            .items={.money=2147483647, .bag="[0,0,0,1];[3667,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+
+    // First, mind is increased.
+    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=72, .mind=75, .spirit=74},
+            .skills={.astral=1000},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+
+    // Mind is increased by 1 to the limit of 76, one point goes to spirit.
+    chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
+    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+
+    want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=72, .mind=76, .spirit=75},
+            .skills={.astral=1000},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+
+    // Spirit is increased by 1 to the limit of 76, one point goes to reaction.
+    chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
+    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+
+    want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=73, .mind=76, .spirit=76},
+            .skills={.astral=1000},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+
+    // Two points to reaction.
+    chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
+    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+
+    want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=75, .mind=76, .spirit=76},
+            .skills={.astral=1000},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
         }
     );
     CHECK_CHARACTER(chr, want);
