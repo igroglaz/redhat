@@ -547,7 +547,7 @@ TEST(UpdateCharacter_Reclass_Success) {
     UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -581,7 +581,7 @@ TEST(UpdateCharacter_Ascend_Witch_Success) {
     UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)1);
-    CHECK_EQUAL(points, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -609,7 +609,7 @@ TEST(UpdateCharacter_Ascend_Amazon_Success) {
     UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)1);
-    CHECK_EQUAL(points, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -662,7 +662,7 @@ TEST(UpdateCharacter_TreasureOnNightmare) {
     unsigned int ascended = 0;
     unsigned int points = 0;
     UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
-    CHECK_EQUAL(points, (unsigned int)30); // Two treasures, 15 each.
+    CHECK_EQUAL(points, (unsigned int)2);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
 
@@ -690,7 +690,7 @@ TEST(UpdateCharacter_TreasureOnQuestT1) {
     UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, &ascended, &points);
 
     CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)60); // Two treasures, 30 each.
+    CHECK_EQUAL(points, (unsigned int)2);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{

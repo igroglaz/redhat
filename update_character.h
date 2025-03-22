@@ -20,4 +20,6 @@ void TreasureOnNightmare(CCharacter& chr, bool coinflip);
 // At QUEST_T1--QUEST_T3 a character can increase stats up to 70.
 bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit);
 
+void SaveTreasurePoints(int character_id, ServerIDType server_id, unsigned int points);
+
 } // namespace update_character

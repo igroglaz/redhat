@@ -1,6 +1,7 @@
 #include "update_character.h"
 
 #include "kill_stats.h"
+#include "sql.hpp"
 #include "utils.hpp"
 
 namespace update_character {
@@ -165,6 +166,23 @@ bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit) {
     }
 
     return true;
+}
+
+void SaveTreasurePoints(int character_id, ServerIDType server_id, unsigned int points) {
+    if (points == 0) {
+        return;
+    }
+
+    auto read = SimpleSQL{Format("SELECT treasure_points FROM treasure WHERE server_id = %d AND character_id = %d;", server_id, character_id)};
+    if (!read) {
+        return;
+    }
+
+    if (SQL_NumRows(read.result) > 0) {
+        SimpleSQL{Format("UPDATE treasure SET treasure_points = treasure_points + %d WHERE server_id = %d AND character_id = %d;", points, server_id, character_id)};
+    } else {
+        SimpleSQL{Format("INSERT INTO treasure (server_id, character_id, treasure_points) VALUES (%d, %d, %d);", server_id, character_id, points)};
+    }
 }
 
 } // namespace update_character

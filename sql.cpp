@@ -185,6 +185,20 @@ void SQL_CreateTableCheckpoint() {
     }
 }
 
+void SQL_CreateTableTreasure() {
+    std::string create_table_treasure = R"(
+        CREATE TABLE IF NOT EXISTS treasure (
+            server_id INT(1) NOT NULL COMMENT 'Server ID, 1--10',
+            character_id BIGINT(1) NOT NULL COMMENT 'Character ID, same as characters.id',
+            treasure_points INT(1) NOT NULL COMMENT 'Amount of treasure points',
+            INDEX treasure_id_index (server_id, character_id)
+        );
+    )";
+    if (mysql_query(&SQL::Connection, create_table_treasure.c_str()) != 0) {
+        Printf(LOG_Silent, "[DB] Warning: table `treasure` not created: %s\n", SQL_Error().c_str());
+    }
+}
+
 void SQL_CreateTables()
 {
     std::string query_table_logins = "CREATE TABLE IF NOT EXISTS `logins` ( \
@@ -288,6 +302,7 @@ void SQL_CreateTables()
     }
 
     SQL_CreateTableCheckpoint();
+    SQL_CreateTableTreasure();
 }
 
 void SQL_UpdateVersion1() {

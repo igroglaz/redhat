@@ -957,6 +957,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 unsigned int ascended = 0; // DB-only flag to ladder score
                 unsigned int points = 0;   // DB-only flag to ladder score
                 UpdateCharacter(chr, srvid, shelf::StoreOnShelf, &ascended, &points); // pass pointers
+                update_character::SaveTreasurePoints(chr.ID, srvid, points);
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -972,8 +973,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
                                                 `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
-                                                `ascended` = `ascended` + %u, \
-                                                `points` = `points` + %u",
+                                                `ascended` = `ascended` + %u",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -986,8 +986,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    ascended,
-                                                    points);
+                                                    ascended);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
@@ -1795,16 +1794,17 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
     ////////////////////////////////////////////
     // 1) check for "Boss key" - treasure
-    uint16_t haveTreasures = 0;
+    int haveTreasures = 0;
 
     const unsigned long bossKeyItem = 3667;  // "Quest Treasure".
 
     for (const auto &item: chr.Bag.Items) {
         if (item.Id == bossKeyItem) {
-            haveTreasures = item.Count;
-            break;
+            haveTreasures += static_cast<int>(item.Count);
         }
     }
+    
+    *points = haveTreasures;
 
     if (haveTreasures > 0) {
         // Remove all quest treasures from the player's bag.
@@ -2252,7 +2252,6 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else {
-        *points = 0;
         // If the player didn't ascend or reclass,
         // the boss key on 7+ increases stats
         // (and increase ladder points on 2+)
@@ -2262,25 +2261,9 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             coinflip = !coinflip; // One treasure is random, two are guaranteed.
 
             switch (srvid) {
-            case EASY:
-                *points += 1;
-                break;
-            case KIDS:
-                *points += 2;
-                break;
-            case NIVAL:
-                *points += 3;
-                break;
-            case MEDIUM:
-                *points += 15;
-                break;
-            case HARD:
-                *points += 15;
-                break;
             case NIGHTMARE: // 2 treasures per map
                 // treasure at 7 server works in 50% cases
                 update_character::TreasureOnNightmare(chr, coinflip);
-                *points += 15;
                 break;
             case QUEST_T1: // 1 treasure. 2x-3x more mind
                 if (coinflip) {
@@ -2288,21 +2271,18 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 } else {
                     update_character::IncreaseUpTo(&chr.Mind, 2, 70);
                 }
-                *points += 30;
                 break;
             case QUEST_T2: // at 9, 10 - we have 3 treasures per map
                 update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
                 if (i == 0 && haveTreasures == 3) { // A bonus for getting all three treasures.
                     update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
                 }
-                *points = 100;
                 break;
             case QUEST_T3:
                 update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
                 if (i == 0 && haveTreasures == 3) { // A bonus for getting all three treasures.
                     update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
                 }
-                *points += 100;
                 break;
             case QUEST_T4: // 1 treasure
                 for (int j = 0; j < 2; ++j) {
@@ -2310,7 +2290,6 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                         || update_character::IncreaseUpTo(&chr.Spirit, 1, 76) 
                         || update_character::IncreaseUpTo(&chr.Reaction, 1, 76);
                 }
-                *points += 500;
                 break;
             }
         }
