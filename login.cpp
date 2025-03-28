@@ -859,10 +859,6 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                         chr.Mind = saved.mind;
                         chr.Spirit = saved.spirit;
                     }
-                    chr.MonstersKills = saved.monsters_kills;
-                    chr.PlayersKills = saved.players_kills;
-                    chr.Frags = saved.frags;
-                    // Deaths are not loaded to preserve ladder statistics.
                     chr.ExpFireBlade = saved.exp_fire_blade;
                     chr.ExpWaterAxe = saved.exp_water_axe;
                     chr.ExpAirBludgeon = saved.exp_air_bludgeon;
