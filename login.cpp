@@ -1454,11 +1454,9 @@ bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
 {
     //Printf("Login_DelCharacter()\n");
     if(!SQL_CheckConnected()) return false;
-
     try
     {
         login = SQL_Escape(login);
-
         SQL_Lock();
         std::string query_checklgn = Format("SELECT `id` FROM `logins` WHERE LOWER(`name`)=LOWER('%s')", login.c_str());
         if(SQL_Query(query_checklgn.c_str()) != 0)
@@ -1472,14 +1470,12 @@ bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
             SQL_Unlock();
             return false;
         }
-
         if(!SQL_NumRows(result))
         {
             SQL_Unlock();
             SQL_FreeResult(result);
             return false; // login does not exist
         }
-
         MYSQL_ROW row = SQL_FetchRow(result);
         int login_id = SQL_FetchInt(row, result, "id");
         SQL_FreeResult(result);
@@ -1490,19 +1486,29 @@ bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
         }
 
         //std::string query_delchar = Format("DELETE FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
+
+        // Mark character as deleted
         std::string query_delchar = Format("UPDATE `characters` SET `deleted`='1' WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
         if(SQL_Query(query_delchar.c_str()) != 0)
         {
             SQL_Unlock();
             return false;
         }
-
         if(SQL_AffectedRows() != 1)
         {
             SQL_Unlock();
             return false;
         }
+        
+        // Delete from treasure table by character_id
+        std::string query_deltreasure = Format(
+            "DELETE FROM `treasure` "
+            "USING `treasure` JOIN `characters` ON treasure.character_id = characters.id "
+            "WHERE characters.login_id='%d' AND characters.id1='%u' AND characters.id2='%u'", 
+            login_id, id1, id2);
 
+        SQL_Query(query_deltreasure.c_str());
+        
         SQL_Unlock();
         return true;
     }
