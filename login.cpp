@@ -1484,11 +1484,9 @@ bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
             SQL_Unlock();
             return false;
         }
-
-        //std::string query_delchar = Format("DELETE FROM `characters` WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
-
+        //std::string query_delchar = Format("DELETE FROM `characters` WHERE `login_id`=%d AND `id1`=%u AND `id2`=%u", login_id, id1, id2);
         // Mark character as deleted
-        std::string query_delchar = Format("UPDATE `characters` SET `deleted`='1' WHERE `login_id`='%d' AND `id1`='%u' AND `id2`='%u'", login_id, id1, id2);
+        std::string query_delchar = Format("UPDATE `characters` SET `deleted`=1 WHERE `login_id`=%d AND `id1`=%u AND `id2`=%u", login_id, id1, id2);
         if(SQL_Query(query_delchar.c_str()) != 0)
         {
             SQL_Unlock();
@@ -1504,9 +1502,8 @@ bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
         std::string query_deltreasure = Format(
             "DELETE FROM `treasure` "
             "USING `treasure` JOIN `characters` ON treasure.character_id = characters.id "
-            "WHERE characters.login_id='%d' AND characters.id1='%u' AND characters.id2='%u'", 
+            "WHERE characters.login_id=%d AND characters.id1=%u AND characters.id2=%u", 
             login_id, id1, id2);
-
         SQL_Query(query_deltreasure.c_str());
         
         SQL_Unlock();
