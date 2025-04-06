@@ -1501,10 +1501,10 @@ bool Login_DelCharacter(std::string login, unsigned long id1, unsigned long id2)
         
         // Delete from treasure table by character_id
         std::string query_deltreasure = Format(
-            "DELETE FROM `treasure` "
-            "USING `treasure` JOIN `characters` ON treasure.character_id = characters.id "
-            "WHERE characters.login_id=%d AND characters.id1=%u AND characters.id2=%u", 
+            "DELETE FROM `treasure` WHERE `character_id` = "
+            "(SELECT `id` FROM `characters` WHERE `login_id`=%d AND `id1`=%u AND `id2`=%u)", 
             login_id, id1, id2);
+
         SQL_Query(query_deltreasure.c_str());
         
         SQL_Unlock();
