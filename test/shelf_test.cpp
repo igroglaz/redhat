@@ -813,7 +813,9 @@ TEST(StoreOnShelf_FilledShelf) {
 }
 
 TEST(StoreOnShelf_Giga) {
-    FakeSQLQuery sql_query{.queries={}}; // No queries --- nothing is saved on shelf.
+    FakeSQLQuery sql_query{.queries={
+        {"UPDATE shelf SET mutex = 1, items = '[0,0,0,3];[53517,1,0,1,{17:50:0:0}];[3649,0,0,10];[42503,1,0,1,{3:2:0:0},{10:100:0:0}]', money = 200 WHERE login_id = 42 AND server_id = 6 AND cabinet = 0 AND mutex = 0", true},
+    }}; // Notice that cabinet is 0 for a legend character.
 
     FakeLoadFromShelf load_from_shelf{
         .want_login_id=42,

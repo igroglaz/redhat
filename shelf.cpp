@@ -391,9 +391,8 @@ int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, 
 }
 
 bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    if (!CanDeposit(chr)) {
-        return true;
-    }
+    // Legend characters cannot deposit normally, but they can deposit upon rebirth.
+    // We store everything into the regular character cabinet.
 
     int shelf_number = FixServerID(server_id);
 
