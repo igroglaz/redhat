@@ -197,7 +197,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=10, .clan="30k_gold"},
+            .info{.deaths=10},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=1234},
             .items={.money=5052, .spells=268385790, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"}, // Money is untouched, treasure disappears.
@@ -227,7 +227,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=10, .clan="treasure"},
+            .info{.deaths=10},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=1234},
             .items={.money=35000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
@@ -255,7 +255,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.deaths=0, .clan="hc_35k_exp"},
+            .info{.deaths=0},
             .stats={.body=14, .reaction=10, .mind=14, .spirit=14}, // All that was 15 is reduced to 14.
             .skills={.astral=30000},
             .items={.money=40000, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]"},
@@ -405,7 +405,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.sex=128, .kills=5000, .clan="500k_exp"},
+            .info{.sex=128, .kills=5000},
             .stats={.body=19, .reaction=19, .mind=19, .spirit=15},
             .skills={.astral=40000},
             .items={.money=380000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
@@ -433,7 +433,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.sex=192, .kills=5000, .clan="21m_gold"},
+            .info{.sex=192, .kills=5000},
             .stats={.body=39, .reaction=39, .mind=39, .spirit=35},
             .skills={.astral=15000000}, // Reduce skills to the ceiling.
             .items={.money=850000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]"},
@@ -520,7 +520,7 @@ TEST(UpdateCharacter_Reborn23_Failure_Solo_Treasures) {
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
-            .info{.main_skill=4, .kills=2000, .nick="@ironman", .clan="2_treasures"},
+            .info{.main_skill=4, .kills=2000, .nick="@ironman"},
             .stats={.body=14, .reaction=12, .mind=14, .spirit=14}, // Reduce mind.
             .skills={.fire=10000, .water=20000, .air=30000, .earth=40000, .astral=50000},
             .items={.money=105000, .bag="[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Remove treasure.

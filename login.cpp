@@ -1717,45 +1717,38 @@ std::string PrettyNumber(uint32_t num) {
 }
 
 // Check if a girl character (amazon/witch) can do a rebirth.
-// If yes, returns an empty string, otherwise --- the failure reason.
-std::string CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDType srvid) {
+bool CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDType srvid) {
     uint32_t need_exp = 0;
-    uint32_t need_kills = 0;
     uint32_t need_gold = 0;
 
     if (srvid == EASY) {
         need_exp = 50000;
-        need_kills = 500;
         need_gold = 100000;
     } else if (srvid == KIDS) {
         need_exp = 500000;
-        need_kills = 1200;
         need_gold = 1000000;
     } else if (srvid == NIVAL) {
         need_exp = 2000000;
-        need_kills = 1500;
         need_gold = 5000000;
     } else if (srvid == MEDIUM) {
         need_exp = 11000000;
-        need_kills = 2000;
         need_gold = 21000000;
     } else if (srvid == HARD) {
         need_exp = 50000000;
-        need_kills = 4000;
         need_gold = 100000000;
     }
 
     if (!update_character::HasKillsForReborn(chr, srvid)) {
-        return "mob_kills";
+        return false;
     }
 
     if (total_exp < need_exp) {
-        return PrettyNumber(need_exp) + "_exp";
+        return false;
     }
     if (chr.Money < need_gold) {
-        return PrettyNumber(need_gold) + "_gold";
+        return false;
     }
-    return "";
+    return true;
 }
 
 void StoreOnShelf(ServerIDType server_id, CCharacter& chr, bool store_dress, shelf::StoreOnShelfFunction store_on_shelf) {
@@ -1882,15 +1875,12 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
     bool reborn = false;
     bool meets_reborn_criteria = true;
-    std::string reborn_failure_reason;
     if (haveTreasures == 0) {
         meets_reborn_criteria = false;
-        reborn_failure_reason = "treasure";
     }
 
     if (srvid <= MEDIUM && IsSolo(chr) && haveTreasures < 2) {
         meets_reborn_criteria = false;
-        reborn_failure_reason = "2_treasures";
     }
 
     unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
@@ -1929,36 +1919,29 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         if (chr.Money < reborn_money_price) {
             meets_reborn_criteria = false;
-            reborn_failure_reason = PrettyNumber(reborn_money_price) + "_gold";
         }
 
         // Amazon and witch have extra requirements.
         if (chr.Sex == 128 || chr.Sex == 192) {
-            reborn_failure_reason = CheckGirlRebirth(chr, total_exp, srvid);
-            if (!reborn_failure_reason.empty()) {
+            if (!CheckGirlRebirth(chr, total_exp, srvid)) {
                 meets_reborn_criteria = false;
             }
         // Hardcore characters do too.
         } else if (chr.Deaths <= 1) {
             if (srvid == EASY && total_exp < 35000) {
                 meets_reborn_criteria = false;
-                reborn_failure_reason = "hc_35k_exp";
             }
             else if (srvid == KIDS && total_exp < 100000) {
                 meets_reborn_criteria = false;
-                reborn_failure_reason = "hc_100k_exp";
             }
             else if (srvid == NIVAL && total_exp < 500000) {
                 meets_reborn_criteria = false;
-                reborn_failure_reason = "hc_500k_exp";
             }
             else if (srvid == MEDIUM && total_exp < 11000000) {
                 meets_reborn_criteria = false;
-                reborn_failure_reason = "hc_2m_exp";
             }
             else if (srvid == HARD && total_exp < 50000000) {
                 meets_reborn_criteria = false;
-                reborn_failure_reason = "hc_25m_exp";
             }
         }
     }
@@ -1992,11 +1975,6 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.Reaction = std::min(chr.Reaction, stat_ceiling);
         chr.Mind = std::min(chr.Mind, stat_ceiling);
         chr.Spirit = std::min(chr.Spirit, stat_ceiling);
-
-        // Show the reason to the player through the "clan" field.
-        if (!reborn_failure_reason.empty()) {
-            chr.Clan = reborn_failure_reason.substr(0, 11); // The clan can be up to 11 symbols long.
-        }
     }
 
     if (reborn) {
