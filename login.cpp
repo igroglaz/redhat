@@ -1,4 +1,5 @@
 #include "checkpoint.h"
+#include "circle.h"
 #include "login.hpp"
 #include "sql.hpp"
 #include "utils.hpp"
@@ -1921,8 +1922,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             meets_reborn_criteria = false;
         }
 
-        // Amazon and witch have extra requirements.
-        if (chr.Sex == 128 || chr.Sex == 192) {
+        // Amazon, witch and circlers have extra requirements.
+        if (chr.Sex == 128 || chr.Sex == 192 || circle::Circle(chr)) {
             if (!CheckGirlRebirth(chr, total_exp, srvid)) {
                 meets_reborn_criteria = false;
             }
@@ -2059,7 +2060,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 WipeSpells(chr);
             }
 
-            // reset BODY for ama/witch upon reborn when moving from 6 to 7
+            // reset BODY for ama/witch upon reborn when moving from HARD to NIGHTMARE
             if (srvid == HARD) {
                 if (chr.Sex == 128) { // ama
                     chr.Body = 25;
@@ -2134,12 +2135,13 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     // RECLASS after maxing EXP //
     //////////////////////////////
     unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
+    int current_circle = circle::Circle(chr);
 
     // RECLASS: warrior/mage become ama/witch
     // (note it can't happen simultaneously with reborn as
     // at reborn we "half" the exp)
     if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
-         chr.Money > 300000000) {
+         chr.Money > 300000000 && current_circle == 0) {
         update_character::ClearMonsterKills(chr);
 
         // Save to shelf upon reclass. Note that this function removes money, empties the bag and dress.
@@ -2183,7 +2185,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
     // ASCEND: ama/witch become again war/mage and receive crown
     } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
-                stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000) {
+                stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000 && current_circle == 0) {
         chr.Money -= 2147000000;
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
@@ -2227,6 +2229,40 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         // Create a checkpoint for giga-characters on ascend.
         if (chr.Nick[0] == '_') {
             Printf(LOG_Info, "[checkpoint] saving %d on ascend\n", chr.ID);
+            checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
+        }
+    } else if (circle::Allowed(chr)) {
+        if (chr.Clan == "miss_hell" && current_circle == 0) {
+            // Womanize!
+            if (chr.Sex == 0) {
+                chr.Sex = 128;
+                chr.Picture = 11;
+            } else if (chr.Sex == 64) {
+                chr.Sex = 192;
+                chr.Picture = 6;
+            }
+        }
+
+        circle::Advance(chr);
+        chr.Money -= circle::price;
+
+        update_character::ClearMonsterKills(chr);
+
+        StoreOnShelf(srvid, chr, true, store_on_shelf);
+
+        if (chr.Deaths == 0) {
+            chr.Money = 133; // HC: leave 133 gold to buy a bow
+        }
+
+        chr.Body = chr.Reaction = chr.Mind = chr.Spirit = 1;
+        chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
+
+        if (chr.Sex == 64 || chr.Sex == 192) {
+            WipeSpells(chr);
+        }
+
+        if (chr.Nick[0] == '_') {
+            Printf(LOG_Info, "[checkpoint] saving %d on circle\n", chr.ID);
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else {

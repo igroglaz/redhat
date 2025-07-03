@@ -14,6 +14,7 @@ add_library(redhat-lib
     CRC_32.cpp
     character.cpp
     checkpoint.cpp
+    circle.cpp
     client.cpp
     config.cpp
     hat2.cpp

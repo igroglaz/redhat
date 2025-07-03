@@ -271,7 +271,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
             .info={.main_skill=3, .sex=64, .deaths=10, .login_id=42},
             .stats={.body=15, .reaction=11, .mind=15, .spirit=15},
             .skills={.fire=1000, .water=2000, .air=3000, .earth=4000, .astral=5000},
-            .items={.money=35000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,2];[1000,0,0,1],[0,0,0,1]"},
+            .items={.money=35000, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,2];[1000,0,0,1];[0,0,0,1]"},
         }
     );
 
@@ -810,6 +810,39 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
         }
     );
     CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Circle) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=2, .sex=64, .deaths=10, .nick="@acharacter", .clan="miss_hell", .login_id=100},
+            .stats={.body=55, .reaction=76, .mind=76, .spirit=76},
+            .skills={.astral=200000000},
+            .items={.money=1234567890, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]", .dress="[0,0,0,2];[1000,0,0,1];[0,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=2, .picture=6, .sex=192, .deaths=10, .nick="@1acharacte", .clan="miss_hell", .login_id=100},
+            .stats={.body=1, .reaction=1, .mind=1, .spirit=1},
+            .items={.money=0, .spells=16777248, .bag="[0,0,0,0]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+
+    CHECK_EQUAL(true, store_on_shelf_called);
+    CHECK_EQUAL(100, shelf_login_id);
+    CHECK_EQUAL(NIGHTMARE, shelf_server_id);
+    CHECK_EQUAL("[0,0,0,3];[1000,0,0,1];[1000,0,0,1];[0,0,0,1]", shelf_items);
+    CHECK_EQUAL(234567890, shelf_money); // 1 billion paid for circle.
 }
 
 }
