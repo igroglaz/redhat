@@ -1,5 +1,6 @@
 #include "update_character.h"
 
+#include "circle.h"
 #include "kill_stats.h"
 #include "sql.hpp"
 #include "utils.hpp"
@@ -7,7 +8,6 @@
 namespace update_character {
 
 std::unordered_map<ServerIDType, std::unordered_map<uint16_t, uint8_t>> girl_needs_monster_kills{
-
     {EASY, {
         ////////////////////// 1
         {692, 1},  // Necro_Female1
@@ -94,7 +94,7 @@ std::unordered_map<ServerIDType, std::unordered_map<uint16_t, uint8_t>> girl_nee
 };
 
 bool HasKillsForReborn(CCharacter& chr, ServerIDType server_id) {
-    if (chr.Sex == 0 || chr.Sex == 64) {
+    if ((chr.Sex == 0 || chr.Sex == 64) && circle::Circle(chr) == 0) {
         return true;
     }
 
