@@ -286,7 +286,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
         CharacterOpts{
             .info={.main_skill=3, .picture=64, .sex=64, .deaths=10, .login_id=42},
             .stats={.body=15, .reaction=11, .mind=15, .spirit=15},
-            .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1}, // Main skill and astral are set to 1, others halved.
+            .skills={.fire=500, .water=1000, .air=0, .earth=2000, .astral=0}, // Main skill and astral are cleared, others halved.
             .items={.spells=16778240}, // Money, bag and dress are wiped, spells are reset.
         }
     );
@@ -320,7 +320,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
         CharacterOpts{
             .info={.main_skill=3, .sex=0, .deaths=10, .login_id=42},
             .stats={.body=29, .reaction=30, .mind=28, .spirit=27},
-            .skills={.fire=500, .water=1000, .air=1, .earth=2000, .astral=1250}, // Main skill is set to 1, shooting is divided by server number (3), others halved.
+            .skills={.fire=500, .water=1000, .air=0, .earth=2000, .astral=1250}, // Main skill is cleared, shooting is divided by server number (3), others halved.
             .items={.dress="[0,0,0,1];[1000,0,0,1]"}, // Money and bag are wiped.
         }
     );
@@ -353,7 +353,7 @@ TEST(UpdateCharacter_Reborn67_Success) {
         CharacterOpts{
             .info={.main_skill=2, .sex=64, .deaths=10},
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
-            .skills={.fire=500, .water=1, .air=1500, .earth=2000, .astral=1}, // Main skill and astral are set to 1, others halved.
+            .skills={.fire=500, .water=0, .air=1500, .earth=2000, .astral=0}, // Main skill and astral are cleared, others halved.
             .items={.spells=16777248}, // Money, bag and dress are wiped, spells are reset.
         }
     );
@@ -464,7 +464,7 @@ TEST(UpdateCharacter_Reborn23_Success_Witch) {
         CharacterOpts{
             .info{.main_skill=4, .picture=15, .sex=192, .kills=2000}, // Doesn't get zombie picture.
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
-            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // Wipe all skills.
+            .skills={}, // Wipe all skills.
             .items={.money=0, .spells=16842752}, // Wipe money, bag and dress, reset spells.
         }
     );
@@ -493,7 +493,7 @@ TEST(UpdateCharacter_Reborn23_Success_Warrior) {
         CharacterOpts{
             .info{.main_skill=4, .picture=64, .sex=0, .kills=2000}, // Get zombie picture.
             .stats={.body=14, .reaction=12, .mind=15, .spirit=14},
-            .skills={.fire=5000, .water=10000, .air=15000, .earth=1, .astral=25000}, // Wipe all skills.
+            .skills={.fire=5000, .water=10000, .air=15000, .earth=0, .astral=25000}, // Main skill is cleared, others halved.
             .items={.money=0, .dress="[0,0,0,1];[1000,0,0,1]"}, // Wipe money and bag.
         }
     );
@@ -553,7 +553,7 @@ TEST(UpdateCharacter_Reclass_Success) {
         CharacterOpts{
             .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="reclass", .login_id=42}, // Sex and picture are changed.
             .stats={.body=1, .reaction=1, .mind=1, .spirit=1}, // All stats are set to 1.
-            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
+            .skills={}, // All skills are cleared.
             .items={.spells=16777218}, // Everything is wiped, spells are reset.
         }
     );
@@ -587,7 +587,7 @@ TEST(UpdateCharacter_Ascend_Witch_Success) {
         CharacterOpts{
             .info={.main_skill=1, .picture=15, .sex=64, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
-            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
+            .skills={}, // All skills are cleared.
             .items={.money=1, .spells=268385790, .bag="[0,0,0,3];[53709,0,2,1];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
         }
     );
@@ -615,7 +615,7 @@ TEST(UpdateCharacter_Ascend_Amazon_Success) {
         CharacterOpts{
             .info={.main_skill=1, .picture=32, .sex=0, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
-            .skills={.fire=1, .water=1, .air=1, .earth=1, .astral=1}, // All skills are set to 1.
+            .skills={}, // All skills are cleared.
             .items={.money=1, .spells=0, .bag="[0,0,0,3];[18118,1,2,1,{2:3:0:0},{19:2:0:0},{12:250:0:0}];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
         }
     );

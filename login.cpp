@@ -2018,10 +2018,10 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         if (chr.Sex == 0 || chr.Sex == 64) {
             // Wipe experience for the main skill
             switch (chr.MainSkill) {
-                case 1: chr.ExpFireBlade = 1; break;
-                case 2: chr.ExpWaterAxe = 1; break;
-                case 3: chr.ExpAirBludgeon = 1; break;
-                case 4: chr.ExpEarthPike = 1; break;
+                case 1: chr.ExpFireBlade = 0; break;
+                case 2: chr.ExpWaterAxe = 0; break;
+                case 3: chr.ExpAirBludgeon = 0; break;
+                case 4: chr.ExpEarthPike = 0; break;
             }
 
             // Reduce all other skills in 2 times...
@@ -2041,22 +2041,18 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             } else if (chr.Sex == 0) {
                 chr.ExpAstralShooting /= static_cast<int>(srvid + 1); // WARR divide in srvid times
             } else if (chr.Sex == 64) {
-                chr.ExpAstralShooting = 1; // MAGE wipe astral skill
+                chr.ExpAstralShooting = 0; // MAGE wipe astral skill
             }
         }
         // RECLASSED chars reborn (AMA/WITCH)
         else if (chr.Sex == 128 || chr.Sex == 192) {
             update_character::ClearMonsterKills(chr);
 
-            chr.ExpFireBlade = 1; // wipe ALL exp
-            chr.ExpWaterAxe = 1;
-            chr.ExpAirBludgeon = 1;
-            chr.ExpEarthPike = 1;
-            chr.ExpAstralShooting = 1;
+            // wipe ALL exp
+            chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
-            // Witch
+            // Witch loses all spells but the basic arrow.
             if (chr.Sex == 192) {
-            // Mage loses all spells but the basic arrow.
                 WipeSpells(chr);
             }
 
@@ -2151,15 +2147,11 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         if (chr.Deaths == 0) {
             chr.Money = 133; // HC: leave 133 gold to buy a bow
         }
-        chr.Body = 1; // stats
-        chr.Reaction = 1;
-        chr.Mind = 1;
-        chr.Spirit = 1;
-        chr.ExpFireBlade = 1; // exp
-        chr.ExpWaterAxe = 1;
-        chr.ExpAirBludgeon = 1;
-        chr.ExpEarthPike = 1;
-        chr.ExpAstralShooting = 1;
+
+        // stats
+        chr.Body = chr.Reaction = chr.Mind = chr.Spirit = 1;
+        // exp
+        chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
         // reclass: war/mage change class
         if (chr.Sex == 0) { // warr become ama
@@ -2200,11 +2192,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.Mind = 50;
         chr.Spirit = 50;
 
-        chr.ExpFireBlade = 1; // pay with exp too
-        chr.ExpWaterAxe = 1;
-        chr.ExpAirBludgeon = 1;
-        chr.ExpEarthPike = 1;
-        chr.ExpAstralShooting = 1;
+        // pay with exp too
+        chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
         // We do not wipe inventory/gold for ascension.
         // The prize item is inserted into the beginning of the inventory.
