@@ -48,10 +48,13 @@
 		<Unit filename="character.hpp" />
 		<Unit filename="checkpoint.cpp" />
 		<Unit filename="checkpoint.h" />
+		<Unit filename="circle.cpp" />
+		<Unit filename="circle.h" />
 		<Unit filename="client.cpp" />
 		<Unit filename="client.hpp" />
 		<Unit filename="config.cpp" />
 		<Unit filename="config.hpp" />
+		<Unit filename="constants.h" />
 		<Unit filename="hat2.cpp" />
 		<Unit filename="hat2.hpp" />
 		<Unit filename="kill_stats.cpp" />
