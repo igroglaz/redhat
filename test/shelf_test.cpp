@@ -12,11 +12,11 @@
 
 namespace {
 
-const CItem book{.Id=3587, .IsMagic=true, .Count=1, .Effects={{.Id1=42, .Value1=1}}};
-const CItem other_book{.Id=3587, .IsMagic=true, .Count=1, .Effects={{.Id1=42, .Value1=2}}};
-const CItem cuirass{.Id=6162, .IsMagic=true, .Count=1, .Effects={{.Id1=2, .Value1=2}}};
-const CItem helm{.Id=42503, .IsMagic=true, .Count=1, .Effects={{.Id1=3, .Value1=2}, {.Id1=10, .Value1=100}}};
-const CItem staff{.Id=53517, .IsMagic=true, .Count=1, .Effects={{.Id1=17, .Value1=50}}};
+const CItem book{.Id=3587, .IsMagic=true, .Count=1, .Effects={{42, 1}}};
+const CItem other_book{.Id=3587, .IsMagic=true, .Count=1, .Effects={{42, 2}}};
+const CItem cuirass{.Id=6162, .IsMagic=true, .Count=1, .Effects={{2, 2}}};
+const CItem helm{.Id=42503, .IsMagic=true, .Count=1, .Effects={{3, 2}, {10, 100}}};
+const CItem staff{.Id=53517, .IsMagic=true, .Count=1, .Effects={{17, 50}}};
 const CItem potions5{.Id=3649, .Count=5};
 const CItem potions10{.Id=3649, .Count=10};
 const CItem scrolls20{.Id=3621, .Count=20};

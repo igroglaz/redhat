@@ -1,5 +1,6 @@
 #include "checkpoint.h"
 #include "circle.h"
+#include "constants.h"
 #include "login.hpp"
 #include "sql.hpp"
 #include "utils.hpp"
@@ -2202,9 +2203,9 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             chr.Picture = 32;
 
             CItem crown{.Id=18118, .IsMagic=1, .Price=2, .Count=1, .Effects={
-                { .Id1=2, .Id2=0, .Value1=3, .Value2=0, }, // body = 3
-                { .Id1=19, .Id2=0, .Value1=2, .Value2=0, }, // scanrange = 2
-                { .Id1=12, .Id2=0, .Value1=250, .Value2=0, }, // attack = 250
+                {stats::body, 3},
+                {stats::scan_range, 2},
+                {stats::attack, 250},
             }};
             chr.Bag.Items.insert(chr.Bag.Items.begin(), crown);
         } else if (chr.Sex == 192) { // witch become mage and get physical damage staff

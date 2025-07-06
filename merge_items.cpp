@@ -76,5 +76,5 @@ void Improve(CItem& item, ServerIDType server_id) {
     }
 
     // Create a new `max_health` effect.
-    item.Effects.push_back(CEffect{.Id1=max_health, .Value1=delta});
+    item.Effects.push_back({max_health, delta});
 }
