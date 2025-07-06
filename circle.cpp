@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "kill_stats.h"
+#include "constants.h"
 #include "utils.hpp"
 
 
@@ -105,46 +106,94 @@ std::string Rename(const std::string& nick) {
     return result;
 }
 
+const std::vector<CEffect> fighter_clothes_effects{
+    {stats::body, 2},
+    {stats::attack, 200},
+    {stats::speed, 1},
+    {stats::protection_fire,     6},
+    {stats::protection_water,    6},
+    {stats::protection_air,      6},
+    {stats::protection_earth,    6},
+    {stats::protection_astral,   2},
+};
+
+const std::vector<CEffect> fighter_bijou_effects{
+    {stats::body, 1},
+    {stats::mind, 1},
+    {stats::reaction, 1},
+    {stats::spirit, 1},
+    {stats::attack, 200},
+    {stats::protection_fire,     6},
+    {stats::protection_water,    6},
+    {stats::protection_air,      6},
+    {stats::protection_earth,    12},
+    {stats::protection_astral,   2},
+};
+
+const std::vector<CEffect> wizard_clothes_effects{
+    {stats::body, 1},
+    {stats::mind, 1},
+    {stats::reaction, 1},
+    {stats::spirit, 1},
+    {stats::speed, 1},
+    {stats::skill_fire, 18},
+    {stats::skill_water, 18},
+    {stats::skill_air, 18},
+    {stats::skill_earth, 18},
+};
+
+const std::vector<CEffect> wizard_bijou_effects{
+    {stats::body, 1},
+    {stats::mind, 1},
+    {stats::reaction, 1},
+    {stats::spirit, 1},
+    {stats::speed, 1},
+    {stats::skill_fire, 15},
+    {stats::skill_water, 15},
+    {stats::skill_air, 15},
+    {stats::skill_earth, 15},
+};
+
 std::unordered_map<int, std::vector<CItem>> awards{
     // Warrior: "Wrath" set.
     {0, {
-        CItem{.Id=18515, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Plate Cuirass
-        CItem{.Id=19550, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Plate Boots
-        CItem{.Id=19034, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Scale Gauntlets
-        CItem{.Id=18774, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Plate Bracers
-        CItem{.Id=18257, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Plate Mail
-        CItem{.Id=17730, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Plate Amulet
-        CItem{.Id=17473, .IsMagic=0, .Price=2, .Count=1}, // Golden Wrath Plate Ring
+        CItem{.Id=18515, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Golden Wrath Plate Cuirass
+        CItem{.Id=19550, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Golden Wrath Plate Boots
+        CItem{.Id=19034, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Golden Wrath Scale Gauntlets
+        CItem{.Id=18774, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Golden Wrath Plate Bracers
+        CItem{.Id=18257, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Golden Wrath Plate Mail
+        CItem{.Id=17730, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_bijou_effects}, // Golden Wrath Plate Amulet
+        CItem{.Id=17473, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_bijou_effects}, // Golden Wrath Plate Ring
     }},
     // Amazon: "Flamer" set.
     {128, {
-        CItem{.Id=55346, .IsMagic=0, .Price=2, .Count=1}, // Flamer Cuirass
-        CItem{.Id=56382, .IsMagic=0, .Price=2, .Count=1}, // Flamer Boots
-        CItem{.Id=55866, .IsMagic=0, .Price=2, .Count=1}, // Flamer Gauntlets
-        CItem{.Id=55606, .IsMagic=0, .Price=2, .Count=1}, // Flamer Plate Bracers
-        CItem{.Id=55088, .IsMagic=0, .Price=2, .Count=1}, // Flamer Mail
-        CItem{.Id=54562, .IsMagic=0, .Price=2, .Count=1}, // Flamer Amulet
-        CItem{.Id=54305, .IsMagic=0, .Price=2, .Count=1}, // Flamer Ring
+        CItem{.Id=55346, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Flamer Cuirass
+        CItem{.Id=56382, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Flamer Boots
+        CItem{.Id=55866, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Flamer Gauntlets
+        CItem{.Id=55606, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Flamer Plate Bracers
+        CItem{.Id=55088, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_clothes_effects}, // Flamer Mail
+        CItem{.Id=54562, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_bijou_effects}, // Flamer Amulet
+        CItem{.Id=54305, .IsMagic=1, .Price=2, .Count=1, .Effects=fighter_bijou_effects}, // Flamer Ring
     }},
     // Mage: "Sanctuary Red" set.
     {64, {
-        CItem{.Id=1934, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Dress
-        CItem{.Id=1669, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Hood
-        CItem{.Id=3227, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Magic Shoes
-        CItem{.Id=2711, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Gloves
-        CItem{.Id=2187, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Cloak
-        CItem{.Id=1410, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Amulet
-        CItem{.Id=1153, .IsMagic=0, .Price=2, .Count=1}, // Sanctuary Red Ring
+        CItem{.Id=1934, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Dress
+        CItem{.Id=1669, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Hood
+        CItem{.Id=3227, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Magic Shoes
+        CItem{.Id=2711, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Gloves
+        CItem{.Id=2187, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Cloak
+        CItem{.Id=1410, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Sanctuary Red Amulet
+        CItem{.Id=1153, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Sanctuary Red Ring
     }},
     // Witch: "Vampic" set.
     {192, {
-        CItem{.Id=55150, .IsMagic=0, .Price=2, .Count=1}, // Vampic Dress
-        CItem{.Id=54885, .IsMagic=0, .Price=2, .Count=1}, // Vampic Crown
-        CItem{.Id=56443, .IsMagic=0, .Price=2, .Count=1}, // Vampic Shoes
-        CItem{.Id=55927, .IsMagic=0, .Price=2, .Count=1}, // Vampic Gloves
-        CItem{.Id=55403, .IsMagic=0, .Price=2, .Count=1}, // Vampic Cloak
-        CItem{.Id=54626, .IsMagic=0, .Price=2, .Count=1}, // Vampic Amulet
-        CItem{.Id=54369, .IsMagic=0, .Price=2, .Count=1}, // Vampic Ring
+        CItem{.Id=55150, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Dress
+        CItem{.Id=54885, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Crown
+        CItem{.Id=56443, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Shoes
+        CItem{.Id=55927, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Gloves
+        CItem{.Id=55403, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Cloak
+        CItem{.Id=54626, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Vampic Amulet
+        CItem{.Id=54369, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Vampic Ring
     }},
 };
 

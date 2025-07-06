@@ -10,6 +10,15 @@ struct CEffect
     uint8_t Id1, Id2;
     uint8_t Value1, Value2;
 
+    CEffect() : CEffect(0, 0, 0, 0) {
+    }
+
+    CEffect(uint8_t id1, uint8_t value1) : CEffect(id1, value1, 0, 0) {
+    }
+
+    CEffect(uint8_t id1, uint8_t value1, uint8_t id2, uint8_t value2) : Id1(id1), Id2(id2), Value1(value1), Value2(value2) {
+    }
+
     bool operator==(const CEffect &other) const {
         return Id1 == other.Id1 && Id2 == other.Id2 && Value1 == other.Value1 && Value2 == other.Value2;
     }
