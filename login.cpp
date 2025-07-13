@@ -2016,7 +2016,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         // 1) perform reborn
         // WARRIOR/MAGE (no reclass OR ascend)
-        if (chr.Sex == 0 || chr.Sex == 64) {
+        if ((chr.Sex == 0 || chr.Sex == 64) && circle::Circle(chr) == 0) {
             // Wipe experience for the main skill
             switch (chr.MainSkill) {
                 case 1: chr.ExpFireBlade = 0; break;
@@ -2045,15 +2045,15 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 chr.ExpAstralShooting = 0; // MAGE wipe astral skill
             }
         }
-        // RECLASSED chars reborn (AMA/WITCH)
-        else if (chr.Sex == 128 || chr.Sex == 192) {
+        // RECLASSED chars (AMA/WITCH) and characters on circles
+        else {
             update_character::ClearMonsterKills(chr);
 
             // wipe ALL exp
             chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
-            // Witch loses all spells but the basic arrow.
-            if (chr.Sex == 192) {
+            // Wizards lose all spells but the basic arrow.
+            if (chr.Sex == 64 || chr.Sex == 192) {
                 WipeSpells(chr);
             }
 
