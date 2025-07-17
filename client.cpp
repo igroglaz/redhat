@@ -4,6 +4,7 @@
 #include <ctime>
 
 #include "config.hpp"
+#include "constants.h"
 #include "login.hpp"
 #include "session.hpp"
 #include "version.hpp"
@@ -1458,27 +1459,27 @@ bool CL_EnterServer(Client* conn, Packet& pack)
 
         if(!memchr(pics, p_picture, sizeof(pics)))
         {
-            switch((p_picture & 0x40) >> 6)
+            switch((p_picture & sex::wizard) >> 6)
             {
-                case 0: p_picture = 0x20 | 0x00;
-                case 1: p_picture = 0x0F | 0x40;
-                case 2: p_picture = 0x0B | 0x80;
-                case 3: p_picture = 0x06 | 0xC0;
+                case 0: p_picture = 0x20 | sex::warrior;
+                case 1: p_picture = 0x0F | sex::mage;
+                case 2: p_picture = 0x0B | sex::amazon;
+                case 3: p_picture = 0x06 | sex::witch;
             }
         }
 
         // Replace girls with boys.
-        p_picture &= ~0x80;
+        p_picture &= ~sex::female;
 
         // Check for solo mage for @ (solo) and _ (hc) modes at hero creation 
         // (DB: 'allow_mage' field at table 'logins')
-        if (p_picture & 0x40) { // mage class flag
+        if (p_picture & sex::wizard) { // mage class flag
             if (p_nickname[0] == '@')
             {
                 if (AllowMage(conn->Login.c_str()) <= 0) // check DB. @ must have 1+
                 {
                     Printf(LOG_Info, "[CL] @-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
-                    p_picture &= ~0x40; // change hero class to warrior
+                    p_picture &= ~sex::wizard; // change hero class to warrior
                 }
             }
             else if (p_nickname[0] == '_')
@@ -1486,7 +1487,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
                 if (AllowMage(conn->Login.c_str()) != 2) // check DB. _ must have 2
                 {
                     Printf(LOG_Info, "[CL] _-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
-                    p_picture &= ~0x40; // change hero class to warrior
+                    p_picture &= ~sex::wizard; // change hero class to warrior
                 }
             }
         }

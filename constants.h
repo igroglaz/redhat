@@ -45,3 +45,13 @@ namespace stats {
     // 40 unused; "creature lore"
     const uint8_t damage_bonus = 41;
 }
+
+namespace sex {
+    const uint8_t wizard = 64; // Mask for mage and witch.
+    const uint8_t female = 128; // Mask for amazon and witch.
+
+    const uint8_t warrior = 0;
+    const uint8_t mage = wizard;
+    const uint8_t amazon = female;
+    const uint8_t witch = female | wizard;
+}
