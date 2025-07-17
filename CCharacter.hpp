@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+
 #include "BinaryStream.hpp"
+#include "constants.h"
 
 struct CEffect
 {
@@ -63,6 +65,13 @@ class CCharacter
         uint32_t StreamCRC(BinaryStream& stream);
 
         void SaveSection(BinaryStream& file, uint32_t magic, uint16_t key, uint32_t crc, BinaryStream& section);
+
+        bool IsWarrior() const { return Sex == sex::warrior; }
+        bool IsMage() const { return Sex == sex::mage; }
+        bool IsAmazon() const { return Sex == sex::amazon; }
+        bool IsWitch() const { return Sex == sex::witch; }
+        bool IsWizard() const { return Sex & sex::wizard; }
+        bool IsFemale() const { return Sex & sex::female; }
 
         uint32_t MonstersKills,
                  PlayersKills,

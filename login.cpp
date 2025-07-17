@@ -870,7 +870,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.Bag.Items.clear();
                     update_character::ClearMonsterKills(chr); // reset info about killed mobs
 
-                    if (chr.Sex == 64 || chr.Sex == 192) {
+                    if (chr.IsWizard()) {
                         WipeSpells(chr);
                     }
 
@@ -1930,7 +1930,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         }
 
         // Amazon, witch and circlers have extra requirements.
-        if (chr.Sex == 128 || chr.Sex == 192 || circle::Circle(chr)) {
+        if (chr.IsFemale() || circle::Circle(chr)) {
             if (!CheckGirlRebirth(chr, total_exp, srvid)) {
                 meets_reborn_criteria = false;
             }
@@ -1988,7 +1988,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     if (reborn) {
         if (srvid == EASY) {
             // Male characters become zombies on first reborn (except Ironman and Legend)
-            if ((chr.Sex == 0 || chr.Sex == 64) && chr.Nick[0] != '@' && chr.Nick[0] != '_') {
+            if (!chr.IsFemale() && chr.Nick[0] != '@' && chr.Nick[0] != '_') {
                 chr.Picture = 64;
             }
 
@@ -2018,11 +2018,11 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         // Save to shelf upon reborn. Note that this function empties the bag and money (and dress for mage/witch).
         chr.Money -= reborn_money_price;
-        StoreOnShelf(srvid, chr, chr.Sex == 64 || chr.Sex == 192, store_on_shelf);
+        StoreOnShelf(srvid, chr, chr.IsWizard(), store_on_shelf);
 
         // 1) perform reborn
         // WARRIOR/MAGE (no reclass OR ascend)
-        if ((chr.Sex == 0 || chr.Sex == 64) && circle::Circle(chr) == 0) {
+        if (!chr.IsFemale() && circle::Circle(chr) == 0) {
             // Wipe experience for the main skill
             switch (chr.MainSkill) {
                 case 1: chr.ExpFireBlade = 0; break;
@@ -2038,16 +2038,16 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
 
             // Mage loses all spells but the basic arrow.
-            if (chr.Sex == 64) {
+            if (chr.IsMage()) {
                 WipeSpells(chr);
             }
 
             // astral/shooting skill
             if (chr.Deaths == 0) {
                 chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
-            } else if (chr.Sex == 0) {
+            } else if (chr.IsWarrior()) {
                 chr.ExpAstralShooting /= static_cast<int>(srvid + 1); // WARR divide in srvid times
-            } else if (chr.Sex == 64) {
+            } else if (chr.IsMage()) {
                 chr.ExpAstralShooting = 0; // MAGE wipe astral skill
             }
         }
@@ -2059,15 +2059,15 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
             // Wizards lose all spells but the basic arrow.
-            if (chr.Sex == 64 || chr.Sex == 192) {
+            if (chr.IsWizard()) {
                 WipeSpells(chr);
             }
 
             // reset BODY for ama/witch upon reborn when moving from HARD to NIGHTMARE
             if (srvid == HARD) {
-                if (chr.Sex == 128) { // ama
+                if (chr.IsAmazon()) {
                     chr.Body = 25;
-                } else if (chr.Sex == 192) { // witch
+                } else if (chr.IsWitch()) {
                     chr.Body = 1;
                 }
             }
@@ -2096,7 +2096,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                     break;
             }
 
-            if (chr.Sex == 128 || chr.Sex == 192) { // ama witch: double limit
+            if (chr.IsFemale()) { // ama and witch: double limit
                 limit *= 2;
             }
 
@@ -2143,7 +2143,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     // RECLASS: warrior/mage become ama/witch
     // (note it can't happen simultaneously with reborn as
     // at reborn we "half" the exp)
-    if ((chr.Sex == 0 || chr.Sex == 64) && chr.Clan == "reclass" && total_exp > 177777777 &&
+    if (!chr.IsFemale() && chr.Clan == "reclass" && total_exp > 177777777 &&
          chr.Money > 300000000 && current_circle == 0) {
         update_character::ClearMonsterKills(chr);
 
@@ -2161,12 +2161,12 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
         // reclass: war/mage change class
-        if (chr.Sex == 0) { // warr become ama
-            chr.Sex = 128;
+        if (chr.IsWarrior()) { // warr become ama
+            chr.Sex = sex::amazon;
             chr.Picture = 11; // and become human
         }
-        else if (chr.Sex == 64) { // mage becomes witch
-            chr.Sex = 192;
+        else if (chr.IsMage()) { // mage becomes witch
+            chr.Sex = sex::witch;
             chr.Picture = 6; // and become human
 
             WipeSpells(chr);
@@ -2183,7 +2183,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     ///////////////////////////////
 
     // ASCEND: ama/witch become again war/mage and receive crown
-    } else if ((chr.Sex == 128 || chr.Sex == 192) && chr.Clan == "ascend" &&
+    } else if (chr.IsFemale() && chr.Clan == "ascend" &&
                 stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000 && current_circle == 0) {
         chr.Money -= 2147000000;
 
@@ -2204,8 +2204,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         // We do not wipe inventory/gold for ascension.
         // The prize item is inserted into the beginning of the inventory.
-        if (chr.Sex == 128) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange +250 attack
-            chr.Sex = 0;
+        if (chr.IsAmazon()) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange +250 attack
+            chr.Sex = sex::warrior;
             chr.Picture = 32;
 
             CItem crown{.Id=18118, .IsMagic=1, .Price=2, .Count=1, .Effects={
@@ -2214,8 +2214,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                 {stats::attack, 250},
             }};
             chr.Bag.Items.insert(chr.Bag.Items.begin(), crown);
-        } else if (chr.Sex == 192) { // witch become mage and get physical damage staff
-            chr.Sex = 64;
+        } else if (chr.IsWitch()) { // witch become mage and get physical damage staff
+            chr.Sex = sex::mage;
             chr.Picture = 15;
 
             CItem staff{.Id=53709, .IsMagic=0, .Price=2, .Count=1};
@@ -2230,11 +2230,11 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     } else if (circle::Allowed(chr)) {
         if (chr.Clan == "miss_hell" && current_circle == 0) {
             // Womanize!
-            if (chr.Sex == 0) {
-                chr.Sex = 128;
+            if (chr.IsWarrior()) {
+                chr.Sex = sex::amazon;
                 chr.Picture = 11;
-            } else if (chr.Sex == 64) {
-                chr.Sex = 192;
+            } else if (chr.IsMage()) {
+                chr.Sex = sex::witch;
                 chr.Picture = 6;
             }
         }
@@ -2253,7 +2253,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.Body = chr.Reaction = chr.Mind = chr.Spirit = 1;
         chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
-        if (chr.Sex == 64 || chr.Sex == 192) {
+        if (chr.IsWizard()) {
             WipeSpells(chr);
         }
 

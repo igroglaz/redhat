@@ -1,6 +1,7 @@
 #include "update_character.h"
 
 #include "circle.h"
+#include "constants.h"
 #include "kill_stats.h"
 #include "sql.hpp"
 #include "utils.hpp"
@@ -94,7 +95,7 @@ std::unordered_map<ServerIDType, std::unordered_map<uint16_t, uint8_t>> girl_nee
 };
 
 bool HasKillsForReborn(CCharacter& chr, ServerIDType server_id) {
-    if ((chr.Sex == 0 || chr.Sex == 64) && circle::Circle(chr) == 0) {
+    if (!chr.IsFemale() && circle::Circle(chr) == 0) {
         return true;
     }
 
@@ -134,7 +135,7 @@ void TreasureOnNightmare(CCharacter& chr, bool coinflip) {
     uint8_t add_body_max = 1;
 
     // Witch and amazon increase Body a bit faster as they start from 1 and 25.
-    if (chr.Sex == 192 || chr.Sex == 128) {
+    if (chr.IsFemale()) {
         if (chr.Body < 15) {
             add_body_min = 1; // At low body levels, at least +1 is guaranteed.
             add_body_max = 4;
