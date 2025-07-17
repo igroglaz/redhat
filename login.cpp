@@ -1913,7 +1913,13 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         switch (srvid) {
             case EASY:  reborn_money_price = 30000; break;
             case KIDS:  reborn_money_price = 300000; break;
-            case NIVAL: reborn_money_price = 1500000; break;
+            case NIVAL:
+                if (chr.Nick[0] == '_') { // It's hard to get money at NIVAL for a legend char.
+                    reborn_money_price = 900000;
+                } else {
+                    reborn_money_price = 1500000;
+                }
+                break;
             case MEDIUM:reborn_money_price = 7000000; break;
             case HARD:  reborn_money_price = 50000000; break;
             default:    reborn_money_price = 0; break;
