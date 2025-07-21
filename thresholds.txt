@@ -1,0 +1,241 @@
+// Various transition thresholds.
+// Numbers can have `k` or `m` suffices.
+// Closing brackets should be on a separate line.
+
+treasure_award {
+    EASY = 5k
+    KIDS = 30k
+    NIVAL = 100k
+    MEDIUM = 500k
+    HARD = 1m
+    NIGHTMARE = 3m
+    QUEST_T1 = 5m
+    QUEST_T2 = 7m
+    QUEST_T3 = 9m
+    QUEST_T4 = 11483647
+}
+
+reborn {
+    stats {
+        mind {
+            EASY = 15
+            HARD = 50
+        }
+        reaction {
+            KIDS = 20
+            NIVAL = 30
+            MEDIUM = 40
+            HARD = 50
+        }
+        spirit {
+            HARD = 50
+        }
+    }
+    failure {
+        stat_ceiling {
+            EASY = 14
+            KIDS = 19
+            NIVAL = 29
+            MEDIUM = 39
+            HARD = 49
+        }
+    }
+    treasures {
+        legend | ironman {
+            EASY = 2
+            KIDS = 2
+            NIVAL = 2
+            MEDIUM = 2
+            HARD = 1
+        }
+        default = 1
+    }
+    experience {
+        female | hell {
+            EASY = 50k
+            KIDS = 500k
+            NIVAL = 2m
+            MEDIUM = 11m
+            HARD = 50m
+        }
+        hardcore {
+            EASY = 35k
+            KIDS = 100k
+            NIVAL = 500k
+            MEDIUM = 11m
+            HARD = 50m
+        }
+    }
+    money {
+        female | hell {
+            EASY = 100k
+            KIDS = 1m
+            NIVAL = 5m
+            MEDIUM = 21m
+            HARD = 100m
+        }
+        legend {
+            EASY = 30k
+            KIDS = 300k
+            NIVAL = 900k
+            MEDIUM = 7m
+            HARD = 50m
+        }
+        default {
+            EASY = 30k
+            KIDS = 300k
+            NIVAL = 1500k
+            MEDIUM = 7m
+            HARD = 50m
+        }
+    }
+    experience_cutoff {
+        hardcore {
+            EASY = 30k
+            KIDS = 60k
+            NIVAL = 300k
+            MEDIUM = 750k
+            HARD = 1500k
+        }
+        default {
+            EASY = 10k
+            KIDS = 20k
+            NIVAL = 100k
+            MEDIUM = 250k
+            HARD = 500k
+        }
+    }
+    mobs {
+        female | hell {
+            EASY {
+                692 = 1  // Necro_Female1
+                616 = 1  // Ogre
+                620 = 1  // Troll
+                657 = 14 // F_Zombie.1
+                664 = 14 // F_Skeleton.1
+                668 = 14 // A_Skeleton.1
+                629 = 14 // Ghost.2
+                715 = 14 // Dino
+                632 = 14 // Bee
+                707 = 14 // Spider
+            }
+            KIDS {
+                617 = 1  // Ogre.2
+                621 = 1  // Troll.2
+                2374 = 1 // Demon
+                711 = 1  // Succubus
+                609 = 3  // Orc_Sword.2
+                630 = 14 // Ghost.3
+                633 = 14 // Bee.2
+                707 = 14 // Spider
+            }
+            NIVAL {
+                696 = 1  // Necro_Leader2
+                695 = 1  // Necro_Female2
+                694 = 1  // Necro_Male2
+                712 = 1  // Succubus.2
+                669 = 14 // A_Skeleton.2
+                662 = 14 // A_Zombie.3
+                617 = 14 // Ogre.2
+                621 = 14 // Troll.2
+                625 = 14 // Bat_Sonic.2
+                708 = 14 // Spider.2
+            }
+            MEDIUM {
+                701 = 1  // Necro_Female4
+                671 = 1  // A_Skeleton.4
+                667 = 1  // F_Skeleton.4
+                666 = 14 // F_Skeleton.3
+                659 = 14 // F_Zombie.3
+                618 = 14 // Ogre.3
+                622 = 14 // Troll.3
+                610 = 14 // Orc_Sword.3
+                614 = 14 // Orc_Bow.3
+                631 = 14 // Ghost.4
+                603 = 14 // Goblin_Pike.4
+                717 = 14 // Dino.3
+                626 = 14 // Bat_Sonic.3
+                634 = 14 // Bee.3
+                709 = 14 // Spider.3
+            }
+            HARD {
+                2132 = 14 // 2F_KnightLeader4
+                2130 = 14 // 2H_Knight4
+                671 = 14 // A_Skeleton.4
+                663 = 14 // A_Zombie.4
+                667 = 14 // F_Skeleton.4
+                660 = 14 // F_Zombie.4
+                718 = 14 // Dino.4
+                673 = 14 // M_Skeleton.4
+                701 = 14 // Necro_Female4
+                702 = 14 // Necro_Leader4
+                700 = 14 // Necro_Male4
+                619 = 14 // Ogre.4
+                623 = 14 // Troll.4
+                656 = 14 // Orc_Shaman.4
+                611 = 14 // Orc_Sword.4
+                615 = 14 // Orc_Bow.4
+                627 = 14 // Bat_Sonic.4
+                635 = 14 // Bee.4
+                710 = 14 // Spider.4
+                714 = 14 // Succubus.4
+                812 = 14 // Turtle.5
+                808 = 14 // Ghost.5
+            }
+        }
+    }
+}
+
+reclass {
+    money = 300m
+    experience = 177777777
+}
+
+ascend {
+    stats {
+        body = 56
+        reaction = 76
+        mind = 76
+        spirit = 76
+    }
+    money = 2147m
+    experience = 177777777
+}
+
+hell {
+    stats {
+        reaction = 76
+        mind = 76
+        spirit = 76
+    }
+    money = 1000m
+    experience = 177777777
+    mobs {
+        803 = 14 // Orc_Sword.5
+        804 = 14 // Orc_Bow.5
+        813 = 14 // Dragon.5
+        814 = 14 // Orc_Shaman.5
+        815 = 14 // F_Zombie.5
+        816 = 14 // A_Zombie.5
+        817 = 14 // F_Skeleton.5
+        818 = 14 // A_Skeleton.5
+        819 = 14 // M_Skeleton.5
+    }
+}
+
+experience_limit {
+    main_skill {
+        EASY = 150k
+        KIDS = 500k
+        NIVAL = 4m
+        MEDIUM = 15m
+        HARD = 30m
+    }
+    secondary {
+        EASY = 50k
+        KIDS = 100k
+        NIVAL = 1m
+        MEDIUM = 5m
+        HARD = 15m
+    }
+}

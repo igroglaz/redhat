@@ -5,6 +5,7 @@
 
 #include "CCharacter.hpp"
 #include "server_id.hpp"
+#include "shelf.hpp"
 
 namespace update_character {
 
@@ -17,9 +18,35 @@ void ClearMonsterKills(CCharacter& chr);
 
 void TreasureOnNightmare(CCharacter& chr, bool coinflip);
 
+// Increase stats from getting a treasure on NIGHTMARE+.
+void DrinkTreasure(CCharacter& chr, ServerIDType server_id, int treasures);
+
 // At QUEST_T1--QUEST_T3 a character can increase stats up to 70.
 bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit);
 
 void SaveTreasurePoints(int character_id, ServerIDType server_id, unsigned int points);
+
+void VisitShelf(CCharacter& chr, ServerIDType server_id);
+
+// Wipe mage's spells: remove all spells, leave only healing and the main skill arrow.
+void WipeSpells(CCharacter& chr);
+
+void StoreOnShelf(ServerIDType server_id, CCharacter& chr, bool store_dress, shelf::StoreOnShelfFunction store_on_shelf);
+
+bool IsAttemptingReborn(const CCharacter& chr, ServerIDType server_id);
+bool MeetsRebornCriteria(CCharacter& chr, ServerIDType server_id, int have_treasures);
+void FailReborn(CCharacter& chr, ServerIDType server_id);
+uint32_t RebornPrice(const CCharacter& chr, ServerIDType server_id);
+void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
+
+int ConsumeTreasures(CCharacter& chr, ServerIDType server_id);
+void CutOffExperienceOnReborn(CCharacter& chr, ServerIDType server_id);
+void ExperienceLimit(CCharacter& chr, ServerIDType server_id);
+
+bool ShouldReclass(const CCharacter& chr, ServerIDType server_id);
+void PerformReclass(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
+
+bool ShouldAscend(const CCharacter& chr, ServerIDType server_id);
+void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
 
 } // namespace update_character

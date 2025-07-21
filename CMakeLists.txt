@@ -8,6 +8,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 link_libraries(ws2_32)
 
+set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/thresholds.txt")
+set(OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/thresholds.generated.h")
+
+add_custom_command(
+    OUTPUT ${OUTPUT_FILE}
+    COMMAND ${CMAKE_COMMAND} 
+            -DINPUT_FILE=${INPUT_FILE} 
+            -DOUTPUT_FILE=${OUTPUT_FILE} 
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/embed_thresholds.cmake
+    DEPENDS ${INPUT_FILE}
+    COMMENT "Generating header from ${INPUT_FILE}"
+    VERBATIM
+)
+
+add_custom_target(generate_threshold_header DEPENDS ${OUTPUT_FILE})
+
 add_library(redhat-lib
     BinaryStream.cpp
     CCharacter.cpp
@@ -32,10 +48,15 @@ add_library(redhat-lib
     socket.cpp
     sql.cpp
     status.cpp
+    thresholds.cpp
     update_character.cpp
     utils.cpp
     version.cpp
 )
+
+add_dependencies(redhat-lib generate_threshold_header)
+
+target_include_directories(redhat-lib PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 
 # MySQL library and dirent.h.
 target_include_directories(redhat-lib PUBLIC include mysql/include)
