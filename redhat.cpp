@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "config.hpp"
 #include "socket.hpp"
 #include "sql.hpp"
@@ -5,6 +7,7 @@
 #include "listener.hpp"
 #include "status.hpp"
 #include "login.hpp"
+#include "thresholds.h"
 
 void H_Quit()
 {
@@ -69,6 +72,21 @@ bool H_Init(int argc, char* argv[])
     Printf(LOG_Info, "[HC] Red Hat (v1.3) started.\n");
 
     Net_Init();
+    
+    try {
+#include "thresholds.generated.h"
+        thresholds::thresholds.LoadFromContent(default_thresholds);
+
+        std::ofstream f_out("thresholds.cfg");
+        f_out.write(default_thresholds, strlen(default_thresholds));
+        if (!f_out) {
+            throw new std::exception("failed to write threshold settings to thresholds.cfg");
+        }
+        f_out.close();
+    } catch(const thresholds::ParseException& e) {
+        Printf(LOG_Error, "Thresholds: %s\n", e.what());
+        return false;
+    }
 
     return true;
 }

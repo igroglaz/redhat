@@ -73,6 +73,10 @@ class CCharacter
         bool IsWizard() const { return Sex & sex::wizard; }
         bool IsFemale() const { return Sex & sex::female; }
 
+        uint32_t TotalExperience() const {
+            return ExpFireBlade + ExpWaterAxe + ExpAirBludgeon + ExpEarthPike + ExpAstralShooting;
+        }
+
         uint32_t MonstersKills,
                  PlayersKills,
                  Frags,
@@ -120,5 +124,18 @@ class CCharacter
 
         std::string ClanTag;
 };
+
+inline bool IsIronMan(const CCharacter& chr) {
+    return chr.Nick.length() && chr.Nick[0] == '@';
+}
+
+inline bool IsLegend(const CCharacter& chr) {
+    return chr.Nick.length() && chr.Nick[0] == '_';
+}
+
+inline bool IsSolo(const CCharacter& chr) {
+    return IsIronMan(chr) || IsLegend(chr);
+}
+
 
 #endif // CCHARACTER_HPP_INCLUDED

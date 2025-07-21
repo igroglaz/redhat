@@ -215,7 +215,7 @@ bool SaveShelf(const CCharacter& chr, int shelf_number, Field field, int32_t mut
             field_values = Format("'%s', %" PRId64, items.c_str(), money);
             break;
         }
-        
+
         query = Format("INSERT INTO shelf (login_id, server_id, cabinet, mutex, %s) VALUES (%d, %d, %d, %d, %s)", field_names.c_str(), chr.LoginID, shelf_number, cabinet, mutex, field_values.c_str());
     }
 
@@ -291,7 +291,7 @@ bool ItemsFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std
         return false;
     }
 
-    Printf(LOG_Info, "[shelf] Loaded items for login %d on server %d at cabinet %d: '%s'\n", chr.LoginID, shelf_number, SQL_Escape(shelf_content).c_str());
+    Printf(LOG_Info, "[shelf] Loaded items for login %d on server %d at cabinet %d: '%s'\n", chr.LoginID, server_id, shelf_number, SQL_Escape(shelf_content).c_str());
 
     // Remove the book.
     inventory.erase(savings_book);

@@ -4,6 +4,7 @@
 
 #include "UnitTest++.h"
 
+#include "../kill_stats.h"
 #include "../login.hpp"
 #include "../server_id.hpp"
 
@@ -443,6 +444,63 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
     CHECK_CHARACTER(chr, want);
 }
 
+TEST(UpdateCharacter_Reborn45_Failed_Hell_NoExp) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.deaths=10, .nick="3hell"},
+            .stats={.body=40, .reaction=40, .mind=40, .spirit=40},
+            .skills={.astral=1000}, // Enough for a regular character, not enough for hell character.
+            .items={.money=100000000, .bag="[0,0,0,1];[3667,0,0,1]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, &ascended, &points);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.deaths=10, .nick="3hell"},
+            .stats={.body=39, .reaction=39, .mind=39, .spirit=39},
+            .skills={.astral=1000},
+            .items={.money=100500000, .bag="[0,0,0,0]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_Reborn45_Failed_Hell_NoMobs) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.deaths=10, .nick="3hell"},
+            .stats={.body=40, .reaction=40, .mind=40, .spirit=40},
+            .skills={.astral=22000000},
+            .items={.money=100000000, .bag="[0,0,0,1];[3667,0,0,1]"},
+        }
+    );
+
+    KillStats kill_stats;
+    kill_stats.by_server_id.fill(3); // Pretend we've killed 3 mobs of each type.
+    bool ok = kill_stats.Marshal(chr.Section55555555);
+    CHECK_EQUAL(true, ok);
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, &ascended, &points);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.deaths=10, .nick="3hell"},
+            .stats={.body=39, .reaction=39, .mind=39, .spirit=39},
+            .skills={.astral=15000000}, // Cut the skills
+            .items={.money=100500000, .bag="[0,0,0,0]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
 TEST(UpdateCharacter_Reborn23_Success_Witch) {
     CCharacter chr = FakeCharacter(
         CharacterOpts{
@@ -572,7 +630,7 @@ TEST(UpdateCharacter_Ascend_Witch_Success) {
             .info={.main_skill=1, .picture=6, .sex=192, .deaths=10, .kills=4200, .clan="ascend"},
             .stats={.body=56, .reaction=76, .mind=76, .spirit=76},
             .skills={.fire=35742359, .water=35742359, .air=35742359, .earth=35742359, .astral=35742359},
-            .items={.money=2147000001, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
+            .items={.money=2147483647, .spells=268385790, .bag="[0,0,0,3];[1000,0,0,1];[3667,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"},
         }
     );
 
@@ -588,7 +646,7 @@ TEST(UpdateCharacter_Ascend_Witch_Success) {
             .info={.main_skill=1, .picture=15, .sex=64, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
             .skills={}, // All skills are cleared.
-            .items={.money=1, .spells=268385790, .bag="[0,0,0,3];[53709,0,2,1];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
+            .items={.money=483647, .spells=268385790, .bag="[0,0,0,3];[53709,0,2,1];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
         }
     );
     CHECK_CHARACTER(chr, want);
@@ -616,7 +674,7 @@ TEST(UpdateCharacter_Ascend_Amazon_Success) {
             .info={.main_skill=1, .picture=32, .sex=0, .deaths=10, .kills=4200, .clan="ascend"}, // Sex and picture are changed.
             .stats={.body=50, .reaction=50, .mind=50, .spirit=50}, // All stats are set to 50.
             .skills={}, // All skills are cleared.
-            .items={.money=1, .spells=0, .bag="[0,0,0,3];[18118,1,2,1,{2:3:0:0},{19:2:0:0},{12:250:0:0}];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
+            .items={.money=483647, .spells=0, .bag="[0,0,0,3];[18118,1,2,1,{2:3:0:0},{19:2:0:0},{12:250:0:0}];[1000,0,0,1];[2000,0,0,2]", .dress="[0,0,0,1];[1000,0,0,1]"}, // Inventory has the prize.
         }
     );
     CHECK_CHARACTER(chr, want);
@@ -843,6 +901,63 @@ TEST(UpdateCharacter_Circle) {
     CHECK_EQUAL(NIGHTMARE, shelf_server_id);
     CHECK_EQUAL("[0,0,0,3];[1000,0,0,1];[1000,0,0,1];[0,0,0,1]", shelf_items);
     CHECK_EQUAL(234567890, shelf_money); // 1 billion paid for circle.
+}
+
+TEST(UpdateCharacter_Circle_Fail_NoMobs) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=2, .sex=64, .deaths=10, .nick="@acharacter", .clan="miss_hell", .login_id=100},
+            .stats={.body=55, .reaction=76, .mind=76, .spirit=76},
+            .skills={.astral=200000000},
+            .items={.money=1234567890, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]", .dress="[0,0,0,2];[1000,0,0,1];[0,0,0,1]"},
+        }
+    );
+
+    KillStats kill_stats;
+    kill_stats.by_server_id.fill(4); // Pretend we've killed 4 mobs of each type.
+    bool ok = kill_stats.Marshal(chr.Section55555555);
+    CHECK_EQUAL(true, ok);
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.main_skill=2, .sex=64, .deaths=10, .nick="@acharacter", .clan="miss_hell", .login_id=100},
+            .stats={.body=55, .reaction=76, .mind=76, .spirit=76},
+            .skills={.astral=200000000},
+            .items={.money=1234567890, .spells=268385790, .bag="[0,0,0,1];[1000,0,0,1]", .dress="[0,0,0,2];[1000,0,0,1];[0,0,0,1]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
+TEST(UpdateCharacter_TreasureMoneyOverflow) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .items={.money=2147400000, .bag="[0,0,0,1];[3667,0,0,2]"}, // Two treasures to have guaranteed +1 body.
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+
+    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(points, (unsigned int)2);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=51, .reaction=50, .mind=50, .spirit=50},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
 }
 
 }

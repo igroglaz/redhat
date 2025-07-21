@@ -4,26 +4,15 @@
 
 #include "kill_stats.h"
 #include "constants.h"
+#include "thresholds.h"
 #include "utils.hpp"
 
 
 namespace circle {
 
-std::unordered_map<uint16_t, uint8_t> circling_needs_monster_kills{
-    {803, 14}, // Orc_Sword.5
-    {804, 14}, // Orc_Bow.5
-    {813, 14}, // Dragon.5
-    {814, 14}, // Orc_Shaman.5
-    {815, 14}, // F_Zombie.5
-    {816, 14}, // A_Zombie.5
-    {817, 14}, // F_Skeleton.5
-    {818, 14}, // A_Skeleton.5
-    {819, 14}, // M_Skeleton.5
-};
-
 int Circle(const CCharacter& chr) {
     char maybe_circle = chr.Nick[0];
-    if (chr.Nick[0] == '_' || chr.Nick[0] == '@') {
+    if (IsSolo(chr)) {
         maybe_circle = chr.Nick[1];
     }
 
@@ -46,33 +35,46 @@ bool Allowed(CCharacter& chr) {
     }
 
     // Have they maxed out stats? We don't check the body, as the player needs to clear out QUEST_T4 to get everything to 76.
-    if (chr.Reaction < 76 || chr.Mind < 76 || chr.Spirit < 76) {
-        Printf(LOG_Info, "[circle] '%s' failed to circle: stats", chr.GetFullName().c_str());
+    if (chr.Reaction < thresholds::thresholds.Value("hell.stats.reaction", chr, NIGHTMARE)) {
+        Printf(LOG_Info, "[circle] '%s' failed to circle: reaction", chr.GetFullName().c_str());
+        return false;
+    }
+    if (chr.Mind < thresholds::thresholds.Value("hell.stats.mind", chr, NIGHTMARE)) {
+        Printf(LOG_Info, "[circle] '%s' failed to circle: mind", chr.GetFullName().c_str());
+        return false;
+    }
+    if (chr.Spirit < thresholds::thresholds.Value("hell.stats.spirit", chr, NIGHTMARE)) {
+        Printf(LOG_Info, "[circle] '%s' failed to circle: spirit", chr.GetFullName().c_str());
         return false;
     }
 
     // Are they experienced enough?
-    if (chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon + chr.ExpEarthPike + chr.ExpAstralShooting < 177777777) {
+    uint32_t need_experience = thresholds::thresholds.Value("hell.experience", chr, NIGHTMARE);
+    if (chr.TotalExperience() < need_experience) {
         Printf(LOG_Info, "[circle] '%s' failed to circle: stats", chr.GetFullName().c_str());
         return false;
     }
 
-    // Do they have the money for the ticket?
+    // Do they have the money for the ticket?    
+    uint32_t price = thresholds::thresholds.Value("hell.money", chr, NIGHTMARE);
     if (chr.Money < price) {
         Printf(LOG_Info, "[circle] '%s' failed to circle: money", chr.GetFullName().c_str());
         return false;
     }
 
     // Have they learned enough about the monsters?
-    KillStats stats;
-    if (!stats.Unmarshal(chr.Section55555555)) {
-        return true; // Should not happen. Return `true` to simplify tests.
-    }
+    auto* mobs = thresholds::thresholds.Mobs("hell.mobs", chr, NIGHTMARE);
+    if (mobs) {
+        KillStats stats;
+        if (!stats.Unmarshal(chr.Section55555555)) {
+            return true; // Should not happen. Return `true` to simplify tests.
+        }
 
-    for (auto it = circling_needs_monster_kills.begin(); it != circling_needs_monster_kills.end(); ++it) {
-        if (stats.by_server_id[it->first] < it->second) {
-            Printf(LOG_Info, "[circle/kills] Player %s has %d kills of %d, want %d\n", chr.GetFullName().c_str(), stats.by_server_id[it->first], it->first, it->second);
-            return false;
+        for (auto it = mobs->begin(); it != mobs->end(); ++it) {
+            if (stats.by_server_id[it->first] < it->second) {
+                Printf(LOG_Info, "[circle/kills] Player %s has %d kills of %d, want %d\n", chr.GetFullName().c_str(), stats.by_server_id[it->first], it->first, it->second);
+                return false;
+            }
         }
     }
 

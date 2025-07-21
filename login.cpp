@@ -871,7 +871,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     update_character::ClearMonsterKills(chr); // reset info about killed mobs
 
                     if (chr.IsWizard()) {
-                        WipeSpells(chr);
+                        update_character::WipeSpells(chr);
                     }
 
                     if (saved.loaded_from_db) { // If the character is new, we'll create a new checkpoint in `UpdateCharacter` anyway.
@@ -1695,83 +1695,6 @@ bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid
     }
 }
 
-// Wipe mage's spells: remove all spells, leave only healing and the main skill arrow.
-void WipeSpells(CCharacter& chr) {
-    switch (chr.MainSkill) {
-        case 1: chr.Spells = 16777218; break; // fire
-        case 2: chr.Spells = 16777248; break; // water
-        case 3: chr.Spells = 16778240; break; // air
-        case 4: chr.Spells = 16842752; break; // earth
-    }
-}
-
-// Return a prettied number, like 5000 -> 5k, 123000000 -> 123m.
-std::string PrettyNumber(uint32_t num) {
-    if (num > 1000000000 && (num % 1000000000) == 0) {
-        return std::to_string(num / 1000000000) + "b";
-    } else if (num > 1000000 && (num % 1000000) == 0) {
-        return std::to_string(num / 1000000) + "m";
-    } else if (num > 1000 && (num % 1000) == 0) {
-        return std::to_string(num / 1000) + "k";
-    } else {
-        return std::to_string(num);
-    }
-}
-
-// Check if a girl character (amazon/witch) can do a rebirth.
-bool CheckGirlRebirth(CCharacter& chr, unsigned int total_exp, ServerIDType srvid) {
-    uint32_t need_exp = 0;
-    uint32_t need_gold = 0;
-
-    if (srvid == EASY) {
-        need_exp = 50000;
-        need_gold = 100000;
-    } else if (srvid == KIDS) {
-        need_exp = 500000;
-        need_gold = 1000000;
-    } else if (srvid == NIVAL) {
-        need_exp = 2000000;
-        need_gold = 5000000;
-    } else if (srvid == MEDIUM) {
-        need_exp = 11000000;
-        need_gold = 21000000;
-    } else if (srvid == HARD) {
-        need_exp = 50000000;
-        need_gold = 100000000;
-    }
-
-    if (!update_character::HasKillsForReborn(chr, srvid)) {
-        return false;
-    }
-
-    if (total_exp < need_exp) {
-        return false;
-    }
-    if (chr.Money < need_gold) {
-        return false;
-    }
-    return true;
-}
-
-void StoreOnShelf(ServerIDType server_id, CCharacter& chr, bool store_dress, shelf::StoreOnShelfFunction store_on_shelf) {
-    std::vector<CItem> items = std::move(chr.Bag.Items);
-    chr.Bag.Items.clear();
-
-    if (store_dress) {
-        // Mage and witch lose the dress in addition to the inventory.
-        items.insert(items.end(), chr.Dress.Items.begin(), chr.Dress.Items.end());
-
-        std::string serializedDress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
-        chr.Dress = Login_UnserializeItems(serializedDress);
-    }
-
-    if (!store_on_shelf(chr, server_id, std::move(items), chr.Money)) {
-        Printf(LOG_Warning, "Failed to store items on shelf upon reborn for character %s at server %d\n", chr.GetFullName(), server_id);
-    }
-
-    chr.Money = 0;
-}
-
 /** Update the character in the database, after creation or after leaving a map.
  *
  *  Parameters:
@@ -1783,206 +1706,18 @@ void StoreOnShelf(ServerIDType server_id, CCharacter& chr, bool store_dress, she
 void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points) {
     MergeItems(chr.Bag, srvid);
 
-    ////////////
-    // REBORN //
-    //////////// before entering next difficulty
-
-    ////////////////////////////////////////////
-    // 1) check for "Boss key" - treasure
-    int haveTreasures = 0;
-
-    const unsigned long bossKeyItem = 3667;  // "Quest Treasure".
-
-    for (const auto &item: chr.Bag.Items) {
-        if (item.Id == bossKeyItem) {
-            haveTreasures += static_cast<int>(item.Count);
-        }
-    }
-    
+    int haveTreasures = update_character::ConsumeTreasures(chr, srvid);
     *points = haveTreasures;
 
-    if (haveTreasures > 0) {
-        // Remove all quest treasures from the player's bag.
-        std::vector<CItem> newItems;
-        newItems.reserve(chr.Bag.Items.size());
+    update_character::VisitShelf(chr, srvid);
 
-        for (const auto& item: chr.Bag.Items) {
-            if (item.Id != bossKeyItem) {
-                newItems.push_back(item);
-            }
+    bool reborn = update_character::IsAttemptingReborn(chr, srvid);
+    if (reborn) {
+        // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
+        if (!update_character::MeetsRebornCriteria(chr, srvid, haveTreasures)) {
+            reborn = false;
+            update_character::FailReborn(chr, srvid);
         }
-
-        chr.Bag.Items = newItems;
-
-        // Award player some gold for Treasure
-        if (chr.Money < 2136000000) {
-            switch (srvid) {
-                case EASY:
-                    chr.Money += 5000;
-                    break;
-                case KIDS:
-                    chr.Money += 30000;
-                    break;
-                case NIVAL:
-                    chr.Money += 100000;
-                    break;
-                case MEDIUM:
-                    chr.Money += 500000;
-                    break;
-                case HARD:
-                    chr.Money += 1000000;
-                    break;
-                case NIGHTMARE:
-                    chr.Money += 3000000;
-                    break;
-                case QUEST_T1:
-                    chr.Money += 5000000;
-                    break;
-                case QUEST_T2:
-                    chr.Money += 7000000;
-                    break;
-                case QUEST_T3:
-                    chr.Money += 9000000;
-                    break;
-                case QUEST_T4:
-                    chr.Money += 11483647;
-                    break;
-            }
-        }
-    }
-
-    if (chr.Clan == "d" || chr.Clan == "deposit") { // Deposit items.
-        shelf::ItemsToSavingsBook(chr, srvid, chr.Bag.Items);
-    } else if (chr.Clan == "w" || chr.Clan == "withdraw") { // Withdraw items.
-        shelf::ItemsFromSavingsBook(chr, srvid, chr.Bag.Items);
-    } else if (chr.Clan.find("dg") == 0) { // Deposit gold.
-        if (chr.Clan == "dg") { // Default: 90% of total gold.
-            chr.Money = shelf::MoneyToSavingsBook(chr, srvid, chr.Bag.Items, chr.Money, chr.Money - (chr.Money / 10));
-        } else {
-            std::string percentage_str = chr.Clan.substr(2);
-            if (CheckInt(percentage_str)) { // Deposit given percentage of total gold.
-                int percentage = StrToInt(percentage_str);
-                if (0 < percentage && percentage <= 100) {
-                    double ratio = percentage / 100.0;
-                    chr.Money = shelf::MoneyToSavingsBook(chr, srvid, chr.Bag.Items, chr.Money, static_cast<int32_t>(chr.Money * ratio));
-                }
-            }
-        }
-    } else if (chr.Clan == "wg") { // Withdraw gold.
-        chr.Money = shelf::MoneyFromSavingsBook(chr, srvid, chr.Bag.Items, chr.Money, std::numeric_limits<int32_t>::max());
-    }
-
-    ////////////////////////////////////////////
-    // 2) now check for reborn
-
-    bool reborn = false;
-    bool meets_reborn_criteria = true;
-    if (haveTreasures == 0) {
-        meets_reborn_criteria = false;
-    }
-
-    if (srvid <= MEDIUM && IsSolo(chr) && haveTreasures < 2) {
-        meets_reborn_criteria = false;
-    }
-
-    unsigned int total_exp = chr.ExpFireBlade + chr.ExpWaterAxe + chr.ExpAirBludgeon +
-             chr.ExpEarthPike + chr.ExpAstralShooting;
-
-    // fix problem when 0-exp character (eg due nullifing) stuck in limbo
-    if (total_exp == 0) {
-        chr.ExpFireBlade = 1;
-    }
-
-    uint32_t reborn_money_price;
-    // note: we check there _!from which server!_ we received character
-    // eg if we received char from srvid KIDS and char finished its stay there
-    // (by drinking reaction to 20) - he will be reborned.. and his next login
-    // will be to srvid NIVAL (as he can't enter 2 anymore).
-    if ((srvid == EASY && chr.Mind > 14) ||
-        (srvid == KIDS && chr.Reaction > 19) ||
-        (srvid == NIVAL && chr.Reaction > 29) ||
-        (srvid == MEDIUM && chr.Reaction > 39) ||
-        (srvid == HARD && chr.Reaction > 49 && chr.Mind > 49 && chr.Spirit > 49))
-    {
-        reborn = true;
-
-        // As we receive character from server - we can control, should it
-        // go to next lvl or not; so we can revert its stats back if reqs
-        // not satisfied. so...
-
-        switch (srvid) {
-            case EASY:  reborn_money_price = 30000; break;
-            case KIDS:  reborn_money_price = 300000; break;
-            case NIVAL:
-                if (chr.Nick[0] == '_') { // It's hard to get money at NIVAL for a legend char.
-                    reborn_money_price = 900000;
-                } else {
-                    reborn_money_price = 1500000;
-                }
-                break;
-            case MEDIUM:reborn_money_price = 7000000; break;
-            case HARD:  reborn_money_price = 50000000; break;
-            default:    reborn_money_price = 0; break;
-        }
-
-        if (chr.Money < reborn_money_price) {
-            meets_reborn_criteria = false;
-        }
-
-        // Amazon, witch and circlers have extra requirements.
-        if (chr.IsFemale() || circle::Circle(chr)) {
-            if (!CheckGirlRebirth(chr, total_exp, srvid)) {
-                meets_reborn_criteria = false;
-            }
-        // Hardcore characters do too.
-        } else if (chr.Deaths <= 1) {
-            if (srvid == EASY && total_exp < 35000) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == KIDS && total_exp < 100000) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == NIVAL && total_exp < 500000) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == MEDIUM && total_exp < 11000000) {
-                meets_reborn_criteria = false;
-            }
-            else if (srvid == HARD && total_exp < 50000000) {
-                meets_reborn_criteria = false;
-            }
-        }
-    }
-
-    // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
-    if (reborn && !meets_reborn_criteria) {
-        reborn = false;
-
-        uint8_t stat_ceiling = 0;
-
-        switch (srvid) {
-        case EASY:
-            stat_ceiling = 14;
-            break;
-        case KIDS:
-            stat_ceiling = 19;
-            break;
-        case NIVAL:
-            stat_ceiling = 29;
-            break;
-        case MEDIUM:
-            stat_ceiling = 39;
-            break;
-        case HARD:
-            stat_ceiling = 49;
-            break;
-        }
-
-        // Make stats at most "max-1".
-        chr.Body = std::min(chr.Body, stat_ceiling);
-        chr.Reaction = std::min(chr.Reaction, stat_ceiling);
-        chr.Mind = std::min(chr.Mind, stat_ceiling);
-        chr.Spirit = std::min(chr.Spirit, stat_ceiling);
     }
 
     if (reborn) {
@@ -2016,110 +1751,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             }
         }
 
-        // Save to shelf upon reborn. Note that this function empties the bag and money (and dress for mage/witch).
-        chr.Money -= reborn_money_price;
-        StoreOnShelf(srvid, chr, chr.IsWizard(), store_on_shelf);
-
-        // 1) perform reborn
-        // WARRIOR/MAGE (no reclass OR ascend)
-        if (!chr.IsFemale() && circle::Circle(chr) == 0) {
-            // Wipe experience for the main skill
-            switch (chr.MainSkill) {
-                case 1: chr.ExpFireBlade = 0; break;
-                case 2: chr.ExpWaterAxe = 0; break;
-                case 3: chr.ExpAirBludgeon = 0; break;
-                case 4: chr.ExpEarthPike = 0; break;
-            }
-
-            // Reduce all other skills in 2 times...
-            if (chr.MainSkill != 1) chr.ExpFireBlade /= 2;
-            if (chr.MainSkill != 2) chr.ExpWaterAxe /= 2;
-            if (chr.MainSkill != 3) chr.ExpAirBludgeon /= 2;
-            if (chr.MainSkill != 4) chr.ExpEarthPike /= 2;
-
-            // Mage loses all spells but the basic arrow.
-            if (chr.IsMage()) {
-                WipeSpells(chr);
-            }
-
-            // astral/shooting skill
-            if (chr.Deaths == 0) {
-                chr.ExpAstralShooting /= 2; // (hardcore character only 2x times)
-            } else if (chr.IsWarrior()) {
-                chr.ExpAstralShooting /= static_cast<int>(srvid + 1); // WARR divide in srvid times
-            } else if (chr.IsMage()) {
-                chr.ExpAstralShooting = 0; // MAGE wipe astral skill
-            }
-        }
-        // RECLASSED chars (AMA/WITCH) and characters on circles
-        else {
-            update_character::ClearMonsterKills(chr);
-
-            // wipe ALL exp
-            chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
-
-            // Wizards lose all spells but the basic arrow.
-            if (chr.IsWizard()) {
-                WipeSpells(chr);
-            }
-
-            // reset BODY for ama/witch upon reborn when moving from HARD to NIGHTMARE
-            if (srvid == HARD) {
-                if (chr.IsAmazon()) {
-                    chr.Body = 25;
-                } else if (chr.IsWitch()) {
-                    chr.Body = 1;
-                }
-            }
-        }
-
-        // 2) prevent preserving after REBORN too high non-main skill
-        if (srvid < NIGHTMARE) {
-            uint32_t limit = 0;
-
-            switch (srvid) {
-                // no need to mention 1st srv as there is no treasure, so no reborn
-                case EASY:
-                    limit = 10000; // Attention! It's for each skill! So total exp...
-                    break; // ...might be up to 40.000 (10k * 4) (4 cause no main skill)
-                case KIDS:
-                    limit = 20000; // 80k
-                    break;
-                case NIVAL:
-                    limit = 100000; // 400k
-                    break;
-                case MEDIUM:
-                    limit = 250000; // 1m
-                    break;
-                case HARD:
-                    limit = 500000; // 2m
-                    break;
-            }
-
-            if (chr.IsFemale()) { // ama and witch: double limit
-                limit *= 2;
-            }
-
-            if (chr.Deaths == 0) { // if HC - triple it
-                limit *= 3;
-            }
-
-            if (chr.ExpFireBlade > limit) {
-                chr.ExpFireBlade = limit;
-            }
-            if (chr.ExpWaterAxe > limit) {
-                chr.ExpWaterAxe = limit;
-            }
-            if (chr.ExpAirBludgeon > limit) {
-                chr.ExpAirBludgeon = limit;
-            }
-            if (chr.ExpEarthPike > limit) {
-                chr.ExpEarthPike = limit;
-            }
-            if (chr.ExpAstralShooting > limit) {
-                chr.ExpAstralShooting = limit;
-            }
-        }
+        update_character::PerformReborn(chr, srvid, store_on_shelf);
 
         // Create a checkpoint for giga-characters on reborn.
         if (chr.Nick[0] == '_') {
@@ -2134,93 +1766,22 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         checkpoint::Checkpoint(chr, true).SaveToDB(chr.ID);
     }
 
-    //////////////////////////////
-    // RECLASS after maxing EXP //
-    //////////////////////////////
-    unsigned int stats_sum = chr.Body + chr.Reaction + chr.Mind + chr.Spirit;
-    int current_circle = circle::Circle(chr);
-
     // RECLASS: warrior/mage become ama/witch
-    // (note it can't happen simultaneously with reborn as
-    // at reborn we "half" the exp)
-    if (!chr.IsFemale() && chr.Clan == "reclass" && total_exp > 177777777 &&
-         chr.Money > 300000000 && current_circle == 0) {
-        update_character::ClearMonsterKills(chr);
-
-        // Save to shelf upon reclass. Note that this function removes money, empties the bag and dress.
-        chr.Money -= 300000000;
-        StoreOnShelf(srvid, chr, true, store_on_shelf);
-
-        if (chr.Deaths == 0) {
-            chr.Money = 133; // HC: leave 133 gold to buy a bow
-        }
-
-        // stats
-        chr.Body = chr.Reaction = chr.Mind = chr.Spirit = 1;
-        // exp
-        chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
-
-        // reclass: war/mage change class
-        if (chr.IsWarrior()) { // warr become ama
-            chr.Sex = sex::amazon;
-            chr.Picture = 11; // and become human
-        }
-        else if (chr.IsMage()) { // mage becomes witch
-            chr.Sex = sex::witch;
-            chr.Picture = 6; // and become human
-
-            WipeSpells(chr);
-        }
+    // (note it can't happen simultaneously with reborn as at reborn we "half" the exp)
+    if (update_character::ShouldReclass(chr, srvid)) {
+        update_character::PerformReclass(chr, srvid, store_on_shelf);
 
         // Create a checkpoint for giga-characters on reclass.
         if (chr.Nick[0] == '_') {
             Printf(LOG_Info, "[checkpoint] saving %d on reclass\n", chr.ID);
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
-
-    ///////////////////////////////
-    // ASCEND after maxing STATS //
-    ///////////////////////////////
-
     // ASCEND: ama/witch become again war/mage and receive crown
-    } else if (chr.IsFemale() && chr.Clan == "ascend" &&
-                stats_sum == 284 && total_exp > 177777777 && chr.Money > 2147000000 && current_circle == 0) {
-        chr.Money -= 2147000000;
+    } else if (update_character::ShouldAscend(chr, srvid)) {
+        update_character::PerformAscend(chr, srvid, store_on_shelf);
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
         *ascended = 1; // We use it as a flag. DB increments if it's 1.
-
-        // Loose some stats as price for ascend,
-        // but still save some be able stay on #7;
-        // otherwise (eg if we reset stats to 1)...
-        // ...reborn will cause mage staff to dissapear
-        chr.Body = 50;
-        chr.Reaction = 50;
-        chr.Mind = 50;
-        chr.Spirit = 50;
-
-        // pay with exp too
-        chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
-
-        // We do not wipe inventory/gold for ascension.
-        // The prize item is inserted into the beginning of the inventory.
-        if (chr.IsAmazon()) { // amazon become warrior and get CROWN (Good Gold Helm) +3 body +2 scanRange +250 attack
-            chr.Sex = sex::warrior;
-            chr.Picture = 32;
-
-            CItem crown{.Id=18118, .IsMagic=1, .Price=2, .Count=1, .Effects={
-                {stats::body, 3},
-                {stats::scan_range, 2},
-                {stats::attack, 250},
-            }};
-            chr.Bag.Items.insert(chr.Bag.Items.begin(), crown);
-        } else if (chr.IsWitch()) { // witch become mage and get physical damage staff
-            chr.Sex = sex::mage;
-            chr.Picture = 15;
-
-            CItem staff{.Id=53709, .IsMagic=0, .Price=2, .Count=1};
-            chr.Bag.Items.insert(chr.Bag.Items.begin(), staff);
-        }
 
         // Create a checkpoint for giga-characters on ascend.
         if (chr.Nick[0] == '_') {
@@ -2228,7 +1789,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else if (circle::Allowed(chr)) {
-        if (chr.Clan == "miss_hell" && current_circle == 0) {
+        if (chr.Clan == "miss_hell" && circle::Circle(chr) == 0) {
             // Womanize!
             if (chr.IsWarrior()) {
                 chr.Sex = sex::amazon;
@@ -2244,7 +1805,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         update_character::ClearMonsterKills(chr);
 
-        StoreOnShelf(srvid, chr, true, store_on_shelf);
+        update_character::StoreOnShelf(srvid, chr, true, store_on_shelf);
 
         if (chr.Deaths == 0) {
             chr.Money = 133; // HC: leave 133 gold to buy a bow
@@ -2254,7 +1815,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = chr.ExpAstralShooting = 0;
 
         if (chr.IsWizard()) {
-            WipeSpells(chr);
+            update_character::WipeSpells(chr);
         }
 
         if (chr.Nick[0] == '_') {
@@ -2262,129 +1823,9 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else {
-        // If the player didn't ascend or reclass,
-        // the boss key on 7+ increases stats
-        // (and increase ladder points on 2+)
-        bool coinflip = std::rand() % 2;
-
-        for (uint16_t i = 0; i < haveTreasures; ++i) {
-            coinflip = !coinflip; // One treasure is random, two are guaranteed.
-
-            switch (srvid) {
-            case NIGHTMARE: // 2 treasures per map
-                // treasure at 7 server works in 50% cases
-                update_character::TreasureOnNightmare(chr, coinflip);
-                break;
-            case QUEST_T1: // 1 treasure. 2x-3x more mind
-                if (coinflip) {
-                    update_character::IncreaseUpTo(&chr.Mind, 3, 70);
-                } else {
-                    update_character::IncreaseUpTo(&chr.Mind, 2, 70);
-                }
-                break;
-            case QUEST_T2: // at 9, 10 - we have 3 treasures per map
-                update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
-                if (i == 0 && haveTreasures == 3) { // A bonus for getting all three treasures.
-                    update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
-                }
-                break;
-            case QUEST_T3:
-                update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
-                if (i == 0 && haveTreasures == 3) { // A bonus for getting all three treasures.
-                    update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
-                }
-                break;
-            case QUEST_T4: // 1 treasure
-                for (int j = 0; j < 2; ++j) {
-                    update_character::IncreaseUpTo(&chr.Mind, 1, 76)
-                        || update_character::IncreaseUpTo(&chr.Spirit, 1, 76) 
-                        || update_character::IncreaseUpTo(&chr.Reaction, 1, 76);
-                }
-                break;
-            }
-        }
+        // If the player didn't ascend or reclass, the boss key on NIGHTMARE+ increases stats.
+        update_character::DrinkTreasure(chr, srvid, haveTreasures);
     }
 
-    // 2-6 servers: don't allow too high skill value on low servers
-    // (also prevent max reward (potion) for mail quest at 6th server)
-    if (srvid < NIGHTMARE) {
-        uint32_t limit = 0;
-        uint32_t limit_main = 0;
-
-        switch (srvid) {
-            case EASY:
-                limit = 50000;    // 450k (cause counts for each skill..
-                limit_main = 150000;
-                break;            // ..and main/astral limit * 3, so 150+150+150
-            case KIDS:
-                limit = 100000;   // 1.3m (main/astral * 5)
-                limit_main = 500000;
-                break;
-            case NIVAL:
-                limit = 1000000;  // 11m (main/astral * 4)
-                limit_main = 4000000;
-                break;
-            case MEDIUM:
-                limit = 5000000;  // 45m (main/astral * 3)
-                limit_main = 15000000;
-                break;
-            case HARD:
-                limit = 15000000; // 90m (main/astral * 2)
-                limit_main = 30000000;
-                break;
-        }
-
-        // FireBlade
-        if (chr.ExpFireBlade > limit) {
-            if (chr.MainSkill != 1) {
-                chr.ExpFireBlade = limit;
-            } else if (chr.ExpFireBlade > limit_main) {
-                chr.ExpFireBlade = limit_main;
-            }
-        }
-
-        // WaterAxe
-        if (chr.ExpWaterAxe > limit) {
-            if (chr.MainSkill != 2) {
-                chr.ExpWaterAxe = limit;
-            } else if (chr.ExpWaterAxe > limit_main) {
-                chr.ExpWaterAxe = limit_main;
-            }
-        }
-
-        // AirBludgeon
-        if (chr.ExpAirBludgeon > limit) {
-            if (chr.MainSkill != 3) {
-                chr.ExpAirBludgeon = limit;
-            } else if (chr.ExpAirBludgeon > limit_main) {
-                chr.ExpAirBludgeon = limit_main;
-            }
-        }
-
-        // EarthPike
-        if (chr.ExpEarthPike > limit) {
-            if (chr.MainSkill != 4) {
-                chr.ExpEarthPike = limit;
-            } else if (chr.ExpEarthPike > limit_main) {
-                chr.ExpEarthPike = limit_main;
-            }
-        }
-
-        // AstralShooting
-        if (chr.ExpAstralShooting > limit_main) {
-            chr.ExpAstralShooting = limit_main;
-        }
-    }
-}
-
-bool IsSolo(const CCharacter& chr) {
-    return IsIronMan(chr) || IsLegend(chr);
-}
-
-bool IsIronMan(const CCharacter& chr) {
-    return chr.Nick.length() && chr.Nick[0] == '@';
-}
-
-bool IsLegend(const CCharacter& chr) {
-    return chr.Nick.length() && chr.Nick[0] == '_';
+    update_character::ExperienceLimit(chr, srvid);
 }
