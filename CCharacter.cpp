@@ -456,7 +456,7 @@ bool CItemList::SaveToStream(BinaryStream& stream, bool min_format)
     return true;
 }
 
-std::string CCharacter::GetFullName()
+std::string CCharacter::GetFullName() const
 {
     if(Clan.length()) return Nick + "|" + Clan;
     else return Nick;

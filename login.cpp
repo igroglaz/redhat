@@ -1013,6 +1013,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                 SQL_Unlock();
                 return false;
             }
+
+            Printf(LOG_Info, "[update] Character '%s' saved to the database\n", chr.GetFullName().c_str());
         }
 
         SQL_Unlock(); // Unlock SQL after successful operation
@@ -1704,17 +1706,27 @@ bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid
  *      points: output parameter: points for finding the treasure
  */
 void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points) {
+    const std::string chr_full_name = chr.GetFullName();
+    const char* full_name = chr_full_name.c_str();
+    Printf(LOG_Info, "[update] character '%s' on s%d\n", full_name, srvid);
+
     MergeItems(chr.Bag, srvid);
 
     int haveTreasures = update_character::ConsumeTreasures(chr, srvid);
     *points = haveTreasures;
 
+    Printf(LOG_Info, "[update] character '%s' has %d treasures\n", full_name, haveTreasures);
+
     update_character::VisitShelf(chr, srvid);
+
+    Printf(LOG_Info, "[update] character '%s' visited shelf\n", full_name);
 
     bool reborn = update_character::IsAttemptingReborn(chr, srvid);
     if (reborn) {
+        Printf(LOG_Info, "[update] character '%s' is attempting reborn\n", full_name);
         // The player wanted to do a reborn, but doesn't meet criteria: revert the stats, so the player is left on the same server.
         if (!update_character::MeetsRebornCriteria(chr, srvid, haveTreasures)) {
+            Printf(LOG_Info, "[update] character '%s' does not meet reborn criteria\n", full_name);
             reborn = false;
             update_character::FailReborn(chr, srvid);
         }
@@ -1722,6 +1734,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
     if (reborn) {
         if (srvid == EASY) {
+            Printf(LOG_Info, "[update] character '%s' does reborn from EASY, gets new face\n", full_name);
             // Male characters become zombies on first reborn (except Ironman and Legend)
             if (!chr.IsFemale() && chr.Nick[0] != '@' && chr.Nick[0] != '_') {
                 chr.Picture = 64;
@@ -1729,7 +1742,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
         // allow to create mages only if managed to finish HARD
         // (fill allow_mage DB field on rebirth)
-        } else if (srvid == HARD) { 
+        } else if (srvid == HARD) {
+            Printf(LOG_Info, "[update] character '%s' does reborn from HARD, unlocks mages\n", full_name);
             if (chr.Nick[0] == '@') { // for @ chars: make it 1 if it's 0
                 std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 1 WHERE `id` = '%u' AND `allow_mage` = 0", chr.LoginID);
 
@@ -1751,6 +1765,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             }
         }
 
+        Printf(LOG_Info, "[update] character '%s' performs reborn\n", full_name);
         update_character::PerformReborn(chr, srvid, store_on_shelf);
 
         // Create a checkpoint for giga-characters on reborn.
@@ -1769,6 +1784,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     // RECLASS: warrior/mage become ama/witch
     // (note it can't happen simultaneously with reborn as at reborn we "half" the exp)
     if (update_character::ShouldReclass(chr, srvid)) {
+        Printf(LOG_Info, "[update] character '%s' performs reclass\n", full_name);
         update_character::PerformReclass(chr, srvid, store_on_shelf);
 
         // Create a checkpoint for giga-characters on reclass.
@@ -1778,6 +1794,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         }
     // ASCEND: ama/witch become again war/mage and receive crown
     } else if (update_character::ShouldAscend(chr, srvid)) {
+        Printf(LOG_Info, "[update] character '%s' performs ascend\n", full_name);
         update_character::PerformAscend(chr, srvid, store_on_shelf);
 
         // increment ascended DB-only field to mark that character was ascended (for ladder score)
@@ -1789,6 +1806,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else if (circle::Allowed(chr)) {
+        Printf(LOG_Info, "[update] character '%s' goes to hell\n", full_name);
         if (chr.Clan == "miss_hell" && circle::Circle(chr) == 0) {
             // Womanize!
             if (chr.IsWarrior()) {
@@ -1823,9 +1841,12 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     } else {
+        Printf(LOG_Info, "[update] character '%s' eats the treasure\n", full_name);
         // If the player didn't ascend or reclass, the boss key on NIGHTMARE+ increases stats.
         update_character::DrinkTreasure(chr, srvid, haveTreasures);
     }
 
     update_character::ExperienceLimit(chr, srvid);
+
+    Printf(LOG_Info, "[update] character '%s' updated successfully\n", full_name);
 }

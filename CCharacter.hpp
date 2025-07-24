@@ -115,7 +115,7 @@ class CCharacter
 
         void CryptSection(BinaryStream& section, uint16_t key);
 
-        std::string GetFullName();
+        std::string GetFullName() const;
 
         BinaryStream Section55555555;
         BinaryStream Section40A40A40;

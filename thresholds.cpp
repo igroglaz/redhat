@@ -152,11 +152,13 @@ void Thresholds::LoadFromStream(std::istream& stream) {
 }
 
 uint32_t Thresholds::Value(std::string key, const CCharacter& chr, ServerIDType server_id) const {
+    Printf(LOG_Info, "[thresholds] Picking value at key '%s' for character '%s' on s%d\n", key.c_str(), chr.GetFullName().c_str(), server_id);
     const Node* node = this->Descend(this->Path(key), chr, server_id);
     return node ? node->number : 0;
 }
 
 const std::unordered_map<uint16_t, int>* Thresholds::Mobs(std::string key, const CCharacter& chr, ServerIDType server_id) const {
+    Printf(LOG_Info, "[thresholds] Picking mobs at key '%s' for character '%s' on s%d\n", key.c_str(), chr.GetFullName().c_str(), server_id);
     const Node* node = this->Descend(this->Path(key), chr, server_id);
     return node ? &node->mobs : nullptr;
 }

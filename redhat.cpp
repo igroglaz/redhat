@@ -18,9 +18,53 @@ void H_Quit()
 
 void LGN_DBConvert(std::string directory);
 
+DWORD ExceptionHandler(struct _EXCEPTION_POINTERS *info) {
+    try {
+        // dump info
+        Printf(LOG_Error, "EXCEPTION DUMP:\neax=%08Xh,ebx=%08Xh,ecx=%08Xh,edx=%08Xh,\nesp=%08Xh,ebp=%08Xh,esi=%08Xh,edi=%08Xh;\neip=%08Xh;\naddr=%08Xh,code=%08Xh,flags=%08Xh\n",
+                info->ContextRecord->Eax,
+                info->ContextRecord->Ebx,
+                info->ContextRecord->Ecx,
+                info->ContextRecord->Edx,
+                info->ContextRecord->Esp,
+                info->ContextRecord->Ebp,
+                info->ContextRecord->Esi,
+                info->ContextRecord->Edi,
+                info->ContextRecord->Eip,
+                info->ExceptionRecord->ExceptionAddress,
+                info->ExceptionRecord->ExceptionCode,
+                info->ExceptionRecord->ExceptionFlags);
+
+        Printf(LOG_Error, "BEGIN STACK TRACE: 0x%08Xh <= ", info->ExceptionRecord->ExceptionAddress);
+        unsigned long stebp = *(unsigned long*)(info->ContextRecord->Ebp);
+        while (true) {
+            bool bad_ebp = false;
+            if(stebp & 3) bad_ebp = true;
+            if(!bad_ebp && IsBadReadPtr((void*)stebp, 8)) bad_ebp = true;
+
+            if(bad_ebp) break;
+
+            Printf(LOG_Error, "%08Xh <= ", *(unsigned long*)(stebp+4));
+            stebp = *(unsigned long*)(stebp);
+        }
+        Printf(LOG_Error, "END STACK TRACE\n");
+        
+        ExitProcess(1);
+    } catch (...) {
+        Printf(LOG_Error, "Failed to capture stack trace\n");
+    }
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+void SetExceptionFilter() {
+    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)&ExceptionHandler);
+}
+
 bool H_Init(int argc, char* argv[])
 {
     atexit(H_Quit);
+    SetExceptionFilter();
 
     SetConsoleTitle("Red Hat");
 
@@ -74,15 +118,19 @@ bool H_Init(int argc, char* argv[])
     Net_Init();
     
     try {
+        Printf(LOG_Info, "[thresholds] Loading thresholds\n");
 #include "thresholds.generated.h"
         thresholds::thresholds.LoadFromContent(default_thresholds);
 
+        Printf(LOG_Info, "[thresholds] Saving thresholds for servers\n");
         std::ofstream f_out("thresholds.cfg");
         f_out.write(default_thresholds, strlen(default_thresholds));
         if (!f_out) {
             throw new std::exception("failed to write threshold settings to thresholds.cfg");
         }
         f_out.close();
+
+        Printf(LOG_Info, "[thresholds] Thresholds OK\n");
     } catch(const thresholds::ParseException& e) {
         Printf(LOG_Error, "Thresholds: %s\n", e.what());
         return false;
