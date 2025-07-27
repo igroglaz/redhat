@@ -139,10 +139,10 @@ target_compile_definitions(redhat-lib PUBLIC -DNOMINMAX -D_WINSOCK_DEPRECATED_NO
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
 
 target_compile_options(redhat-lib PUBLIC /MT)
-target_link_options(redhat-lib PUBLIC /NODEFAULTLIB:MSVCRT)
+target_link_options(redhat-lib PUBLIC /NODEFAULTLIB:MSVCRT /DYNAMICBASE:NO /NXCOMPAT:NO)
 
 target_compile_options(redhat PUBLIC /MT)
-target_link_options(redhat PUBLIC /NODEFAULTLIB:MSVCRT)
+target_link_options(redhat PUBLIC /NODEFAULTLIB:MSVCRT /DYNAMICBASE:NO /NXCOMPAT:NO)
 
 target_compile_options(redhat-test PUBLIC /MT)
 target_link_options(redhat-test PUBLIC /NODEFAULTLIB:MSVCRT)
