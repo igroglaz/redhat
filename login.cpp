@@ -1842,8 +1842,19 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         }
     } else {
         Printf(LOG_Info, "[update] character '%s' eats the treasure\n", full_name);
-        // If the player didn't ascend or reclass, the boss key on NIGHTMARE+ increases stats.
+
+        uint8_t stats_before[4] = {chr.Body, chr.Reaction, chr.Mind, chr.Spirit};
+        // If the player didn't ascend or reclass, the treasure on NIGHTMARE+ increases stats.
         update_character::DrinkTreasure(chr, srvid, haveTreasures);
+
+        // If the legend character finished drinking one of the stats, create a checkpoint.
+        if (IsLegend(chr)) {
+            const char* completed_server = update_character::NightmareCheckpoint(chr, stats_before);
+            if (completed_server) {
+                Printf(LOG_Info, "[checkpoint] saving %d on %s\n", chr.ID, completed_server);
+                checkpoint::Checkpoint(chr).SaveToDB(chr.ID);
+            }
+        }
     }
 
     update_character::ExperienceLimit(chr, srvid);

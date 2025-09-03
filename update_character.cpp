@@ -121,6 +121,31 @@ bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit) {
     return true;
 }
 
+const char* NightmareCheckpoint(const CCharacter& chr, uint8_t stats_before[4]) {
+    uint8_t max_body = chr.IsFemale() ? 56 : 55;
+    if (chr.Body == max_body && stats_before[0] < chr.Body) {
+        return "nightmare";
+    }
+
+    if (chr.Mind == 70 && stats_before[2] < 70) {
+        return "quest_1";
+    }
+
+    if (chr.Spirit == 70 && stats_before[3] < 70) {
+        return "quest_2";
+    }
+
+    if (chr.Reaction == 70 && stats_before[1] < 70) {
+        return "quest_3";
+    }
+
+    if (chr.Reaction + chr.Mind + chr.Spirit == 3*76 && stats_before[1] + stats_before[2] + stats_before[3] < 3*76) {
+        return "quest_4";
+    }
+
+    return nullptr;
+}
+
 void SaveTreasurePoints(int character_id, ServerIDType server_id, unsigned int points) {
     if (points == 0) {
         return;

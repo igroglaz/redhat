@@ -27,7 +27,7 @@ struct Checkpoint {
     uint32_t exp_astral_shooting;
     std::string dress;
 
-    Checkpoint(CCharacter& chr, bool only_stats);
+    Checkpoint(CCharacter& chr, bool only_stats=false);
 
     // Loads the checkpoint from DB for the given character.
     Checkpoint(int character_id);
