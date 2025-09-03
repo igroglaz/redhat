@@ -21,6 +21,9 @@ void TreasureOnNightmare(CCharacter& chr, bool coinflip);
 // Increase stats from getting a treasure on NIGHTMARE+.
 void DrinkTreasure(CCharacter& chr, ServerIDType server_id, int treasures);
 
+// Checks if the legend character has completed a certain level.
+const char* NightmareCheckpoint(const CCharacter& chr, uint8_t stats_before[4]);
+
 // At QUEST_T1--QUEST_T3 a character can increase stats up to 70.
 bool IncreaseUpTo(uint8_t* value, uint8_t increment, uint8_t limit);
 
