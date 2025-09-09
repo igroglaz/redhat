@@ -144,6 +144,19 @@ const std::vector<CEffect> wizard_clothes_effects{
     {stats::skill_earth, 18},
 };
 
+const std::vector<CEffect> wizard_hat_effects{
+    {stats::body, 1},
+    {stats::mind, 1},
+    {stats::reaction, 1},
+    {stats::spirit, 1},
+    {stats::speed, 1},
+    {stats::skill_fire, 18},
+    {stats::skill_water, 18},
+    {stats::skill_air, 18},
+    {stats::skill_earth, 18},
+    {stats::scan_range, 2},
+};
+
 const std::vector<CEffect> wizard_bijou_effects{
     {stats::body, 1},
     {stats::mind, 1},
@@ -180,22 +193,22 @@ std::unordered_map<int, std::vector<CItem>> awards{
     // Mage: "Sanctuary Red" set.
     {64, {
         CItem{.Id=1934, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Dress
-        CItem{.Id=1669, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Hood
         CItem{.Id=3227, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Magic Shoes
         CItem{.Id=2711, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Gloves
         CItem{.Id=2187, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Sanctuary Red Cloak
         CItem{.Id=1410, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Sanctuary Red Amulet
         CItem{.Id=1153, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Sanctuary Red Ring
+        CItem{.Id=1669, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_hat_effects}, // Sanctuary Red Hood
     }},
     // Witch: "Vampic" set.
     {192, {
         CItem{.Id=55150, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Dress
-        CItem{.Id=54885, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Crown
         CItem{.Id=56443, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Shoes
         CItem{.Id=55927, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Gloves
         CItem{.Id=55403, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_clothes_effects}, // Vampic Cloak
         CItem{.Id=54626, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Vampic Amulet
         CItem{.Id=54369, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_bijou_effects}, // Vampic Ring
+        CItem{.Id=54885, .IsMagic=1, .Price=2, .Count=1, .Effects=wizard_hat_effects}, // Vampic Crown
     }},
 };
 
