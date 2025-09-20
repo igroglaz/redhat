@@ -664,6 +664,22 @@ int AllowMage(const char* login) {
     return allow_mage;
 }
 
+int AllowFemale(const std::string& login) {
+    int allow_mage = 0;
+
+    SimpleSQL query{Format("SELECT `allow_female` FROM `logins` WHERE LOWER(`name`) = LOWER('%s')", login.c_str())};
+    if (!query) {
+        return -1;
+    }
+
+    if (SQL_NumRows(query.result) > 0) {
+        MYSQL_ROW row_allow = SQL_FetchRow(query.result);
+        return SQL_FetchInt(row_allow, query.result, "allow_female");
+    }
+
+    return -1;
+}
+
 bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2, unsigned long size, char* data, std::string nickname, ServerIDType srvid)
 {
     //Printf("Login_SetCharacter()\n");
@@ -1774,6 +1790,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
     }
+
+    update_character::MaybeAllowFemale(chr, srvid);
 
     // Create a checkpoint for giga-characters on EASY server always but only with stats.
     if (chr.Nick[0] == '_' && !reborn && srvid == EASY) {

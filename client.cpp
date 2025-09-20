@@ -1468,8 +1468,16 @@ bool CL_EnterServer(Client* conn, Packet& pack)
             }
         }
 
-        // Replace girls with boys.
-        p_picture &= ~sex::female;
+        // If the player isn't allowed to create a female character, replace with male.
+        if (p_picture & sex::female) {
+            int want = p_nickname[0] == '_' ? 2 : p_nickname[0] == '@' ? 1 : 0;
+            int have_access_to = AllowFemale(conn->Login);
+
+            if (have_access_to < want) {
+                Printf(LOG_Info, "Player %s is not allowed to create females: access %d < want %d\n", conn->Login.c_str(), have_access_to, want);
+                p_picture &= ~sex::female;
+            }
+        }
 
         // Check for solo mage for @ (solo) and _ (hc) modes at hero creation 
         // (DB: 'allow_mage' field at table 'logins')
