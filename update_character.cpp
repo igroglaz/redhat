@@ -363,6 +363,32 @@ void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfF
 
     // Prevent preserving after reborn too high non-main skill.
     CutOffExperienceOnReborn(chr, server_id);
+
+    // Upon leaving HARD, give the circle rewards.
+    if (server_id == HARD) {
+        int circle_number = circle::Circle(chr);
+
+        if (circle_number > 0) {
+            if (IsLegend(chr)) {
+                // Legends get all rewards from the first circle till the current one.
+                for (int i = 1; i <= circle_number; ++i) {
+                    auto item = circle::Reward(chr.Sex, i);
+                    Printf(LOG_Info, "[circle] Giving reward id=%d to legend character '%s'\n", item.Id, chr.GetFullName().c_str());
+                    if (item.Id) {
+                        chr.Bag.Items.push_back(std::move(item));
+                    }
+                }
+
+                // Also should give the crown, but I'd need to pick `ascended` from DB. Can do it when we have ascended legends.
+            } else {
+                auto item = circle::Reward(chr.Sex, circle_number);
+                Printf(LOG_Info, "[circle] Giving reward id=%d to character '%s'\n", item.Id, chr.GetFullName().c_str());
+                if (item.Id) {
+                    chr.Bag.Items.push_back(std::move(item));
+                }
+            }
+        }
+    }
 }
 
 void CutOffExperienceOnReborn(CCharacter& chr, ServerIDType server_id) {

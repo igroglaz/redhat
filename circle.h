@@ -13,7 +13,10 @@ int Circle(const CCharacter& chr);
 // Can this character go to the next circle?
 bool Allowed(CCharacter& chr);
 
-// Advance to a new circle: rename character and award an item.
+// Return the reward item for the given circle.
+CItem Reward(uint8_t sex, int circle);
+
+// Advance to a new circle: rename character.
 void Advance(CCharacter& chr);
 
 } // namespace circle
