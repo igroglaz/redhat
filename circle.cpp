@@ -212,8 +212,8 @@ std::unordered_map<int, std::vector<CItem>> awards{
     }},
 };
 
-CItem Award(const CCharacter& chr, int circle) {
-    const auto& items = awards[chr.Sex];
+CItem Reward(uint8_t sex, int circle) {
+    const auto& items = awards[sex];
     if (circle > 0 && static_cast<int>(items.size()) >= circle) {
         return items[circle - 1];
     }
@@ -221,17 +221,7 @@ CItem Award(const CCharacter& chr, int circle) {
 }
 
 void Advance(CCharacter& chr) {
-    const int leaving_circle = Circle(chr);
-
     chr.Nick = Rename(chr.Nick);
-
-    if (leaving_circle != 0) {
-        const CItem item = Award(chr, leaving_circle);
-
-        if (item.Id) {
-            chr.Bag.Items.insert(chr.Bag.Items.begin(), item);
-        }
-    }
 }
 
 } // namespace circle
