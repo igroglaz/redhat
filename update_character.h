@@ -52,4 +52,7 @@ void PerformReclass(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelf
 bool ShouldAscend(const CCharacter& chr, ServerIDType server_id);
 void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
 
+// Allows creating female characters for players who reached NIGHTMARE with 0 deaths and 177777777 experience.
+void MaybeAllowFemale(const CCharacter& chr, ServerIDType server_id);
+
 } // namespace update_character

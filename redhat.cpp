@@ -112,6 +112,9 @@ bool H_Init(int argc, char* argv[])
         } else if (arg == "-fix-shelves") {
             SQL_FixShelves();
             exit_ = true;
+        } else if (arg == "-update-allow-female") {
+            SQL_UpdateAllowFemale();
+            exit_ = true;
         }
     }
     if(exit_) return false;
@@ -119,7 +122,7 @@ bool H_Init(int argc, char* argv[])
     Printf(LOG_Info, "[HC] Red Hat (v1.3) started.\n");
 
     Net_Init();
-    
+
     try {
         Printf(LOG_Info, "[thresholds] Loading thresholds\n");
 #include "thresholds.generated.h"

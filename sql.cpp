@@ -257,6 +257,7 @@ void SQL_CreateTables()
         `discordRole` VARCHAR(1020) DEFAULT NULL, \
         `changes` TINYINT(4) NOT NULL DEFAULT '0', \
         `allow_mage` TINYINT(1) NOT NULL DEFAULT '0', \
+        `allow_female` TINYINT(1) NOT NULL DEFAULT '-1', \
         `alias_nickname` VARCHAR(50) DEFAULT NULL, \
         UNIQUE(`id`))";
 
@@ -388,6 +389,14 @@ void SQL_UpdateVersion1() {
     query = "ALTER TABLE shelf ADD INDEX shelf_id_index (login_id, server_id, cabinet)";
     if (mysql_query(&SQL::Connection, query) != 0) {
         Printf(LOG_Warning, "[DB] Warning: failed to update shelf table to v1: add index: %s\n", SQL_Error().c_str());
+    }
+}
+
+void SQL_UpdateAllowFemale() {
+    std::string query = "ALTER TABLE `logins` ADD COLUMN `allow_female` TINYINT(1) NOT NULL DEFAULT -1;";
+
+    if (SQL_Query(query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to add `allow_female` column: %s\n", SQL_Error().c_str());
     }
 }
 
