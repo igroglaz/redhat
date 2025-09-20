@@ -53,8 +53,12 @@ int32_t MoneyFromSavingsBook(const CCharacter& chr, ServerIDType server_id, std:
     return impl::MoneyFromSavingsBookImpl(chr, server_id, inventory, current_money, amount, impl::LoadShelf, SQLUpsertOneRow);
 }
 
-bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
+bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int64_t money) {
     return impl::StoreOnShelfImpl(chr, server_id, std::move(inventory), money, impl::LoadShelf, SQLUpsertOneRow);
+}
+
+bool PickFromShelf(const CCharacter& chr, int shelf_number, int32_t* mutex, std::string* items_repr, int64_t* money, bool& shelf_exists) {
+    return impl::LoadShelf(chr, shelf_number, impl::Field::BOTH, mutex, items_repr, money, shelf_exists);
 }
 
 namespace impl {
@@ -82,11 +86,8 @@ int FixServerID(ServerIDType server_id) {
     return server_id;
 }
 
-// 0 --- default, 1 --- solo-characters.
+// We can support different cabinets for different character types. Right now we use a single one.
 int Cabinet(const CCharacter& chr) {
-    if (chr.Nick[0] == '@') {
-        return 1;
-    }
     return 0;
 }
 
@@ -390,10 +391,8 @@ int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, 
     return current_money + withdraw;
 }
 
-bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
-    // Legend characters cannot deposit normally, but they can deposit upon rebirth.
-    // We store everything into the regular character cabinet.
-
+bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int64_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query) {
+    // Legend characters cannot deposit anything, we store everything into the regular character cabinet.
     int shelf_number = FixServerID(server_id);
 
     int32_t mutex = 0;

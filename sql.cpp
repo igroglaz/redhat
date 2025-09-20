@@ -1,6 +1,8 @@
 #include "config.hpp"
 #include "sql.hpp"
 #include "utils.hpp"
+#include "shelf.hpp"
+#include "login.hpp"
 
 #include <inttypes.h>
 #include <iostream>
@@ -183,6 +185,37 @@ void SQL_CreateTableCheckpoint() {
     if (mysql_query(&SQL::Connection, create_table_checkpoint.c_str()) != 0) {
         Printf(LOG_Silent, "[DB] Warning: table `checkpoint` not created: %s\n", SQL_Error().c_str());
     }
+}
+
+void SQL_FixShelves() {
+    SimpleSQL cabinet1{"SELECT login_id, server_id FROM shelf WHERE cabinet = 1;"};
+    for (int i = 0; i < SQL_NumRows(cabinet1.result); i++) {
+        MYSQL_ROW row = SQL_FetchRow(cabinet1.result);
+
+        uint32_t login_id = SQL_FetchInt(row, cabinet1.result, "login_id");
+        uint32_t shelf_number = SQL_FetchInt(row, cabinet1.result, "server_id");
+
+        CCharacter chr;
+        chr.Nick = "@nick";
+        chr.LoginID = login_id;
+
+        int32_t mutex = 0;
+        std::string items;
+        int64_t money;
+        bool shelf_exists;
+
+        if (!shelf::PickFromShelf(chr, shelf_number, &mutex, &items, &money, shelf_exists)) {
+            Printf(LOG_Error, "SQL_FixShelves: failed to load shelf for login_id %d and shelf_number %d\n", login_id, shelf_number);
+        } else {
+            chr.Nick = "nick";
+            auto items_list = Login_UnserializeItems(items);
+            if (!shelf::StoreOnShelf(chr, ServerIDType(shelf_number), std::move(items_list.Items), money)) {
+                Printf(LOG_Error, "SQL_FixShelves: failed to save shelf for login_id %d and shelf_number %d\n", login_id, shelf_number);
+            }
+        }
+    }
+    
+    SimpleSQL{"DELETE FROM shelf WHERE cabinet = 1;"};
 }
 
 void SQL_CreateTableTreasure() {

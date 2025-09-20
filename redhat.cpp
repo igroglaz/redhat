@@ -109,6 +109,9 @@ bool H_Init(int argc, char* argv[])
         } else if (arg == "-create-table-checkpoint") {
             SQL_CreateTableCheckpoint();
             exit_ = true;
+        } else if (arg == "-fix-shelves") {
+            SQL_FixShelves();
+            exit_ = true;
         }
     }
     if(exit_) return false;

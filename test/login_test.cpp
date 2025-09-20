@@ -59,9 +59,9 @@ bool store_on_shelf_called;
 int shelf_login_id;
 ServerIDType shelf_server_id;
 std::string shelf_items;
-int32_t shelf_money;
+int64_t shelf_money;
 
-bool FakeStoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money) {
+bool FakeStoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int64_t money) {
     store_on_shelf_called = true;
     shelf_login_id = chr.LoginID;
     shelf_server_id = server_id;

@@ -61,9 +61,11 @@ bool CanDeposit(const CCharacter& chr);
 bool CanWithdraw(const CCharacter& chr);
 
 // Store given items and money on the shelf.
-bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
+bool StoreOnShelf(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int64_t money);
 
-using StoreOnShelfFunction = bool(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money);
+using StoreOnShelfFunction = bool(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int64_t money);
+
+bool PickFromShelf(const CCharacter& chr, int shelf_number, int32_t* mutex, std::string* items_repr, int64_t* money, bool& shelf_exists);
 
 // Implementation details. Aren't expected to be used outside of `shelf.cpp`.
 namespace impl {
@@ -89,6 +91,6 @@ namespace impl {
     int32_t MoneyToSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
     int32_t MoneyFromSavingsBookImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem>& inventory, int32_t current_money, int32_t amount, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
 
-    bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int32_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
+    bool StoreOnShelfImpl(const CCharacter& chr, ServerIDType server_id, std::vector<CItem> inventory, int64_t money, LoadShelfFunction load_shelf, SQLQueryFunction sql_query);
 } // namespace impl
 } // namespace shelf
