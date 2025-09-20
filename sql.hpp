@@ -29,6 +29,7 @@ std::string SQL_Error();
 void SQL_DropTables();
 void SQL_CreateTables();
 void SQL_CreateTableCheckpoint();
+void SQL_FixShelves();
 
 void SQL_UpdateTables();
 
