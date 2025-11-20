@@ -16,7 +16,7 @@ bool HasKillsForReborn(CCharacter& chr, ServerIDType server_id);
 // Reset monster kills for reborn restriction
 void ClearMonsterKills(CCharacter& chr);
 
-void TreasureOnNightmare(CCharacter& chr, bool coinflip);
+uint8_t TreasureOnNightmare(CCharacter& chr, bool coinflip);
 
 // Increase stats from getting a treasure on NIGHTMARE+.
 void DrinkTreasure(CCharacter& chr, ServerIDType server_id, int treasures);

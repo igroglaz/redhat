@@ -960,4 +960,31 @@ TEST(UpdateCharacter_TreasureMoneyOverflow) {
     CHECK_CHARACTER(chr, want);
 }
 
+TEST(UpdateCharacter_Circle_Treasure) {
+    // At circle 5: 1 + 0.3 * 5 = 2.5; 2.5 * 4 = 10. So we should get plus 10 reaction.
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info{.nick="5acharacter"},
+            .stats={.body=50, .reaction=50, .mind=50, .spirit=50},
+            .items={.money=0, .bag="[0,0,0,1];[3667,0,0,4]"},
+        }
+    );
+
+    unsigned int ascended = 0;
+    unsigned int points = 0;
+    UpdateCharacter(chr, QUEST_T3, FakeStoreOnShelf, &ascended, &points);
+
+    CHECK_EQUAL(points, (unsigned int)4);
+
+    CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .info{.nick="5acharacter"},
+            .stats={.body=50, .reaction=60, .mind=50, .spirit=50},
+            .items={.money=9000000, .bag="[0,0,0,0]"},
+        }
+    );
+
+    CHECK_CHARACTER(chr, want);
+}
+
 }
