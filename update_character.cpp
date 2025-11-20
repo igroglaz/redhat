@@ -41,7 +41,7 @@ void ClearMonsterKills(CCharacter& chr) {
     }
 }
 
-void TreasureOnNightmare(CCharacter& chr, bool coinflip) {
+uint8_t TreasureOnNightmare(CCharacter& chr, bool coinflip) {
     uint8_t add_body_min = 0;
     uint8_t add_body_max = 1;
 
@@ -61,47 +61,51 @@ void TreasureOnNightmare(CCharacter& chr, bool coinflip) {
         }
     }
 
-    chr.Body += coinflip ? add_body_min : add_body_max;
+    return coinflip ? add_body_min : add_body_max;
 }
 
 void DrinkTreasure(CCharacter& chr, ServerIDType server_id, int treasures) {
     bool coinflip = std::rand() % 2;
+    double circle_multiplier = circle::TreasureMultiplier(chr);
+    uint8_t add = 0;
+    uint8_t max_body = chr.IsFemale() ? 56 : 55;
 
-    for (int i = 0; i < treasures; ++i) {
-        coinflip = !coinflip; // One treasure is random, two are guaranteed.
+    switch (server_id) {
+    case NIGHTMARE: // 2 treasures per map
+        for (int i = 0; i < treasures; ++i) {
+            coinflip = !coinflip; // One treasure is random, two are guaranteed.
 
-        switch (server_id) {
-        case NIGHTMARE: // 2 treasures per map
-            // treasure at 7 server works in 50% cases
-            update_character::TreasureOnNightmare(chr, coinflip);
-            break;
-        case QUEST_T1: // 1 treasure. 2x-3x more mind
-            if (coinflip) {
-                update_character::IncreaseUpTo(&chr.Mind, 3, 70);
-            } else {
-                update_character::IncreaseUpTo(&chr.Mind, 2, 70);
-            }
-            break;
-        case QUEST_T2: // at 9, 10 - we have 3 treasures per map
-            update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
-            if (i == 0 && treasures == 3) { // A bonus for getting all three treasures.
-                update_character::IncreaseUpTo(&chr.Spirit, 1, 70);
-            }
-            break;
-        case QUEST_T3:
-            update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
-            if (i == 0 && treasures == 3) { // A bonus for getting all three treasures.
-                update_character::IncreaseUpTo(&chr.Reaction, 1, 70);
-            }
-            break;
-        case QUEST_T4: // 1 treasure
-            for (int j = 0; j < 2; ++j) {
-                update_character::IncreaseUpTo(&chr.Mind, 1, 76)
-                    || update_character::IncreaseUpTo(&chr.Spirit, 1, 76) 
-                    || update_character::IncreaseUpTo(&chr.Reaction, 1, 76);
-            }
-            break;
+            add = TreasureOnNightmare(chr, coinflip);
+            update_character::IncreaseUpTo(&chr.Body, static_cast<uint8_t>(add * circle_multiplier), max_body);
         }
+        break;
+    case QUEST_T1: // 1 treasure. 2x-3x more mind
+        for (int i = 0; i < treasures; ++i) {
+            coinflip = !coinflip; // One treasure is random, two are guaranteed. This is used in tests.
+
+            if (coinflip) {
+                update_character::IncreaseUpTo(&chr.Mind, static_cast<uint8_t>(3 * circle_multiplier), 70);
+            } else {
+                update_character::IncreaseUpTo(&chr.Mind, static_cast<uint8_t>(2 * circle_multiplier), 70);
+            }
+        }
+        break;
+    case QUEST_T2: // here we have 3 treasures per map
+        add = treasures + (treasures == 3 ? 1 : 0); // With a bonus for all three treasures.
+        update_character::IncreaseUpTo(&chr.Spirit, static_cast<uint8_t>(add * circle_multiplier), 70);
+        break;
+    case QUEST_T3: // here we have 3 treasures per map
+        add = treasures + (treasures == 3 ? 1 : 0); // With a bonus for all three treasures.
+        update_character::IncreaseUpTo(&chr.Reaction, static_cast<uint8_t>(add * circle_multiplier), 70);
+        break;
+    case QUEST_T4: // 1 treasure
+        add = static_cast<uint8_t>(2 * circle_multiplier);
+        for (int j = 0; j < add; ++j) {
+            update_character::IncreaseUpTo(&chr.Mind, 1, 76)
+                || update_character::IncreaseUpTo(&chr.Spirit, 1, 76)
+                || update_character::IncreaseUpTo(&chr.Reaction, 1, 76);
+        }
+        break;
     }
 }
 

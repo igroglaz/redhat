@@ -224,4 +224,9 @@ void Advance(CCharacter& chr) {
     chr.Nick = Rename(chr.Nick);
 }
 
+double TreasureMultiplier(const CCharacter& chr) {
+    int circle = Circle(chr);
+    return 1.0 + circle * 0.3;
+}
+
 } // namespace circle

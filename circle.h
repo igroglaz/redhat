@@ -19,4 +19,7 @@ CItem Reward(uint8_t sex, int circle);
 // Advance to a new circle: rename character.
 void Advance(CCharacter& chr);
 
+// Multiplier for treasures on circles at NIGHTMARE and above. Returns 1.0 for non-circle characters.
+double TreasureMultiplier(const CCharacter& chr);
+
 } // namespace circle
