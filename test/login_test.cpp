@@ -811,17 +811,30 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
         CharacterOpts{
             .stats={.body=50, .reaction=72, .mind=73, .spirit=74},
             .skills={.astral=1000},
-            .items={.money=2147483647, .bag="[0,0,0,1];[3667,0,0,1]"},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
         }
     );
 
     unsigned int ascended = 0;
     unsigned int points = 0;
 
-    // First, mind is increased.
+    // No treasure --- get nothing.
     UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
 
     CCharacter want = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=50, .reaction=72, .mind=73, .spirit=74},
+            .skills={.astral=1000},
+            .items={.money=2147483647, .bag="[0,0,0,0]"},
+        }
+    );
+    CHECK_CHARACTER(chr, want);
+
+    // First, mind is increased.
+    chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
+    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+
+    want = FakeCharacter(
         CharacterOpts{
             .stats={.body=50, .reaction=72, .mind=75, .spirit=74},
             .skills={.astral=1000},

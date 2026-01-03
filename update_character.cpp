@@ -99,7 +99,7 @@ void DrinkTreasure(CCharacter& chr, ServerIDType server_id, int treasures) {
         update_character::IncreaseUpTo(&chr.Reaction, static_cast<uint8_t>(add * circle_multiplier), 70);
         break;
     case QUEST_T4: // 1 treasure
-        add = static_cast<uint8_t>(2 * circle_multiplier);
+        add = static_cast<uint8_t>(treasures * 2 * circle_multiplier);
         for (int j = 0; j < add; ++j) {
             update_character::IncreaseUpTo(&chr.Mind, 1, 76)
                 || update_character::IncreaseUpTo(&chr.Spirit, 1, 76)
