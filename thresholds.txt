@@ -68,25 +68,25 @@ reborn {
     }
     money {
         female | hell {
-            EASY = 100k
-            KIDS = 1m
-            NIVAL = 5m
-            MEDIUM = 21m
-            HARD = 100m
+            EASY = 105k
+            KIDS = 1030k
+            NIVAL = 5100k
+            MEDIUM = 21500k
+            HARD = 101m
         }
         legend {
-            EASY = 30k
-            KIDS = 300k
+            EASY = 35k
+            KIDS = 330k
             NIVAL = 900k
-            MEDIUM = 7m
-            HARD = 50m
+            MEDIUM = 7500k
+            HARD = 51m
         }
         default {
-            EASY = 30k
-            KIDS = 300k
-            NIVAL = 1500k
-            MEDIUM = 7m
-            HARD = 50m
+            EASY = 35k
+            KIDS = 330k
+            NIVAL = 1600k
+            MEDIUM = 7500k
+            HARD = 51m
         }
     }
     experience_cutoff {

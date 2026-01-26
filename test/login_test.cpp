@@ -297,7 +297,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
     CHECK_EQUAL(42, shelf_login_id);
     CHECK_EQUAL(EASY, shelf_server_id);
     CHECK_EQUAL("[0,0,0,4];[1000,0,0,1];[2000,0,0,2];[1000,0,0,1];[0,0,0,1]", shelf_items);
-    CHECK_EQUAL(10000, shelf_money); // 35000 + 5000 (treasure) - 30000 (reborn price)
+    CHECK_EQUAL(5000, shelf_money); // 35000 + 5000 (treasure) - 35000 (reborn price)
 }
 
 TEST(UpdateCharacter_Reborn45_Success_Warrior) {
@@ -331,7 +331,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
     CHECK_EQUAL(42, shelf_login_id);
     CHECK_EQUAL(NIVAL, shelf_server_id);
     CHECK_EQUAL("[0,0,0,2];[1000,0,0,1];[2000,0,0,2]", shelf_items);
-    CHECK_EQUAL(100003, shelf_money); // +100000 from treasure
+    CHECK_EQUAL(3, shelf_money);
 }
 
 TEST(UpdateCharacter_Reborn67_Success) {

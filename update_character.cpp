@@ -540,7 +540,7 @@ void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfF
 }
 
 void MaybeAllowFemale(const CCharacter& chr, ServerIDType server_id) {
-    if (chr.Deaths == 0 && server_id >= NIGHTMARE) {
+    if (chr.Deaths <= 1 && server_id >= NIGHTMARE) {
         // HC warriors on NIGHTMARE need to max only main and secondary skill
         // to be able to reclass (110+110 is 72m.. which we will make to 77m)
         uint32_t exp_requirement = chr.IsWarrior() ? 77777777 : 177777777;
