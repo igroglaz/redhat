@@ -70,7 +70,10 @@ reborn {
         female | hell {
             EASY = 105k
             KIDS = 1030k
-            NIVAL = 5100k
+            NIVAL {
+                legend = 3600k
+                default = 5100k
+            }
             MEDIUM = 21500k
             HARD = 101m
         }
