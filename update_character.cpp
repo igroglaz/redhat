@@ -558,7 +558,7 @@ void MaybeAllowFemale(const CCharacter& chr, ServerIDType server_id) {
         // to be able to reclass (110+110 is 72m.. which we will make to 77m)
         uint32_t exp_requirement = chr.IsWarrior() ? 77777777 : 177777777;
         if (chr.TotalExperience() >= exp_requirement) {
-            int allowed = chr.Nick[0] == '_' ? 2 : chr.Nick[0] == '@' ? 1 : 0;
+            int allowed = chr.Nick[0] == '_' ? 3 : chr.Nick[0] == '!' ? 2 : chr.Nick[0] == '@' ? 1 : 0;
             SimpleSQL{Format("UPDATE logins SET allow_female = %d WHERE id = %d AND allow_female < %d;", allowed, chr.LoginID, allowed)};
             Printf(LOG_Info, "allow female: allowing player '%s' with login %d to create females of kind %d: %d rows affected\n", chr.GetFullName().c_str(), chr.LoginID, allowed, SQL_AffectedRows());
         }

@@ -1470,8 +1470,9 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         }
 
         // If the player isn't allowed to create a female character, replace with male.
+        // allow_female levels: 0 = not unlocked, 1 = ironman (@), 2 = pure (!), 3 = legend (_)
         if (p_picture & sex::female) {
-            int want = p_nickname[0] == '_' ? 2 : p_nickname[0] == '@' ? 1 : 0;
+            int want = p_nickname[0] == '_' ? 3 : p_nickname[0] == '!' ? 2 : p_nickname[0] == '@' ? 1 : 0;
             int have_access_to = AllowFemale(conn->Login);
 
             if (have_access_to < want) {
@@ -1482,18 +1483,27 @@ bool CL_EnterServer(Client* conn, Packet& pack)
 
         // Check for solo mage for @ (solo) and _ (hc) modes at hero creation 
         // (DB: 'allow_mage' field at table 'logins')
+        // allow_mage levels: 0 = not unlocked, 1 = ironman (@), 2 = pure (!), 3 = legend (_)
         if (p_picture & sex::wizard) { // mage class flag
-            if (p_nickname[0] == '@' || p_nickname[0] == '!')
+            if (p_nickname[0] == '@')
             {
-                if (AllowMage(conn->Login.c_str()) <= 0) // check DB. @ must have 1+
+                if (AllowMage(conn->Login.c_str()) < 1) // check DB. @ must have 1+
                 {
                     Printf(LOG_Info, "[CL] @-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
                     p_picture &= ~sex::wizard; // change hero class to warrior
                 }
             }
+            else if (p_nickname[0] == '!')
+            {
+                if (AllowMage(conn->Login.c_str()) < 2) // check DB. ! must have 2+
+                {
+                    Printf(LOG_Info, "[CL] !-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
+                    p_picture &= ~sex::wizard; // change hero class to warrior
+                }
+            }
             else if (p_nickname[0] == '_')
             {
-                if (AllowMage(conn->Login.c_str()) != 2) // check DB. _ must have 2
+                if (AllowMage(conn->Login.c_str()) < 3) // check DB. _ must have 3
                 {
                     Printf(LOG_Info, "[CL] _-mage creation is not allowed for login %s, converting to warrior\n", conn->Login.c_str());
                     p_picture &= ~sex::wizard; // change hero class to warrior

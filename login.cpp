@@ -1751,13 +1751,14 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     if (reborn) {
         if (srvid == EASY) {
             Printf(LOG_Info, "[update] character '%s' does reborn from EASY, gets new face\n", full_name);
-            // Male characters become zombies on first reborn (except Ironman and Legend)
-            if (!chr.IsFemale() && chr.Nick[0] != '@' && chr.Nick[0] != '_') {
+            // Male characters become zombies on first reborn (except Ironman, Pure and Legend)
+            if (!chr.IsFemale() && chr.Nick[0] != '@' && chr.Nick[0] != '!' && chr.Nick[0] != '_') {
                 chr.Picture = 64;
             }
 
         // allow to create mages only if managed to finish HARD
         // (fill allow_mage DB field on rebirth)
+        // allow_mage levels: 0 = not unlocked, 1 = ironman (@), 2 = pure (!), 3 = legend (_)
         } else if (srvid == HARD) {
             Printf(LOG_Info, "[update] character '%s' does reborn from HARD, unlocks mages\n", full_name);
             if (chr.Nick[0] == '@') { // for @ chars: make it 1 if it's 0
@@ -1769,8 +1770,17 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
                      Printf(LOG_Error, "[DB] Failed to update allow_mage: %s\n", SQL_Error().c_str());
                 }
                 SQL_Unlock();
-            } else if (chr.Nick[0] == '_') { // for _ chars: make it 2
-                std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 2 WHERE `id` = '%u'", chr.LoginID);
+            } else if (chr.Nick[0] == '!') { // for ! chars: set to 2 if less than 2
+                std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 2 WHERE `id` = '%u' AND `allow_mage` < 2", chr.LoginID);
+
+                SQL_Lock();
+                if (SQL_Query(query_update_allow.c_str()) != 0)
+                {
+                     Printf(LOG_Error, "[DB] Failed to update allow_mage: %s\n", SQL_Error().c_str());
+                }
+                SQL_Unlock();
+            } else if (chr.Nick[0] == '_') { // for _ chars: always set to 3
+                std::string query_update_allow = Format("UPDATE `logins` SET `allow_mage` = 3 WHERE `id` = '%u'", chr.LoginID);
 
                 SQL_Lock();
                 if (SQL_Query(query_update_allow.c_str()) != 0)
