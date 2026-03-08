@@ -16,11 +16,11 @@
 namespace shelf {
     
 bool CanDeposit(const CCharacter& chr) {
-    return !chr.Nick.length() || chr.Nick[0] != '_';
+    return !IsLegend(chr) && !IsPure(chr);
 }
 
 bool CanWithdraw(const CCharacter& chr) {
-    return !chr.Nick.length() || chr.Nick[0] != '_';
+    return !IsLegend(chr) && !IsPure(chr);
 }
 
 bool SQLUpsertOneRow(std::string query) {

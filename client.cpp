@@ -1158,7 +1158,8 @@ uint32_t CheckNickname_creation(std::string nickname, int hatId, bool secondary)
             // characters which are allowed in nickname
             bool allowed = (ch >= 'A' && ch <= 'Z') ||
                            (ch >= 'a' && ch <= 'z') ||
-                           (i == 0 && (ch == '@' || ch == '_')); // Only first character can be a `@` or `_`.
+                           (i == 0 && // ...first character can be:
+                           (ch == '@' || ch == '_' || ch == '!'));
 
             if (!allowed) return P_WRONG_NAME;
         }
@@ -1482,7 +1483,7 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         // Check for solo mage for @ (solo) and _ (hc) modes at hero creation 
         // (DB: 'allow_mage' field at table 'logins')
         if (p_picture & sex::wizard) { // mage class flag
-            if (p_nickname[0] == '@')
+            if (p_nickname[0] == '@' || p_nickname[0] == '!')
             {
                 if (AllowMage(conn->Login.c_str()) <= 0) // check DB. @ must have 1+
                 {

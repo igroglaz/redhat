@@ -133,8 +133,12 @@ inline bool IsLegend(const CCharacter& chr) {
     return chr.Nick.length() && chr.Nick[0] == '_';
 }
 
+inline bool IsPure(const CCharacter& chr) {
+    return chr.Nick.length() && chr.Nick[0] == '!';
+}
+
 inline bool IsSolo(const CCharacter& chr) {
-    return IsIronMan(chr) || IsLegend(chr);
+    return IsIronMan(chr) || IsLegend(chr) || IsPure(chr);
 }
 
 

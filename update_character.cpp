@@ -409,6 +409,19 @@ void CutOffExperienceOnReborn(CCharacter& chr, ServerIDType server_id) {
 }
 
 void ExperienceLimit(CCharacter& chr, ServerIDType server_id) {
+    // Pure mode: on servers 1-5 (EASY..HARD), reset all non-main skills on map exit.
+    // On servers 6+ (NIGHTMARE and above), skills behave normally.
+    if (IsPure(chr) && server_id <= HARD) {
+        switch (chr.MainSkill) {
+            case 1: chr.ExpWaterAxe = chr.ExpAirBludgeon = chr.ExpEarthPike = 0; break;
+            case 2: chr.ExpFireBlade = chr.ExpAirBludgeon = chr.ExpEarthPike = 0; break;
+            case 3: chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpEarthPike = 0; break;
+            case 4: chr.ExpFireBlade = chr.ExpWaterAxe = chr.ExpAirBludgeon = 0; break;
+        }
+        // AstralShooting is the secondary skill — keep it.
+        return;
+    }
+
     uint32_t limit_main = thresholds::thresholds.Value("experience_limit.main_skill", chr, server_id);
     if (limit_main == 0) {
         return;
@@ -418,10 +431,10 @@ void ExperienceLimit(CCharacter& chr, ServerIDType server_id) {
         return;
     }
 
-    chr.ExpFireBlade = std::min(chr.ExpFireBlade, chr.MainSkill == 1 ? limit_main : limit_secondary);
-    chr.ExpWaterAxe = std::min(chr.ExpWaterAxe, chr.MainSkill == 2 ? limit_main : limit_secondary);
-    chr.ExpAirBludgeon = std::min(chr.ExpAirBludgeon, chr.MainSkill == 3 ? limit_main : limit_secondary);
-    chr.ExpEarthPike = std::min(chr.ExpEarthPike, chr.MainSkill == 4 ? limit_main : limit_secondary);
+    chr.ExpFireBlade    = std::min(chr.ExpFireBlade,    chr.MainSkill == 1 ? limit_main : limit_secondary);
+    chr.ExpWaterAxe     = std::min(chr.ExpWaterAxe,     chr.MainSkill == 2 ? limit_main : limit_secondary);
+    chr.ExpAirBludgeon  = std::min(chr.ExpAirBludgeon,  chr.MainSkill == 3 ? limit_main : limit_secondary);
+    chr.ExpEarthPike    = std::min(chr.ExpEarthPike,    chr.MainSkill == 4 ? limit_main : limit_secondary);
     chr.ExpAstralShooting = std::min(chr.ExpAstralShooting, limit_main);
 }
 
