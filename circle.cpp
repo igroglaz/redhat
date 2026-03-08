@@ -85,7 +85,7 @@ std::string Rename(const std::string& nick) {
     std::string prefix, suffix;
 
     char maybe_circle = nick[0];
-    if (nick[0] == '_' || nick[0] == '@') {
+    if (nick[0] == '_' || nick[0] == '@' || nick[0] == '!') {
         prefix = nick[0];
         suffix = nick.substr(1);
 
