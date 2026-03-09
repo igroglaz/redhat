@@ -884,6 +884,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpAstralShooting = saved.exp_astral_shooting;
                     chr.Dress = Login_UnserializeItems(saved.dress);
                     chr.Bag.Items.clear();
+                    chr.Money = 0; // <-- reset money! other way it's dupe
                     update_character::ClearMonsterKills(chr); // reset info about killed mobs
 
                     if (chr.IsWizard()) {
