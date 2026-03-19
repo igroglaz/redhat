@@ -44,7 +44,15 @@ bool Login_SetIPF(std::string login, std::string ipf);
 std::string Login_SerializeItems(CItemList& list);
 CItemList Login_UnserializeItems(std::string data);
 bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid);
-void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points);
+
+struct UpdateCharacterResult {
+    bool ascended;
+    bool reclassed;
+    int points;
+};
+
+UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf);
+
 int AllowMage(const char* login);
 int AllowFemale(const std::string& login);
 

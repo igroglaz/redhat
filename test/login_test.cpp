@@ -163,11 +163,9 @@ TEST(UpdateCharacter_NoChanges) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -189,12 +187,10 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
     store_on_shelf_called = false;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -220,11 +216,9 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -248,11 +242,9 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -276,12 +268,10 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
     store_on_shelf_called = false;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -310,12 +300,10 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
     store_on_shelf_called = false;
-    UpdateCharacter(chr, NIVAL, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIVAL, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -344,11 +332,9 @@ TEST(UpdateCharacter_Reborn67_Success) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, HARD, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, HARD, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -371,11 +357,9 @@ TEST(UpdateCharacter_RebornToNightmare_Stats) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, HARD, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, HARD, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -398,11 +382,9 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, KIDS, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, KIDS, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -426,11 +408,9 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -454,9 +434,7 @@ TEST(UpdateCharacter_Reborn45_Failed_Hell_NoExp) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -485,9 +463,7 @@ TEST(UpdateCharacter_Reborn45_Failed_Hell_NoMobs) {
     bool ok = kill_stats.Marshal(chr.Section55555555);
     CHECK_EQUAL(true, ok);
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -511,12 +487,10 @@ TEST(UpdateCharacter_Reborn23_Success_Witch) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)1);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.points, 1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -540,12 +514,10 @@ TEST(UpdateCharacter_Reborn23_Success_Warrior) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)1);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.points, 1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -569,12 +541,10 @@ TEST(UpdateCharacter_Reborn23_Failure_Solo_Treasures) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, EASY, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)1);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.points, 1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -598,14 +568,13 @@ TEST(UpdateCharacter_Reclass_Success) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
     store_on_shelf_called = false;
 
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)1);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.reclassed, true);
+    CHECK_EQUAL(result.points, 1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -634,12 +603,10 @@ TEST(UpdateCharacter_Ascend_Witch_Success) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)1);
-    CHECK_EQUAL(points, (unsigned int)1);
+    CHECK_EQUAL(result.ascended, true);
+    CHECK_EQUAL(result.points, 1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -662,12 +629,10 @@ TEST(UpdateCharacter_Ascend_Amazon_Success) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)1);
-    CHECK_EQUAL(points, (unsigned int)1);
+    CHECK_EQUAL(result.ascended, true);
+    CHECK_EQUAL(result.points, 1);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -690,12 +655,10 @@ TEST(UpdateCharacter_NoChanges_Nightmare) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.points, 0);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -717,12 +680,10 @@ TEST(UpdateCharacter_TreasureOnNightmare) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
-    CHECK_EQUAL(points, (unsigned int)2);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    CHECK_EQUAL(result.points, 2);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -743,12 +704,10 @@ TEST(UpdateCharacter_TreasureOnQuestT1) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)2);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.points, 2);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -769,9 +728,7 @@ TEST(UpdateCharacter_TreasureLimitOnQuestT1) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -792,9 +749,7 @@ TEST(UpdateCharacter_TreasureBonusOnQuestT2) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, QUEST_T2, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, QUEST_T2, FakeStoreOnShelf);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -815,11 +770,9 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
 
     // No treasure --- get nothing.
-    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -832,7 +785,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // First, mind is increased.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -845,7 +798,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // Mind is increased by 1 to the limit of 76, one point goes to spirit.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -858,7 +811,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // Spirit is increased by 1 to the limit of 76, one point goes to reaction.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -871,7 +824,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // Two points to reaction.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, &ascended, &points);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -893,11 +846,9 @@ TEST(UpdateCharacter_Circle) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -931,11 +882,9 @@ TEST(UpdateCharacter_Circle_Fail_NoMobs) {
     bool ok = kill_stats.Marshal(chr.Section55555555);
     CHECK_EQUAL(true, ok);
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
+    CHECK_EQUAL(result.ascended, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -957,12 +906,10 @@ TEST(UpdateCharacter_TreasureMoneyOverflow) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
 
-    CHECK_EQUAL(ascended, (unsigned int)0);
-    CHECK_EQUAL(points, (unsigned int)2);
+    CHECK_EQUAL(result.ascended, false);
+    CHECK_EQUAL(result.points, 2);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -983,11 +930,9 @@ TEST(UpdateCharacter_Circle_Treasure) {
         }
     );
 
-    unsigned int ascended = 0;
-    unsigned int points = 0;
-    UpdateCharacter(chr, QUEST_T3, FakeStoreOnShelf, &ascended, &points);
+    auto result = UpdateCharacter(chr, QUEST_T3, FakeStoreOnShelf);
 
-    CHECK_EQUAL(points, (unsigned int)4);
+    CHECK_EQUAL(result.points, 4);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{

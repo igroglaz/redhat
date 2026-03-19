@@ -400,6 +400,14 @@ void SQL_UpdateAllowFemale() {
     }
 }
 
+void SQL_UpdateReclassed() {
+    std::string query = "ALTER TABLE `characters` ADD COLUMN `reclassed` TINYINT(1) NOT NULL DEFAULT 0;";
+
+    if (SQL_Query(query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to add `reclassed` column: %s\n", SQL_Error().c_str());
+    }
+}
+
 #include "CCharacter.hpp"
 #include "login.hpp"
 

@@ -169,6 +169,9 @@ bool H_Init(int argc, char* argv[])
         } else if (arg == "-update-allow-female") {
             SQL_UpdateAllowFemale();
             exit_ = true;
+        } else if (arg == "-update-reclassed") {
+            SQL_UpdateReclassed();
+            exit_ = true;
         }
     }
     if(exit_) return false;

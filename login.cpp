@@ -908,8 +908,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             if(create)
             {
                 // Query to insert character with all attributes
-                // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
-                // when we receive character from the server (down below))). There we just init it as 0)
+                // (((NOTE: `ascended`/`reclassed` fields are not at the server. It's DB-only field so we can update it only
+                // when we receive character from the server (down below))). Here we just init it as 0.
                 chr_query_update = Format("INSERT INTO `characters` ( \
                                                 `login_id`, `id1`, `id2`, `hat_id`, \
                                                 `unknown_value_1`, `unknown_value_2`, `unknown_value_3`, \
@@ -922,7 +922,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_air_bludgeon`, `exp_earth_pike`, \
                                                 `exp_astral_shooting`, `bag`, `dress`, `clantag`, \
                                                 `sec_55555555`, `sec_40A40A40`, `retarded`, `deleted`, \
-                                                `ascended`, \
+                                                `ascended`, `reclassed`,\
                                                 `points`) VALUES ( \
                                                     '%u', '%u', '%u', '%u', \
                                                     '%u', '%u', '%u', \
@@ -965,15 +965,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr_query_update += ch;
                 }
 
-                chr_query_update += "', '0', '0')";
+                chr_query_update += "', '0', '0', '0')";
             }
             // create FLAG is false - update an existing character
             else
             {
-                unsigned int ascended = 0; // DB-only flag to ladder score
-                unsigned int points = 0;   // DB-only flag to ladder score
-                UpdateCharacter(chr, srvid, shelf::StoreOnShelf, &ascended, &points); // pass pointers
-                update_character::SaveTreasurePoints(chr.ID, srvid, points);
+                auto update_result = UpdateCharacter(chr, srvid, shelf::StoreOnShelf);
+                update_character::SaveTreasurePoints(chr.ID, srvid, update_result.points);
 
                 // Query to update character with new attributes
                 // (((NOTE: ascended field is not at the server. It's DB-only field so we can update it only
@@ -989,7 +987,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                 `exp_fire_blade`='%u', `exp_water_axe`='%u', \
                                                 `exp_air_bludgeon`='%u', `exp_earth_pike`='%u', \
                                                 `exp_astral_shooting`='%u', `bag`='%s', `dress`='%s', `deleted`='0', \
-                                                `ascended` = `ascended` + %u",
+                                                `ascended` = `ascended` + %u, `reclassed` = `reclassed` + %u",
                                                     chr.Id1, chr.Id2, chr.HatId,
                                                     chr.UnknownValue1, chr.UnknownValue2, chr.UnknownValue3,
                                                     SQL_Escape(chr.Nick).c_str(), SQL_Escape(chr.Clan).c_str(),
@@ -1002,7 +1000,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                                                     chr.ExpAstralShooting,
                                                     Login_SerializeItems(chr.Bag).c_str(),
                                                     Login_SerializeItems(chr.Dress).c_str(),
-                                                    ascended);
+                                                    update_result.ascended ? 1 : 0,
+                                                    update_result.reclassed ? 1 : 0);
 
                 chr_query_update += ", `sec_55555555`='"; // Append section data
                 for(size_t i = 0; i < data_55555555.size(); i++)
@@ -1718,11 +1717,11 @@ bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid
  *
  *  Parameters:
  *      chr: the character. Will be updated inplace.
- *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, mind <= 15).
- *      ascended: output parameter: has the character ascended?
- *      points: output parameter: points for finding the treasure
+ *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, 15 <= reaction <= 20).
  */
-void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, unsigned int* ascended, unsigned int* points) {
+UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf) {
+    UpdateCharacterResult result{.ascended = false, .reclassed = false, .points = 0};
+
     const std::string chr_full_name = chr.GetFullName();
     const char* full_name = chr_full_name.c_str();
     Printf(LOG_Info, "[update] character '%s' on s%d\n", full_name, srvid);
@@ -1730,7 +1729,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     MergeItems(chr.Bag, srvid);
 
     int haveTreasures = update_character::ConsumeTreasures(chr, srvid);
-    *points = haveTreasures;
+    result.points = haveTreasures;
 
     Printf(LOG_Info, "[update] character '%s' has %d treasures\n", full_name, haveTreasures);
 
@@ -1815,6 +1814,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
     if (update_character::ShouldReclass(chr, srvid)) {
         Printf(LOG_Info, "[update] character '%s' performs reclass\n", full_name);
         update_character::PerformReclass(chr, srvid, store_on_shelf);
+        result.reclassed = true;
 
         // Create a checkpoint for giga-characters on reclass.
         if (chr.Nick[0] == '_') {
@@ -1826,8 +1826,8 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
         Printf(LOG_Info, "[update] character '%s' performs ascend\n", full_name);
         update_character::PerformAscend(chr, srvid, store_on_shelf);
 
-        // increment ascended DB-only field to mark that character was ascended (for ladder score)
-        *ascended = 1; // We use it as a flag. DB increments if it's 1.
+        // increment `ascended` DB-only field to mark that character was ascended (for ladder score)
+        result.ascended = true; // We use it as a flag. DB increments if it's 1.
 
         // Create a checkpoint for giga-characters on ascend.
         if (chr.Nick[0] == '_') {
@@ -1869,7 +1869,7 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
             Printf(LOG_Info, "[checkpoint] saving %d on circle\n", chr.ID);
             checkpoint::Checkpoint(chr, false).SaveToDB(chr.ID);
         }
-    } else {
+    } else if (haveTreasures > 0) {
         Printf(LOG_Info, "[update] character '%s' eats the treasure\n", full_name);
 
         uint8_t stats_before[4] = {chr.Body, chr.Reaction, chr.Mind, chr.Spirit};
@@ -1888,5 +1888,6 @@ void UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFun
 
     update_character::ExperienceLimit(chr, srvid);
 
-    Printf(LOG_Info, "[update] character '%s' updated successfully\n", full_name);
+    Printf(LOG_Info, "[update] character '%s' updated successfully: {ascended=%d, reclassed=%d, points=%d}\n", full_name, result.ascended, result.reclassed, result.points);
+    return result;
 }
