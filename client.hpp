@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "CCharacter.hpp"
 #include "socket.hpp"
 #include "server.hpp"
 
@@ -102,6 +103,8 @@ void CL_Disconnect(Client* conn);
 std::string TrimNickname(std::string nickname);
 uint32_t CheckNickname_creation(std::string nickname, int hatId, bool secondary = false);
 uint32_t CheckNickname(std::string nickname, int hatId, bool secondary = false);
+
+bool IsCharacterAllowed(const CCharacter& chr, ServerIDType srvid);
 
 bool CL_Login(Client* conn, Packet& pack);
 bool CL_Authorize(Client* conn, Packet& pack);

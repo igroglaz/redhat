@@ -970,7 +970,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             // create FLAG is false - update an existing character
             else
             {
-                auto update_result = UpdateCharacter(chr, srvid, shelf::StoreOnShelf);
+                auto update_result = UpdateCharacter(chr, srvid, shelf::StoreOnShelf, true);
                 update_character::SaveTreasurePoints(chr.ID, srvid, update_result.points);
 
                 // Query to update character with new attributes
@@ -1719,7 +1719,7 @@ bool Login_LogAuthentication(std::string login, std::string ip, std::string uuid
  *      chr: the character. Will be updated inplace.
  *      srvid: the ID of a server the character was on. For example: 2 means the character was at #2 (so, 15 <= reaction <= 20).
  */
-UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf) {
+UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, bool emboss_relics) {
     UpdateCharacterResult result{.ascended = false, .reclassed = false, .points = 0};
 
     const std::string chr_full_name = chr.GetFullName();
@@ -1792,7 +1792,7 @@ UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf
         }
 
         Printf(LOG_Info, "[update] character '%s' performs reborn\n", full_name);
-        update_character::PerformReborn(chr, srvid, store_on_shelf);
+        update_character::PerformReborn(chr, srvid, store_on_shelf, emboss_relics);
 
         // Create a checkpoint for giga-characters on reborn.
         if (chr.Nick[0] == '_') {
@@ -1824,7 +1824,7 @@ UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf
     // ASCEND: ama/witch become again war/mage and receive crown
     } else if (update_character::ShouldAscend(chr, srvid)) {
         Printf(LOG_Info, "[update] character '%s' performs ascend\n", full_name);
-        update_character::PerformAscend(chr, srvid, store_on_shelf);
+        update_character::PerformAscend(chr, srvid, store_on_shelf, emboss_relics);
 
         // increment `ascended` DB-only field to mark that character was ascended (for ladder score)
         result.ascended = true; // We use it as a flag. DB increments if it's 1.

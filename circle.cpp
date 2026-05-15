@@ -220,6 +220,10 @@ CItem Reward(uint8_t sex, int circle) {
     return CItem{};
 }
 
+const std::unordered_map<int, std::vector<CItem>>& AllAwards() {
+    return awards;
+}
+
 void Advance(CCharacter& chr) {
     chr.Nick = Rename(chr.Nick);
 }

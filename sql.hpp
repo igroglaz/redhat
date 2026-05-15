@@ -36,6 +36,7 @@ void SQL_UpdateTables();
 void SQL_UpdateVersion1();
 void SQL_UpdateAllowFemale();
 void SQL_UpdateReclassed();
+void SQL_UpdateSigil();
 
 int SQL_Query(std::string query);
 int SQL_NumRows(MYSQL_RES* result);

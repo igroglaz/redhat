@@ -9,6 +9,7 @@
 #include "login.hpp"
 #include "circle.h"
 #include "thresholds.h"
+#include "relic.h"
 
 void H_Quit()
 {
@@ -74,7 +75,7 @@ void GiveCircleReward(std::string value) {
     std::string reward_str = value.substr(colon_pos + 1);
     int reward_index = std::stoi(reward_str);
     
-    SimpleSQL query{Format("SELECT class, bag FROM characters WHERE nick = '%s' AND deleted = 0;", SQL_Escape(nickname).c_str())};
+    SimpleSQL query{Format("SELECT id, class, bag FROM characters WHERE nick = '%s' AND deleted = 0;", SQL_Escape(nickname).c_str())};
     if (!query) {
         Printf(LOG_Error, "Failed to query character with nick %s\n", nickname.c_str());
         return;
@@ -86,12 +87,22 @@ void GiveCircleReward(std::string value) {
     }
 
     auto row = SQL_FetchRow(query.result);
+    auto chr_id = SQL_FetchInt(row, query.result, "id");
     auto sex = static_cast<uint8_t>(SQL_FetchInt(row, query.result, "class"));
     auto bag = SQL_FetchString(row, query.result, "bag");
 
     auto item_list = Login_UnserializeItems(bag);
 
-    auto item = circle::Reward(sex, reward_index);
+    CItem item;
+    if (reward_index == 0) {
+        if (sex & sex::wizard) {
+            item = ascension_staff;
+        } else {
+            item = ascension_crown;
+        }
+    } else {
+        item = circle::Reward(sex, reward_index);
+    }
     Printf(LOG_Info, "Giving reward id=%d to character '%s'\n", item.Id, nickname.c_str());
 
     if (!item.Id) {
@@ -99,11 +110,20 @@ void GiveCircleReward(std::string value) {
         return;
     }
 
+    CCharacter chr;
+    chr.ID = chr_id;
+    auto sigil = BestowSigil(chr);
+    if (!sigil) {
+        Printf(LOG_Error, "Failed to bestow a sigil upon character %d\n", chr_id);
+        return;
+    }
+    EmbossSigil(item, sigil);
+
     item_list.Items.push_back(std::move(item));
     std::string new_bag = Login_SerializeItems(item_list);
 
     SimpleSQL insert{Format("UPDATE characters SET bag = '%s' WHERE nick = '%s' AND deleted = 0;", SQL_Escape(new_bag).c_str(), SQL_Escape(nickname).c_str())};
-    if (!query) {
+    if (!insert) {
         Printf(LOG_Error, "Failed to update\n");
         return;
     }
@@ -171,6 +191,21 @@ bool H_Init(int argc, char* argv[])
             exit_ = true;
         } else if (arg == "-update-reclassed") {
             SQL_UpdateReclassed();
+            exit_ = true;
+        } else if (arg == "-update-sigil") {
+            SQL_UpdateSigil();
+            exit_ = true;
+        } else if (arg == "-migrate-relics-dry-run") {
+            MigrateRelics(true);
+            exit_ = true;
+        } else if (arg == "-migrate-relics-for-real") {
+            MigrateRelics(false);
+            exit_ = true;
+        } else if (arg == "-restore-relics-dry-run") {
+            RestoreRelics(true);
+            exit_ = true;
+        } else if (arg == "-restore-relics-for-real") {
+            RestoreRelics(false);
             exit_ = true;
         }
     }

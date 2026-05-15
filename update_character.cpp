@@ -3,6 +3,7 @@
 #include "circle.h"
 #include "constants.h"
 #include "kill_stats.h"
+#include "relic.h"
 #include "shelf.hpp"
 #include "sql.hpp"
 #include "thresholds.h"
@@ -309,7 +310,7 @@ int ConsumeTreasures(CCharacter& chr, ServerIDType server_id) {
     return treasures;
 }
 
-void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf) {
+void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf, bool emboss_relics) {
     // Save to shelf upon reborn. Note that this function empties the bag and money (and dress for mage/witch).
     chr.Money -= RebornPrice(chr, server_id);
     StoreOnShelf(server_id, chr, chr.IsWizard(), store_on_shelf);
@@ -379,7 +380,14 @@ void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfF
                     auto item = circle::Reward(chr.Sex, i);
                     Printf(LOG_Info, "[circle] Giving reward id=%d to legend character '%s'\n", item.Id, chr.GetFullName().c_str());
                     if (item.Id) {
-                        chr.Bag.Items.push_back(std::move(item));
+                        if (emboss_relics) {
+                            auto sigil = BestowSigil(chr);
+                            if (sigil && EmbossSigil(item, sigil)) {
+                                chr.Bag.Items.insert(chr.Bag.Items.begin(), item);
+                            }
+                        } else {
+                            chr.Bag.Items.insert(chr.Bag.Items.begin(), item);
+                        }
                     }
                 }
 
@@ -388,7 +396,14 @@ void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfF
                 auto item = circle::Reward(chr.Sex, circle_number);
                 Printf(LOG_Info, "[circle] Giving reward id=%d to character '%s'\n", item.Id, chr.GetFullName().c_str());
                 if (item.Id) {
-                    chr.Bag.Items.push_back(std::move(item));
+                    if (emboss_relics) {
+                        auto sigil = BestowSigil(chr);
+                        if (sigil && EmbossSigil(item, sigil)) {
+                            chr.Bag.Items.insert(chr.Bag.Items.begin(), item);
+                        }
+                    } else {
+                        chr.Bag.Items.insert(chr.Bag.Items.begin(), item);
+                    }
                 }
             }
         }
@@ -516,7 +531,7 @@ bool ShouldAscend(const CCharacter& chr, ServerIDType server_id) {
     return true;
 }
 
-void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf) {
+void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf, bool emboss_relics) {
     chr.Money -= thresholds::thresholds.Value("ascend.money", chr, server_id);
 
     // Loose some stats as price for ascend,
@@ -533,22 +548,30 @@ void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfF
 
     // We do not wipe inventory for ascension.
     // The prize item is inserted into the beginning of the inventory.
-    if (chr.IsAmazon()) { // amazon becomes warrior and gets CROWN (Good Gold Helm) +3 body +2 scanRange +250 attack
+    if (chr.IsAmazon()) { // amazon becomes warrior and gets ascension crown
         chr.Sex = sex::warrior;
         chr.Picture = 32;
 
-        CItem crown{.Id=18118, .IsMagic=1, .Price=2, .Count=1, .Effects={
-            {stats::body, 3},
-            {stats::scan_range, 2},
-            {stats::attack, 250},
-        }};
-        chr.Bag.Items.insert(chr.Bag.Items.begin(), crown);
+        CItem reward = ascension_crown;
+        if (emboss_relics) {
+            auto sigil = BestowSigil(chr);
+            if (!sigil || !EmbossSigil(reward, sigil)) {
+                return;
+            }
+        }
+        chr.Bag.Items.insert(chr.Bag.Items.begin(), reward);
     } else if (chr.IsWitch()) { // witch becomes mage and gets physical damage staff
         chr.Sex = sex::mage;
         chr.Picture = 15;
 
-        CItem staff{.Id=53709, .IsMagic=0, .Price=2, .Count=1};
-        chr.Bag.Items.insert(chr.Bag.Items.begin(), staff);
+        CItem reward = ascension_staff;
+        if (emboss_relics) {
+            auto sigil = BestowSigil(chr);
+            if (!sigil || !EmbossSigil(reward, sigil)) {
+                return;
+            }
+        }
+        chr.Bag.Items.insert(chr.Bag.Items.begin(), reward);
     }
 }
 

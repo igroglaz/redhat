@@ -1340,7 +1340,6 @@ float CL_NeedPointsFrom(uint8_t what)
 }
 
 bool IsCharacterAllowed(const CCharacter& chr, ServerIDType srvid) {
-    // newborn chars must enter "town" server 1st (#1)
     switch (srvid) {
         case EASY:
             return chr.Mind < 15;

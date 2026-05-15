@@ -40,7 +40,7 @@ bool IsAttemptingReborn(const CCharacter& chr, ServerIDType server_id);
 bool MeetsRebornCriteria(CCharacter& chr, ServerIDType server_id, int have_treasures);
 void FailReborn(CCharacter& chr, ServerIDType server_id);
 uint32_t RebornPrice(const CCharacter& chr, ServerIDType server_id);
-void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
+void PerformReborn(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf, bool emboss_relics = true);
 
 int ConsumeTreasures(CCharacter& chr, ServerIDType server_id);
 void CutOffExperienceOnReborn(CCharacter& chr, ServerIDType server_id);
@@ -50,7 +50,7 @@ bool ShouldReclass(const CCharacter& chr, ServerIDType server_id);
 void PerformReclass(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
 
 bool ShouldAscend(const CCharacter& chr, ServerIDType server_id);
-void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf);
+void PerformAscend(CCharacter& chr, ServerIDType server_id, shelf::StoreOnShelfFunction store_on_shelf, bool emboss_relics = true);
 
 // Allows creating female characters for players who reached NIGHTMARE with 0 deaths and
 // 77777777 experience (warriors) and 177777777 (for mages)

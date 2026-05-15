@@ -52,6 +52,7 @@ add_library(redhat-lib
     update_character.cpp
     utils.cpp
     version.cpp
+    relic.cpp
 )
 
 add_dependencies(redhat-lib generate_threshold_header)
@@ -127,6 +128,7 @@ add_executable(redhat-test
     test/UnitTest++/Win32/TimeHelpers.h
     test/UnitTest++/XmlTestReporter.cpp
     test/UnitTest++/XmlTestReporter.h
+    test/relic_test.cpp
 )
 target_link_libraries(redhat-test redhat-lib)
 

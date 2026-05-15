@@ -51,7 +51,7 @@ struct UpdateCharacterResult {
     int points;
 };
 
-UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf);
+UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf::StoreOnShelfFunction store_on_shelf, bool emboss_relics = true);
 
 int AllowMage(const char* login);
 int AllowFemale(const std::string& login);

@@ -408,6 +408,21 @@ void SQL_UpdateReclassed() {
     }
 }
 
+void SQL_UpdateSigil() {
+    const char* sql = R"(
+        CREATE TABLE IF NOT EXISTS sigil (
+            sigil_id INT NOT NULL AUTO_INCREMENT,
+            character_id BIGINT NOT NULL,
+            PRIMARY KEY (sigil_id),
+            INDEX character_index (character_id)
+        );
+    )";
+
+    if (SQL_Query(sql) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to create `sigil` table: %s\n", SQL_Error().c_str());
+    }
+}
+
 #include "CCharacter.hpp"
 #include "login.hpp"
 

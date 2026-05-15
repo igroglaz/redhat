@@ -163,7 +163,7 @@ TEST(UpdateCharacter_NoChanges) {
         }
     );
 
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -188,7 +188,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoMoney) {
     );
 
     store_on_shelf_called = false;
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -216,7 +216,7 @@ TEST(UpdateCharacter_Reborn23_Failed_NoTreasure) {
         }
     );
 
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -242,7 +242,7 @@ TEST(UpdateCharacter_Reborn23_Failed_HardCoreNoExp) {
         }
     );
 
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -269,7 +269,7 @@ TEST(UpdateCharacter_Reborn23_Success_Mage) {
     );
 
     store_on_shelf_called = false;
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -301,7 +301,7 @@ TEST(UpdateCharacter_Reborn45_Success_Warrior) {
     );
 
     store_on_shelf_called = false;
-    auto result = UpdateCharacter(chr, NIVAL, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIVAL, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -332,7 +332,7 @@ TEST(UpdateCharacter_Reborn67_Success) {
         }
     );
 
-    auto result = UpdateCharacter(chr, HARD, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, HARD, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -357,7 +357,7 @@ TEST(UpdateCharacter_RebornToNightmare_Stats) {
         }
     );
 
-    auto result = UpdateCharacter(chr, HARD, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, HARD, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -382,7 +382,7 @@ TEST(UpdateCharacter_Reborn3_Failed_Amazon_NoExp) {
         }
     );
 
-    auto result = UpdateCharacter(chr, KIDS, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, KIDS, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -408,7 +408,7 @@ TEST(UpdateCharacter_Reborn5_Failed_Witch_NoGold) {
         }
     );
 
-    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -434,7 +434,7 @@ TEST(UpdateCharacter_Reborn45_Failed_Hell_NoExp) {
         }
     );
 
-    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -463,7 +463,7 @@ TEST(UpdateCharacter_Reborn45_Failed_Hell_NoMobs) {
     bool ok = kill_stats.Marshal(chr.Section55555555);
     CHECK_EQUAL(true, ok);
 
-    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, MEDIUM, FakeStoreOnShelf, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -487,7 +487,7 @@ TEST(UpdateCharacter_Reborn23_Success_Witch) {
         }
     );
 
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.points, 1);
@@ -514,7 +514,7 @@ TEST(UpdateCharacter_Reborn23_Success_Warrior) {
         }
     );
 
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.points, 1);
@@ -541,7 +541,7 @@ TEST(UpdateCharacter_Reborn23_Failure_Solo_Treasures) {
         }
     );
 
-    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, EASY, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.points, 1);
@@ -570,7 +570,7 @@ TEST(UpdateCharacter_Reclass_Success) {
 
     store_on_shelf_called = false;
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.reclassed, true);
@@ -603,7 +603,7 @@ TEST(UpdateCharacter_Ascend_Witch_Success) {
         }
     );
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, true);
     CHECK_EQUAL(result.points, 1);
@@ -629,7 +629,7 @@ TEST(UpdateCharacter_Ascend_Amazon_Success) {
         }
     );
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, true);
     CHECK_EQUAL(result.points, 1);
@@ -655,7 +655,7 @@ TEST(UpdateCharacter_NoChanges_Nightmare) {
         }
     );
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.points, 0);
@@ -680,7 +680,7 @@ TEST(UpdateCharacter_TreasureOnNightmare) {
         }
     );
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
     CHECK_EQUAL(result.points, 2);
 
     CHECK_EQUAL(result.ascended, false);
@@ -704,7 +704,7 @@ TEST(UpdateCharacter_TreasureOnQuestT1) {
         }
     );
 
-    auto result = UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.points, 2);
@@ -728,7 +728,7 @@ TEST(UpdateCharacter_TreasureLimitOnQuestT1) {
         }
     );
 
-    auto result = UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, QUEST_T1, FakeStoreOnShelf, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -749,7 +749,7 @@ TEST(UpdateCharacter_TreasureBonusOnQuestT2) {
         }
     );
 
-    auto result = UpdateCharacter(chr, QUEST_T2, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, QUEST_T2, FakeStoreOnShelf, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -772,7 +772,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
 
     // No treasure --- get nothing.
-    auto result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, false);
 
     CCharacter want = FakeCharacter(
         CharacterOpts{
@@ -785,7 +785,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // First, mind is increased.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, false);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -798,7 +798,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // Mind is increased by 1 to the limit of 76, one point goes to spirit.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, false);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -811,7 +811,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // Spirit is increased by 1 to the limit of 76, one point goes to reaction.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, false);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -824,7 +824,7 @@ TEST(UpdateCharacter_TreasureOnQuestT4) {
 
     // Two points to reaction.
     chr.Bag.Items.push_back(CItem{.Id=3667, .Count=1});
-    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf);
+    result = UpdateCharacter(chr, QUEST_T4, FakeStoreOnShelf, false);
 
     want = FakeCharacter(
         CharacterOpts{
@@ -846,7 +846,7 @@ TEST(UpdateCharacter_Circle) {
         }
     );
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -882,7 +882,7 @@ TEST(UpdateCharacter_Circle_Fail_NoMobs) {
     bool ok = kill_stats.Marshal(chr.Section55555555);
     CHECK_EQUAL(true, ok);
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
 
@@ -906,7 +906,7 @@ TEST(UpdateCharacter_TreasureMoneyOverflow) {
         }
     );
 
-    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, NIGHTMARE, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.ascended, false);
     CHECK_EQUAL(result.points, 2);
@@ -930,7 +930,7 @@ TEST(UpdateCharacter_Circle_Treasure) {
         }
     );
 
-    auto result = UpdateCharacter(chr, QUEST_T3, FakeStoreOnShelf);
+    auto result = UpdateCharacter(chr, QUEST_T3, FakeStoreOnShelf, false);
 
     CHECK_EQUAL(result.points, 4);
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "CCharacter.hpp"
 
 namespace circle {
@@ -15,6 +17,8 @@ bool Allowed(CCharacter& chr);
 
 // Return the reward item for the given circle.
 CItem Reward(uint8_t sex, int circle);
+
+const std::unordered_map<int, std::vector<CItem>>& AllAwards();
 
 // Advance to a new circle: rename character.
 void Advance(CCharacter& chr);
