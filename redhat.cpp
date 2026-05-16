@@ -195,12 +195,6 @@ bool H_Init(int argc, char* argv[])
         } else if (arg == "-update-sigil") {
             SQL_UpdateSigil();
             exit_ = true;
-        } else if (arg == "-migrate-relics-dry-run") {
-            MigrateRelics(true);
-            exit_ = true;
-        } else if (arg == "-migrate-relics-for-real") {
-            MigrateRelics(false);
-            exit_ = true;
         } else if (arg == "-restore-relics-dry-run") {
             RestoreRelics(true);
             exit_ = true;
@@ -232,6 +226,11 @@ bool H_Init(int argc, char* argv[])
     } catch(const thresholds::ParseException& e) {
         Printf(LOG_Error, "Thresholds: %s\n", e.what());
         return false;
+    }
+
+    if (Config::RestoreRelicsOnStartup) {
+        Printf(LOG_Info, "[relic] Restoring relics on startup\n");
+        RestoreRelics(false);
     }
 
     return true;

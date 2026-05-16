@@ -52,6 +52,7 @@ namespace Config
     //extern std::vector<uint32_t> GraphicsCRC;
 
     extern bool ReportDatabaseErrors;
+    extern bool RestoreRelicsOnStartup;
 
     extern std::string OnlineLog;
 }

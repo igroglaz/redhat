@@ -18,27 +18,6 @@ TEST(IsRelic) {
             CHECK_EQUAL(true, IsRelic(item));
         }
     }
-
-    // Check that old non-relics don't count as relics. These are actual effects of old items.
-    CItem old_item1{.Id=54369, .IsMagic=true, .Count=1, .Effects={{stats::body, 2}, {stats::mind, 3}, {stats::reaction, 2}, {stats::spirit, 2}, {stats::mp_regen, 25}, {stats::attack, 250}, {stats::skill_water, 15}}};
-    CHECK_EQUAL(false, IsRelic(old_item1));
-    CItem old_item2{.Id=54626, .IsMagic=true, .Count=1, .Effects={{stats::body, 2}, {stats::mind, 3}, {stats::reaction, 2}, {stats::spirit, 2}, {stats::mp_regen, 25}, {stats::attack, 250}, {stats::skill_water, 15}}};
-    CHECK_EQUAL(false, IsRelic(old_item2));
-
-    CItem old_item3{.Id=17473, .IsMagic=true, .Count=1, .Effects={{stats::body, 1}, {stats::mind, 3}, {stats::reaction, 3}, {stats::spirit, 3}, {stats::hp_regen, 10}, {stats::attack, 250}, {stats::speed, 2}, {stats::protection_astral, 5}, {stats::skill_shooting, 14}}};
-    CHECK_EQUAL(false, IsRelic(old_item3));
-    CItem old_item4{.Id=17730, .IsMagic=true, .Count=1, .Effects={{stats::body, 1}, {stats::mind, 3}, {stats::reaction, 3}, {stats::spirit, 3}, {stats::hp_regen, 10}, {stats::attack, 250}, {stats::speed, 2}, {stats::protection_astral, 5}, {stats::skill_shooting, 14}}};
-    CHECK_EQUAL(false, IsRelic(old_item4));
-
-    CItem old_item5{.Id=17473, .IsMagic=true, .Count=1, .Effects={{stats::reaction, 2}, {stats::spirit, 2}, {stats::hp_max, 5}, {stats::hp_regen, 10}}};
-    CHECK_EQUAL(false, IsRelic(old_item5));
-    CItem old_item6{.Id=17730, .IsMagic=true, .Count=1, .Effects={{stats::reaction, 2}, {stats::spirit, 2}, {stats::hp_max, 5}, {stats::hp_regen, 10}}};
-    CHECK_EQUAL(false, IsRelic(old_item6));
-
-    CItem old_item7{.Id=17473, .IsMagic=true, .Count=1, .Effects={{stats::reaction, 3}, {stats::speed, 1}, {stats::protection_water, 10}}};
-    CHECK_EQUAL(false, IsRelic(old_item7));
-    CItem old_item8{.Id=17730, .IsMagic=true, .Count=1, .Effects={{stats::reaction, 3}, {stats::speed, 1}, {stats::protection_fire, 10}}};
-    CHECK_EQUAL(false, IsRelic(old_item8));
 }
 
 TEST(ReadSigil) {

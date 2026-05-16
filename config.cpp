@@ -54,6 +54,7 @@ namespace Config
     std::string OnlineLog = "redhat.ohd";
 
     bool ReportDatabaseErrors = false;
+    bool RestoreRelicsOnStartup = false;
 }
 
 bool ReadConfig(std::string filename)
@@ -386,6 +387,14 @@ bool ReadConfig(std::string filename)
                         Config::GraphicsCRC.push_back(HexToInt(st));
                     }
                 }*/
+            }
+            else if (section == "settings.special")
+            {
+                if (parameter == "restorerelicsonstartup") {
+                    if (CheckBool(value)) {
+                        Config::RestoreRelicsOnStartup = StrToBool(value);
+                    }
+                }
             }
             else if(section == "server")
             {
