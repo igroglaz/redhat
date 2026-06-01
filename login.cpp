@@ -907,6 +907,13 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             // if create FLAG is true - create a new character
             if(create)
             {
+                // Regular heroes got ez start
+                if (chr.Nick[0] != '_' && chr.Nick[0] != '!' && chr.Nick[0] != '@')
+                {
+                    chr.Body   = 10;
+                    chr.Spirit = 5;
+                }
+
                 // Query to insert character with all attributes
                 // (((NOTE: `ascended`/`reclassed` fields are not at the server. It's DB-only field so we can update it only
                 // when we receive character from the server (down below))). Here we just init it as 0.
