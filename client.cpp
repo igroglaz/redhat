@@ -1514,10 +1514,12 @@ bool CL_EnterServer(Client* conn, Packet& pack)
         memset(data, 0, 0x30);
         *(uint32_t*)(data) = 0xFFDDAA11;
         *(uint8_t*)(data + 4) = static_cast<uint8_t>(p_nickname.length());
-        *(uint8_t*)(data + 5) = 1; // All base stats are set to 1.
-        *(uint8_t*)(data + 6) = 1;
-        *(uint8_t*)(data + 7) = 1;
-        *(uint8_t*)(data + 8) = 1;
+        // Regular heroes (not _, !, @) got ez start
+        bool is_regular = (p_nickname[0] != '_' && p_nickname[0] != '!' && p_nickname[0] != '@');
+        *(uint8_t*)(data + 5) = is_regular ? 10 : 1; // body
+        *(uint8_t*)(data + 6) = 1;                   // reaction
+        *(uint8_t*)(data + 7) = 1;                   // mind
+        *(uint8_t*)(data + 8) = 1;                   // spirit
         *(uint8_t*)(data + 9) = p_base;
         *(uint8_t*)(data + 10) = p_picture;
         *(uint8_t*)(data + 11) = p_sex;
