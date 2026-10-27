@@ -4,6 +4,7 @@
 
 #include "UnitTest++.h"
 
+#include "../checkpoint.h"
 #include "../kill_stats.h"
 #include "../login.hpp"
 #include "../server_id.hpp"
@@ -943,6 +944,63 @@ TEST(UpdateCharacter_Circle_Treasure) {
     );
 
     CHECK_CHARACTER(chr, want);
+}
+
+TEST(Checkpoint_Bag) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .stats={.body=55, .reaction=50, .mind=50, .spirit=50},
+            .items={
+                .bag=
+                    "[0,0,0,17]"
+                    ";[1000,0,100,1]"                 // Non-magic item (ignored)
+                    ";[1001,1,2,1,{2:1:0:0}]"         // Quest item 1 (saved)
+                    ";[3587,1,100,1,{42:1:0:0}]"      // Magic book (0x0E03, top byte 0x0e, ignored)
+                    ";[3621,1,100,1,{42:1:0:0}]"      // Magic scroll (0x0E25, top byte 0x0e, ignored)
+                    ";[2001,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 1 (saved)
+                    ";[2002,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 2 (saved)
+                    ";[2003,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 3 (saved)
+                    ";[2004,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 4 (saved)
+                    ";[2005,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 5 (saved)
+                    ";[1002,1,2,1,{2:2:0:0}]"         // Quest item 2 (saved, doesn't count towards 10 limit)
+                    ";[2006,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 6 (saved)
+                    ";[2007,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 7 (saved)
+                    ";[2008,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 8 (saved)
+                    ";[2009,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 9 (saved)
+                    ";[2010,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 10 (saved)
+                    ";[2011,1,100,1,{2:1:0:0}]"       // Magic weapon/armor 11 (exceeds 10 limit, ignored)
+                    ";[1003,1,2,1,{2:3:0:0}]",        // Quest item 3 (saved even after 10 magic items)
+            },
+        }
+    );
+
+    // Default checkpoint does not save bag.
+    checkpoint::Checkpoint cp_default(chr);
+    CHECK_EQUAL("[0,0,0,0]", cp_default.bag);
+
+    // Stats-only checkpoint does not save bag.
+    checkpoint::Checkpoint cp_stats(chr, true, true);
+    CHECK_EQUAL("[0,0,0,0]", cp_stats.bag);
+
+    // Nightmare checkpoint saves quest items and first 10 non-0x0e magic items.
+    checkpoint::Checkpoint cp_nightmare(chr, false, true);
+    CHECK_EQUAL(
+        "[0,0,0,13]"
+        ";[1001,1,2,1,{2:1:0:0}]"
+        ";[2001,1,100,1,{2:1:0:0}]"
+        ";[2002,1,100,1,{2:1:0:0}]"
+        ";[2003,1,100,1,{2:1:0:0}]"
+        ";[2004,1,100,1,{2:1:0:0}]"
+        ";[2005,1,100,1,{2:1:0:0}]"
+        ";[1002,1,2,1,{2:2:0:0}]"
+        ";[2006,1,100,1,{2:1:0:0}]"
+        ";[2007,1,100,1,{2:1:0:0}]"
+        ";[2008,1,100,1,{2:1:0:0}]"
+        ";[2009,1,100,1,{2:1:0:0}]"
+        ";[2010,1,100,1,{2:1:0:0}]"
+        ";[1003,1,2,1,{2:3:0:0}]",
+        cp_nightmare.bag
+    );
 }
 
 }

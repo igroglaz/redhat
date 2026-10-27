@@ -195,6 +195,9 @@ bool H_Init(int argc, char* argv[])
         } else if (arg == "-update-sigil") {
             SQL_UpdateSigil();
             exit_ = true;
+        } else if (arg == "-update-checkpoint") {
+            SQL_UpdateCheckpoint();
+            exit_ = true;
         } else if (arg == "-restore-relics-dry-run") {
             RestoreRelics(true);
             exit_ = true;

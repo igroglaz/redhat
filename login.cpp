@@ -867,6 +867,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     saved.exp_earth_pike = 0;
                     saved.exp_astral_shooting = 0;
                     saved.dress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+                    saved.bag = "[0,0,0,0]";
                 }
 
                 if (chr.Deaths > saved.deaths) {
@@ -883,7 +884,7 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     chr.ExpEarthPike = saved.exp_earth_pike;
                     chr.ExpAstralShooting = saved.exp_astral_shooting;
                     chr.Dress = Login_UnserializeItems(saved.dress);
-                    chr.Bag.Items.clear();
+                    chr.Bag = Login_UnserializeItems(saved.bag);
                     chr.Money = 0; // <-- reset money! other way it's dupe
                     update_character::ClearMonsterKills(chr); // reset info about killed mobs
 
@@ -1881,7 +1882,7 @@ UpdateCharacterResult UpdateCharacter(CCharacter& chr, ServerIDType srvid, shelf
             const char* completed_server = update_character::NightmareCheckpoint(chr, stats_before);
             if (completed_server) {
                 Printf(LOG_Info, "[checkpoint] saving %d on %s\n", chr.ID, completed_server);
-                checkpoint::Checkpoint(chr).SaveToDB(chr.ID);
+                checkpoint::Checkpoint(chr, false, true).SaveToDB(chr.ID);
             }
         }
     }
