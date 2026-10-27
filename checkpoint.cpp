@@ -4,7 +4,7 @@
 
 namespace checkpoint {
 
-Checkpoint::Checkpoint(CCharacter& chr, bool only_stats) {
+Checkpoint::Checkpoint(CCharacter& chr, bool only_stats, bool save_bag) {
     this->loaded_from_db = false;
 
     this->body = chr.Body;
@@ -23,6 +23,7 @@ Checkpoint::Checkpoint(CCharacter& chr, bool only_stats) {
         this->exp_earth_pike = 0;
         this->exp_astral_shooting = 0;
         this->dress = "[0,0,40,12];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1];[0,0,0,1]";
+        this->bag = "[0,0,0,0]";
         return;
     }
 
@@ -36,6 +37,23 @@ Checkpoint::Checkpoint(CCharacter& chr, bool only_stats) {
     this->exp_earth_pike = chr.ExpEarthPike;
     this->exp_astral_shooting = chr.ExpAstralShooting;
     this->dress = Login_SerializeItems(chr.Dress);
+
+    CItemList saved_bag{};
+    if (save_bag) {
+        int non_quest_magic_items = 0;
+        for (const auto& item : chr.Bag.Items) {
+            if (!item.IsMagic) {
+                continue;
+            }
+            if (item.Price == 2) {
+                saved_bag.Items.push_back(item);
+            } else if ((item.Id & 0xFF00) != 0x0E00 && non_quest_magic_items < 10) {
+                saved_bag.Items.push_back(item);
+                ++non_quest_magic_items;
+            }
+        }
+    }
+    this->bag = Login_SerializeItems(saved_bag);
 }
     
 Checkpoint::Checkpoint(int character_id) {
@@ -69,6 +87,10 @@ Checkpoint::Checkpoint(int character_id) {
     this->exp_earth_pike = SQL_FetchInt(row, data.result, "exp_earth_pike");
     this->exp_astral_shooting = SQL_FetchInt(row, data.result, "exp_astral_shooting");
     this->dress = SQL_FetchString(row, data.result, "dress");
+    this->bag = SQL_FetchString(row, data.result, "bag");
+    if (this->bag.empty()) {
+        this->bag = "[0,0,0,0]";
+    }
 }
 
 bool Checkpoint::SaveToDB(int character_id) const {
@@ -84,16 +106,16 @@ bool Checkpoint::SaveToDB(int character_id) const {
                     body, reaction, mind, spirit,
                     monsters_kills, players_kills, frags, deaths,
                     exp_fire_blade, exp_water_axe, exp_air_bludgeon, exp_earth_pike, exp_astral_shooting,
-                    dress
+                    dress, bag
                 ) VALUES (
-                    %d, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, "%s"
+                    %d, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, "%s", "%s"
                 );
             )",
             character_id,
             this->body, this->reaction, this->mind, this->spirit,
             this->monsters_kills, this->players_kills, this->frags, this->deaths,
             this->exp_fire_blade, this->exp_water_axe, this->exp_air_bludgeon, this->exp_earth_pike, this->exp_astral_shooting,
-            this->dress.c_str()
+            this->dress.c_str(), this->bag.c_str()
         ));
     } else {
         return SimpleSQL(Format(
@@ -103,13 +125,13 @@ bool Checkpoint::SaveToDB(int character_id) const {
                     body = %u, reaction = %u, mind = %u, spirit = %u,
                     monsters_kills = %u, players_kills = %u, frags = %u, deaths = %u,
                     exp_fire_blade = %u, exp_water_axe = %u, exp_air_bludgeon = %u, exp_earth_pike = %u, exp_astral_shooting = %u,
-                    dress = "%s"
+                    dress = "%s", bag = "%s"
                 WHERE id = %d;
             )",
             this->body, this->reaction, this->mind, this->spirit,
             this->monsters_kills, this->players_kills, this->frags, this->deaths,
             this->exp_fire_blade, this->exp_water_axe, this->exp_air_bludgeon, this->exp_earth_pike, this->exp_astral_shooting,
-            this->dress.c_str(), character_id
+            this->dress.c_str(), this->bag.c_str(), character_id
         ));
     }
 }

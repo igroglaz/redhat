@@ -179,6 +179,7 @@ void SQL_CreateTableCheckpoint() {
             `exp_earth_pike` INT(1) UNSIGNED NOT NULL,
             `exp_astral_shooting` INT(1) UNSIGNED NOT NULL,
             `dress` LONGTEXT CHARACTER SET cp866 COLLATE cp866_bin NOT NULL,
+            `bag` LONGTEXT CHARACTER SET cp866 COLLATE cp866_bin NOT NULL,
             UNIQUE(`id`)
         );
     )";
@@ -420,6 +421,14 @@ void SQL_UpdateSigil() {
 
     if (SQL_Query(sql) != 0) {
         Printf(LOG_Warning, "[DB] Warning: failed to create `sigil` table: %s\n", SQL_Error().c_str());
+    }
+}
+
+void SQL_UpdateCheckpoint() {
+    std::string query = "ALTER TABLE `checkpoint` ADD COLUMN `bag` LONGTEXT CHARACTER SET cp866 COLLATE cp866_bin NOT NULL;";
+
+    if (SQL_Query(query) != 0) {
+        Printf(LOG_Warning, "[DB] Warning: failed to add `bag` column to `checkpoint`: %s\n", SQL_Error().c_str());
     }
 }
 
