@@ -13,5 +13,4 @@ obj
 logs/
 redhat.layout
 redhat.depend
-.vscode/
 build/
