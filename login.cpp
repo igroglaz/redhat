@@ -847,12 +847,24 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
             // Giga-characters are restored from a checkpoint if they've died.
             if (chr.Nick[0] == '_') {
                 checkpoint::Checkpoint saved(character_id);
+                bool can_restore = true;
 
-                if (!saved.loaded_from_db) {
-                    // Character died before saving for the first time. Create a fake checkpoint from scratch.
-                    if (srvid != EASY) {
-                        Printf(LOG_Error, "[checkpoint] no checkpoint for %d at server %d!\n", character_id, srvid);
+                if (saved.load_failed) {
+                    // Don't wipe the character based on unknown data.
+                    Printf(LOG_Error, "[checkpoint] failed to load checkpoint for %d at server %d, not restoring\n", character_id, srvid);
+                    can_restore = false;
+                } else if (!saved.loaded_from_db && srvid != EASY) {
+                    // Legends outside EASY must always have a checkpoint. If there's none, saving it has failed earlier.
+                    Printf(LOG_Error, "[checkpoint] no checkpoint for %d at server %d, not restoring\n", character_id, srvid);
+                    can_restore = false;
+
+                    // Recreate the missing checkpoint from the current state, so the next death is restored to it.
+                    if (!create && srvid != UNDEFINED) {
+                        Printf(LOG_Info, "[checkpoint] recreating missing checkpoint for %d at server %d\n", character_id, srvid);
+                        checkpoint::Checkpoint(chr, false, srvid >= NIGHTMARE).SaveToDB(character_id);
                     }
+                } else if (!saved.loaded_from_db) {
+                    // Character died on EASY before saving for the first time. Create a fake checkpoint from scratch.
                     saved.body = chr.Body;
                     saved.reaction = chr.Reaction;
                     saved.mind = chr.Mind;
@@ -870,8 +882,11 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     saved.bag = "[0,0,0,0]";
                 }
 
-                if (chr.Deaths > saved.deaths) {
-                    Printf(LOG_Info, "[checkpoint] restoring character %d from checkpoint\n", character_id);
+                if (can_restore && chr.Deaths > saved.deaths) {
+                    Printf(LOG_Info, "[checkpoint] restoring character %d at server %d from %s checkpoint (deaths: character=%u, checkpoint=%u)\n",
+                        character_id, srvid, saved.loaded_from_db ? "saved" : "fake", chr.Deaths, saved.deaths);
+                    Printf(LOG_Info, "[checkpoint] character %d before restore: %s\n", character_id, checkpoint::DescribeCharacter(chr).c_str());
+                    Printf(LOG_Info, "[checkpoint] character %d checkpoint: %s\n", character_id, saved.Describe().c_str());
                     if (srvid != EASY) { // On EASY server the base stats are preserved.
                         chr.Body = saved.body;
                         chr.Reaction = saved.reaction;
@@ -891,6 +906,8 @@ bool Login_SetCharacter(std::string login, unsigned long id1, unsigned long id2,
                     if (chr.IsWizard()) {
                         update_character::WipeSpells(chr);
                     }
+
+                    Printf(LOG_Info, "[checkpoint] character %d after restore: %s\n", character_id, checkpoint::DescribeCharacter(chr).c_str());
 
                     if (saved.loaded_from_db) { // If the character is new, we'll create a new checkpoint in `UpdateCharacter` anyway.
                         checkpoint::UpdateDeaths(character_id, chr.Deaths);

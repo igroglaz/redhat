@@ -1003,4 +1003,47 @@ TEST(Checkpoint_Bag) {
     );
 }
 
+TEST(Checkpoint_Describe) {
+    CCharacter chr = FakeCharacter(
+        CharacterOpts{
+            .info={.deaths=3, .kills=7},
+            .stats={.body=20, .reaction=21, .mind=22, .spirit=23},
+            .skills={.fire=1, .water=2, .air=3, .earth=4, .astral=5},
+            .items={
+                .money=100,
+                .spells=6,
+                .bag="[0,0,0,3];[1000,0,0,1];[0,0,0,1];[1001,1,2,1,{2:1:0:0}]",
+                .dress="[0,0,40,4];[2000,0,0,1];[0,0,0,1];[0,0,0,1];[2001,0,0,1]",
+            },
+        }
+    );
+
+    // Only items with non-zero ID are counted.
+    CHECK_EQUAL(
+        "stats={20, 21, 22, 23}, "
+        "kills={monsters=7, players=0, frags=0, deaths=3}, "
+        "exp={1, 2, 3, 4, 5}, "
+        "money=100, spells=0x6, dress=2 items, bag=2 items",
+        checkpoint::DescribeCharacter(chr)
+    );
+
+    // Bag is saved only at nightmare+, so only the magic item ends up in the checkpoint.
+    CHECK_EQUAL(
+        "stats={20, 21, 22, 23}, "
+        "kills={monsters=7, players=0, frags=0, deaths=3}, "
+        "exp={1, 2, 3, 4, 5}, "
+        "dress=2 items, bag=1 items",
+        checkpoint::Checkpoint(chr, false, true).Describe()
+    );
+
+    // Stats-only checkpoint has an empty dress and bag.
+    CHECK_EQUAL(
+        "stats={20, 21, 22, 23}, "
+        "kills={monsters=0, players=0, frags=0, deaths=3}, "
+        "exp={0, 0, 0, 0, 0}, "
+        "dress=0 items, bag=0 items",
+        checkpoint::Checkpoint(chr, true).Describe()
+    );
+}
+
 }

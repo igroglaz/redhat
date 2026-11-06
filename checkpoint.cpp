@@ -4,8 +4,23 @@
 
 namespace checkpoint {
 
+namespace {
+
+unsigned CountItems(const CItemList& list) {
+    unsigned count = 0;
+    for (const auto& item : list.Items) {
+        if (item.Id != 0) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+} // namespace
+
 Checkpoint::Checkpoint(CCharacter& chr, bool only_stats, bool save_bag) {
     this->loaded_from_db = false;
+    this->load_failed = false;
 
     this->body = chr.Body;
     this->reaction = chr.Reaction;
@@ -58,10 +73,12 @@ Checkpoint::Checkpoint(CCharacter& chr, bool only_stats, bool save_bag) {
     
 Checkpoint::Checkpoint(int character_id) {
     this->loaded_from_db = false;
+    this->load_failed = false;
 
     SimpleSQL data(Format("SELECT * FROM `checkpoint` WHERE `id` = %d;", character_id));
     if (!data) {
         Printf(LOG_Warning, "[checkpoint] failed to select checkpoint data for %d\n", character_id);
+        this->load_failed = true;
         return;
     }
 
@@ -95,11 +112,13 @@ Checkpoint::Checkpoint(int character_id) {
 
 bool Checkpoint::SaveToDB(int character_id) const {
     SimpleSQL exists(Format("SELECT 1 FROM `checkpoint` WHERE `id` = %d;", character_id));
+    bool insert = !exists || SQL_NumRows(exists.result) == 0;
 
-    Printf(LOG_Info, "[checkpoint] saving for character %d (exists: %d)\n", character_id, SQL_NumRows(exists.result));
+    Printf(LOG_Info, "[checkpoint] saving for character %d (%s): %s\n", character_id, insert ? "insert" : "update", this->Describe().c_str());
 
-    if (!exists || SQL_NumRows(exists.result) == 0) {
-        return SimpleSQL(Format(
+    bool saved;
+    if (insert) {
+        saved = SimpleSQL(Format(
             R"(
                 INSERT INTO `checkpoint` (
                     id,
@@ -118,7 +137,7 @@ bool Checkpoint::SaveToDB(int character_id) const {
             this->dress.c_str(), this->bag.c_str()
         ));
     } else {
-        return SimpleSQL(Format(
+        saved = SimpleSQL(Format(
             R"(
                 UPDATE `checkpoint`
                 SET
@@ -134,10 +153,49 @@ bool Checkpoint::SaveToDB(int character_id) const {
             this->dress.c_str(), this->bag.c_str(), character_id
         ));
     }
+
+    if (saved) {
+        Printf(LOG_Info, "[checkpoint] saved for character %d\n", character_id);
+    } else {
+        Printf(LOG_Error, "[checkpoint] FAILED to save for character %d\n", character_id);
+    }
+    return saved;
+}
+
+std::string Checkpoint::Describe() const {
+    return Format(
+        "stats={%u, %u, %u, %u}, "
+        "kills={monsters=%u, players=%u, frags=%u, deaths=%u}, "
+        "exp={%u, %u, %u, %u, %u}, "
+        "dress=%u items, bag=%u items",
+        this->body, this->reaction, this->mind, this->spirit,
+        this->monsters_kills, this->players_kills, this->frags, this->deaths,
+        this->exp_fire_blade, this->exp_water_axe, this->exp_air_bludgeon, this->exp_earth_pike, this->exp_astral_shooting,
+        CountItems(Login_UnserializeItems(this->dress)), CountItems(Login_UnserializeItems(this->bag))
+    );
+}
+
+std::string DescribeCharacter(const CCharacter& chr) {
+    return Format(
+        "stats={%u, %u, %u, %u}, "
+        "kills={monsters=%u, players=%u, frags=%u, deaths=%u}, "
+        "exp={%u, %u, %u, %u, %u}, "
+        "money=%u, spells=0x%x, dress=%u items, bag=%u items",
+        chr.Body, chr.Reaction, chr.Mind, chr.Spirit,
+        chr.MonstersKills, chr.PlayersKills, chr.Frags, chr.Deaths,
+        chr.ExpFireBlade, chr.ExpWaterAxe, chr.ExpAirBludgeon, chr.ExpEarthPike, chr.ExpAstralShooting,
+        chr.Money, chr.Spells, CountItems(chr.Dress), CountItems(chr.Bag)
+    );
 }
 
 bool UpdateDeaths(int character_id, uint32_t deaths) {
-    return SimpleSQL(Format("UPDATE `checkpoint` SET deaths = %d WHERE id = %d", deaths, character_id));
+    bool updated = SimpleSQL(Format("UPDATE `checkpoint` SET deaths = %d WHERE id = %d", deaths, character_id));
+    if (updated) {
+        Printf(LOG_Info, "[checkpoint] updated deaths for character %d to %u\n", character_id, deaths);
+    } else {
+        Printf(LOG_Error, "[checkpoint] FAILED to update deaths for character %d to %u\n", character_id, deaths);
+    }
+    return updated;
 }
 
 }
