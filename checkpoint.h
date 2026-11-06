@@ -11,6 +11,8 @@ namespace checkpoint {
 
 struct Checkpoint {
     bool loaded_from_db;
+    // The SELECT query itself failed, so it's unknown whether the checkpoint exists.
+    bool load_failed;
 
     uint8_t body;
     uint8_t reaction;
@@ -35,7 +37,13 @@ struct Checkpoint {
 
     // Upserts the checkpoint to the DB for the given character.
     bool SaveToDB(int character_id) const;
+
+    // Human-readable dump of all fields, for logs.
+    std::string Describe() const;
 };
+
+// Human-readable dump of the character fields affected by a checkpoint restore, for logs.
+std::string DescribeCharacter(const CCharacter& chr);
 
 bool UpdateDeaths(int character_id, uint32_t deaths);
 
