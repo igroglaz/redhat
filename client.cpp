@@ -16,6 +16,7 @@
 
 #include "session.hpp"
 #include "CRC_32.h"
+#include "netlog.hpp"
 
 std::vector<Client*> Clients;
 
@@ -130,6 +131,18 @@ bool CL_Process(Client* conn)
     Packet pack;
     while(conn->Receiver.GetPacket(pack))
     {
+        {
+            uint8_t* nd = NULL; uint32_t nsz = 0;
+            pack.GetAllData(nd, nsz);
+            if(nd)
+            {
+                netlog::hex("C->HAT", nd, nsz, "pkt from %s%s id=0x%02X",
+                            conn->HisAddr.c_str(),
+                            conn->Login.length() ? Format(" (%s)", conn->Login.c_str()).c_str() : "",
+                            nsz ? nd[0] : 0);
+                delete[] nd;
+            }
+        }
         // check 0x5C0EE250
         uint32_t packet_uid;
         pack >> packet_uid;

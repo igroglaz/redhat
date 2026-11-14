@@ -42,6 +42,7 @@ add_library(redhat-lib
     packet.cpp
     serialize.cpp
     server.cpp
+    netlog.cpp
     session.cpp
     shelf.cpp
     sha1.cpp

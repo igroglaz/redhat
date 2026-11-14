@@ -5,6 +5,7 @@
 #include "character.hpp"
 #include "socket.hpp"
 #include "status.hpp"
+#include "netlog.hpp"
 
 std::vector<Server*> Servers;
 
@@ -414,6 +415,17 @@ bool SV_Process(Server* srv)
         pack >> packet_id;
         pack.ResetPosition();
 
+        {
+            uint8_t* nd = NULL; uint32_t nsz = 0;
+            pack.GetAllData(nd, nsz);
+            if(nd)
+            {
+                netlog::hex("SRV->HAT", nd, nsz, "layer pkt from server ID %u id=0x%02X",
+                            srv->Number, packet_id);
+                delete[] nd;
+            }
+        }
+
         switch(packet_id)
         {
             default:
@@ -459,6 +471,17 @@ bool SV_ProcessLayer(Server* srv)
         uint8_t packet_id;
         pack >> packet_id;
         pack.ResetPosition();
+
+        {
+            uint8_t* nd = NULL; uint32_t nsz = 0;
+            pack.GetAllData(nd, nsz);
+            if(nd)
+            {
+                netlog::hex("SRV->HATc", nd, nsz, "control pkt from server ID %u id=0x%02X",
+                            srv->Number, packet_id);
+                delete[] nd;
+            }
+        }
 
         switch(packet_id)
         {
